@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>记忆长廊 - 宝珠酿造</title>
+    <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="back-btn" id="back-btn">←</button>
+            <h1>记忆长廊</h1>
+            <div class="header-progress">
+                <span id="total-progress">0/16</span>
+            </div>
+        </header>
+
+        <!-- 进度指示 -->
+        <div class="gallery-intro">
+            <p class="intro-text">收集配方，解锁宝珠的记忆碎片</p>
+            <div class="progress-visual">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 碎片分类 -->
+        <div class="fragment-categories">
+            <button class="category-btn active" data-category="all">全部</button>
+            <button class="category-btn" data-category="founder">创始故事</button>
+            <button class="category-btn" data-category="craft">传统工艺</button>
+            <button class="category-btn" data-category="ingredient">食材来源</button>
+            <button class="category-btn" data-category="philosophy">品牌哲学</button>
+        </div>
+
+        <!-- 碎片网格 -->
+        <div class="fragment-grid" id="fragment-grid">
+            <!-- 由JS动态生成 -->
+        </div>
+
+        <!-- 终极目标预览 -->
+        <div class="ultimate-preview" id="ultimate-preview">
+            <div class="ultimate-silhouette" id="ultimate-silhouette">
+                <span class="ultimate-icon">✨</span>
+            </div>
+            <div class="ultimate-label">天赐宝珠酪</div>
+            <div class="ultimate-hint">收集全部碎片后解锁</div>
+        </div>
+    </div>
+
+    <!-- 碎片详情弹窗 -->
+    <div class="modal-overlay" id="fragment-modal">
+        <div class="fragment-detail">
+            <button class="close-btn" id="close-modal">×</button>
+            <div class="fragment-image" id="detail-image">🏮</div>
+            <div class="fragment-category" id="detail-category">创始故事</div>
+            <div class="fragment-story" id="detail-story">
+                "2010年夏天，田子坊，第一盏灯被点亮。"
+            </div>
+            <div class="fragment-trigger">
+                <span class="trigger-label">解锁条件：</span>
+                <span class="trigger-item" id="detail-trigger">合成冰酥酪</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/gallery.js"></script>
+</body>
+</html>
+

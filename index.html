@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>宝珠酿造 - 唤醒酿造之力</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/intro.css">
+</head>
+<body>
+    <!-- ========== 开场序列容器 ========== -->
+    <div id="intro-screen">
+        <!-- 粒子 Canvas 层 -->
+        <canvas id="intro-canvas"></canvas>
+        
+        <!-- 白点触发器 -->
+        <div id="intro-dot"></div>
+        
+        <!-- 拱门（简化版）-->
+        <div id="intro-door">
+            <div class="door-frame"></div>
+            <div class="door-inner">
+                <div class="door-glow"></div>
+            </div>
+        </div>
+        
+        <!-- 物品栏（教学用） -->
+        <div id="intro-inventory"></div>
+        
+        <!-- 叙事文字 -->
+        <div id="intro-narrative"></div>
+        
+        <!-- 标题（粒子拼字后由 canvas 绘制，这里只做占位） -->
+        <div id="intro-title"></div>
+        
+        <!-- 开始游戏按钮 -->
+        <button id="intro-start-btn">开始游戏</button>
+    </div>
+
+    <!-- ========== 主界面容器 ========== -->
+    <div class="container" style="display: none;">
+        <header>
+            <h1>宝珠酿造</h1>
+            <div class="subtitle">唤醒酿造之力</div>
+        </header>
+
+        <!-- 进度指示器 -->
+        <div class="progress-panel" id="progress-panel">
+            <div class="progress-row" onclick="window.location.href='codex.html'">
+                <span class="progress-icon">📖</span>
+                <span class="progress-label">配方图谱</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="codex-progress-fill"></div>
+                </div>
+                <span class="progress-text" id="codex-progress-text">0/50</span>
+            </div>
+            <div class="progress-row" onclick="window.location.href='gallery.html'">
+                <span class="progress-icon">🧩</span>
+                <span class="progress-label">记忆碎片</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="fragment-progress-fill"></div>
+                </div>
+                <span class="progress-text" id="fragment-progress-text">0/30</span>
+            </div>
+        </div>
+
+        <!-- 世界地图节点 -->
+        <div class="world-map">
+            <!-- 由JS动态生成 -->
+        </div>
+
+        <!-- 关卡门阵列 -->
+        <div class="level-doors">
+            <!-- 由JS动态生成 -->
+        </div>
+
+        <!-- 故事文本 -->
+        <div class="story-section">
+            <p class="story-text"></p>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="quick-actions">
+            <button class="quick-action-btn" id="free-mode-btn">
+                <span class="btn-icon">🧪</span>
+                <span class="btn-text">自由探索</span>
+            </button>
+            <button class="quick-action-btn" id="codex-btn" onclick="window.location.href='codex.html'">
+                <span class="btn-icon">📖</span>
+                <span class="btn-text">配方图鉴</span>
+            </button>
+            <button class="quick-action-btn" id="gallery-btn" onclick="window.location.href='gallery.html'">
+                <span class="btn-icon">🧩</span>
+                <span class="btn-text">记忆长廊</span>
+            </button>
+        </div>
+
+        <!-- 设置区域 -->
+        <div class="settings-area" style="text-align: center; margin-top: 20px; opacity: 0.6;">
+            <button id="reset-btn" style="background: none; border: 1px solid #8d6e63; color: #8d6e63; padding: 5px 15px; border-radius: 15px; cursor: pointer; font-size: 12px;">重置进度</button>
+        </div>
+    </div>
+
+    <!-- 脚本引入 -->
+    <script src="js/data.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/intro.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

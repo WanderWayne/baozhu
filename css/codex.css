@@ -1,0 +1,404 @@
+/* 配方图鉴页面样式 */
+:root {
+    --bg-color: #F9F7F2;
+    --brand-color: #D4A574;
+    --brand-color-light: #E8D5C4;
+    --text-color: #5A4A42;
+    --text-light: #9C8C74;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-shadow: 0 4px 16px rgba(139, 115, 85, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    background-image: radial-gradient(rgba(212, 165, 116, 0.08) 1px, transparent 1px);
+    background-size: 25px 25px;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 40px;
+}
+
+/* ========== 头部 ========== */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px 0;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--card-bg);
+    border: 1px solid rgba(212, 165, 116, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--brand-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    transform: scale(0.9);
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: var(--brand-color);
+}
+
+.header-progress {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-color);
+    background: var(--card-bg);
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+}
+
+/* ========== 主进度条 ========== */
+.main-progress {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--card-shadow);
+}
+
+.progress-bar-large {
+    height: 12px;
+    background: rgba(212, 165, 116, 0.15);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.progress-fill-large {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-color) 0%, #E8C4A0 100%);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-around;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--brand-color);
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+/* ========== 配方分区 ========== */
+.codex-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.codex-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212, 165, 116, 0.15);
+}
+
+.section-icon {
+    font-size: 20px;
+}
+
+.section-title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.section-count {
+    font-size: 13px;
+    color: var(--brand-color);
+    font-weight: 600;
+}
+
+/* ========== 配方网格 ========== */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.recipe-item {
+    aspect-ratio: 1;
+    background: rgba(212, 165, 116, 0.08);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.recipe-item:active {
+    transform: scale(0.95);
+}
+
+.recipe-item.discovered {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(212, 165, 116, 0.3);
+}
+
+.recipe-item.discovered:hover {
+    border-color: var(--brand-color);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.2);
+}
+
+.recipe-item.hidden-recipe.discovered {
+    border-color: #FFD700;
+    background: linear-gradient(135deg, #FFF8E8 0%, #FFF0D8 100%);
+}
+
+.recipe-item.undiscovered {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.recipe-item .icon {
+    font-size: 24px;
+}
+
+.recipe-item.undiscovered .icon {
+    filter: grayscale(100%) brightness(0.5);
+    opacity: 0.3;
+}
+
+.recipe-item .name {
+    font-size: 8px;
+    color: var(--text-light);
+    margin-top: 4px;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 2px;
+}
+
+.recipe-item.undiscovered .name {
+    color: #CCC;
+}
+
+/* 隐藏配方星标 */
+.recipe-item.hidden-recipe.discovered::after {
+    content: '★';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    color: #FFD700;
+}
+
+/* ========== 配方详情弹窗 ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.recipe-detail {
+    width: 85%;
+    max-width: 320px;
+    background: white;
+    border-radius: 20px;
+    padding: 30px 24px;
+    text-align: center;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.modal-overlay.visible .recipe-detail {
+    transform: scale(1) translateY(0);
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    color: var(--text-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recipe-detail .recipe-icon {
+    font-size: 56px;
+    margin-bottom: 12px;
+}
+
+.recipe-detail .recipe-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 8px;
+}
+
+.recipe-detail .recipe-desc {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+.recipe-formula {
+    background: rgba(212, 165, 116, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.formula-title {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 12px;
+}
+
+.formula-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.formula-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.formula-item .icon {
+    font-size: 28px;
+}
+
+.formula-item .name {
+    font-size: 10px;
+    color: var(--text-color);
+}
+
+.formula-arrow {
+    font-size: 20px;
+    color: var(--brand-color);
+}
+
+.recipe-story {
+    font-size: 13px;
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.8;
+    padding: 12px;
+    background: linear-gradient(135deg, #FFF8F0 0%, #FFF0E5 100%);
+    border-radius: 10px;
+    border-left: 3px solid var(--brand-color);
+}
+
+.recipe-story:empty {
+    display: none;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 360px) {
+    .recipe-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .recipe-item .icon {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 600px;
+    }
+    .recipe-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+    }
+    .recipe-item .icon {
+        font-size: 28px;
+    }
+}
+
+/* 安全区域适配 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .container {
+        padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    }
+}
+

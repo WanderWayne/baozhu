@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>配方图鉴 - 宝珠酿造</title>
+    <link rel="stylesheet" href="css/codex.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="back-btn" id="back-btn">←</button>
+            <h1>配方图鉴</h1>
+            <div class="header-progress">
+                <span id="total-progress">0/50</span>
+            </div>
+        </header>
+
+        <!-- 总进度条 -->
+        <div class="main-progress">
+            <div class="progress-bar-large">
+                <div class="progress-fill-large" id="main-progress-fill"></div>
+            </div>
+            <div class="progress-stats">
+                <div class="stat">
+                    <span class="stat-value" id="core-count">0</span>
+                    <span class="stat-label">核心配方</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="branch-count">0</span>
+                    <span class="stat-label">支线配方</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="hidden-count">0</span>
+                    <span class="stat-label">隐藏配方</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配方列表 -->
+        <div class="codex-sections">
+            <!-- 核心配方 -->
+            <div class="codex-section">
+                <div class="section-header">
+                    <span class="section-icon">📖</span>
+                    <span class="section-title">核心配方</span>
+                    <span class="section-count" id="core-section-count">0/14</span>
+                </div>
+                <div class="recipe-grid" id="core-recipes">
+                    <!-- 由JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 支线配方 -->
+            <div class="codex-section">
+                <div class="section-header">
+                    <span class="section-icon">🌿</span>
+                    <span class="section-title">支线配方</span>
+                    <span class="section-count" id="branch-section-count">0/20</span>
+                </div>
+                <div class="recipe-grid" id="branch-recipes">
+                    <!-- 由JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 隐藏配方 -->
+            <div class="codex-section">
+                <div class="section-header">
+                    <span class="section-icon">✨</span>
+                    <span class="section-title">隐藏配方</span>
+                    <span class="section-count" id="hidden-section-count">0/16</span>
+                </div>
+                <div class="recipe-grid" id="hidden-recipes">
+                    <!-- 由JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配方详情弹窗 -->
+    <div class="modal-overlay" id="recipe-modal">
+        <div class="recipe-detail">
+            <button class="close-btn" id="close-modal">×</button>
+            <div class="recipe-icon" id="detail-icon">🍨</div>
+            <div class="recipe-name" id="detail-name">冰酥酪</div>
+            <div class="recipe-desc" id="detail-desc">宝珠的第一碗</div>
+            <div class="recipe-formula">
+                <div class="formula-title">合成配方</div>
+                <div class="formula-content" id="detail-formula">
+                    <!-- 由JS填充 -->
+                </div>
+            </div>
+            <div class="recipe-story" id="detail-story">
+                <!-- 故事碎片（如果有） -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/codex.js"></script>
+</body>
+</html>
+

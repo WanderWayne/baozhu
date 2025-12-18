@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>宝珠酿造 - 游戏</title>
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+    <!-- 第一关教学动画覆盖层 -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden">
+        <div class="tutorial-content">
+            <div class="tutorial-door-spotlight">
+                <div class="tutorial-door-container">
+                    <div class="tutorial-door-aura"></div>
+                    <div class="tutorial-door-frame">
+                        <div class="tutorial-door-glow">
+                            <div class="tutorial-door-fog"></div>
+                            <div class="tutorial-door-icon" id="tutorial-door-icon">🍨</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tutorial-text-container">
+                <div class="tutorial-text tutorial-text-1">打开这扇门</div>
+                <div class="tutorial-text tutorial-text-2">
+                    <span class="tutorial-hint-icon">💡</span>
+                    <span>将物品拖拽合成，做出<span class="highlight" id="tutorial-target-name">冰酥酪</span></span>
+                </div>
+            </div>
+            
+            <div class="tutorial-skip-btn" id="tutorial-skip-btn">点击继续</div>
+        </div>
+    </div>
+
+    <!-- 顶部目标门区域 -->
+    <div id="door-area">
+        <button class="back-btn" id="back-btn">←</button>
+        
+        <!-- 身份铭牌 -->
+        <div class="identity-plaque" id="identity-plaque">
+            <span class="identity-icon">🌱</span>
+            <span class="identity-title">寻味者</span>
+        </div>
+        
+        <div class="door-container stage-0" id="door-container">
+            <div class="door-aura"></div>
+            <div class="door-frame">
+                <div class="door-glow">
+                    <div class="door-fog"></div>
+                    <div class="door-target-silhouette" id="door-icon">🍨</div>
+                </div>
+            </div>
+            <div class="door-offer-hint">献上</div>
+        </div>
+        
+        <div class="level-info">
+            <div class="level-name" id="level-name">冰酥门廊</div>
+            <div class="level-target-text" id="level-target">目标：冰酥酪</div>
+        </div>
+        
+        <div class="door-status" id="door-status"></div>
+    </div>
+
+    <!-- 合成工作台区域 -->
+    <div id="synthesis-area">
+        <div class="workbench-texture"></div>
+        <!-- 拖拽的元素会放在这里 -->
+    </div>
+
+    <!-- 底部原料带 -->
+    <div id="inventory-area">
+        <!-- 由JS动态生成 -->
+    </div>
+
+    <!-- 脚本引入 -->
+    <script src="js/data.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/synthesis.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
