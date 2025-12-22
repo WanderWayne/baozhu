@@ -28,10 +28,104 @@ body {
     background: var(--bg-color);
     overflow: hidden;
     touch-action: manipulation;
-    /* 添加全局纹理 */
-    background-image: radial-gradient(#D4A574 1px, transparent 1px);
-    background-size: 40px 40px;
+    /* 更柔和的全局纹理 - 奶雾感 */
+    background-image: radial-gradient(rgba(212, 165, 116, 0.06) 1.5px, transparent 1.5px);
+    background-size: 35px 35px;
     background-color: var(--bg-color);
+}
+
+/* ========== 奶雾粒子背景层 ========== */
+.milk-fog-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.milk-fog-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 252, 245, 0.4) 0%, transparent 70%);
+    animation: milkFogFloat 6s ease-in-out infinite;
+}
+
+.milk-fog-particle:nth-child(1) { width: 80px; height: 80px; left: 10%; top: 20%; animation-delay: 0s; }
+.milk-fog-particle:nth-child(2) { width: 120px; height: 120px; left: 70%; top: 15%; animation-delay: -1.5s; }
+.milk-fog-particle:nth-child(3) { width: 60px; height: 60px; left: 30%; top: 50%; animation-delay: -3s; }
+.milk-fog-particle:nth-child(4) { width: 100px; height: 100px; left: 80%; top: 60%; animation-delay: -4.5s; }
+.milk-fog-particle:nth-child(5) { width: 70px; height: 70px; left: 15%; top: 75%; animation-delay: -2s; }
+.milk-fog-particle:nth-child(6) { width: 90px; height: 90px; left: 55%; top: 35%; animation-delay: -5s; }
+.milk-fog-particle:nth-child(7) { width: 50px; height: 50px; left: 45%; top: 80%; animation-delay: -1s; }
+.milk-fog-particle:nth-child(8) { width: 110px; height: 110px; left: 85%; top: 40%; animation-delay: -3.5s; }
+
+@keyframes milkFogFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.04;
+    }
+    50% {
+        transform: translateY(-8px) scale(1.05);
+        opacity: 0.06;
+    }
+}
+
+/* ========== 糖晶微闪粒子 ========== */
+.sugar-sparkle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(255, 220, 180, 0.9) 30%,
+        rgba(212, 165, 116, 0.5) 60%, 
+        transparent 80%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 6px 2px rgba(255, 255, 255, 0.8),
+        0 0 12px 4px rgba(255, 220, 180, 0.5);
+    animation: sugarSparkle 2.5s ease-out forwards;
+}
+
+.sugar-sparkle::before {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 4px rgba(255, 220, 180, 0.8);
+}
+
+@keyframes sugarSparkle {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    10% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.6;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
 }
 
 /* ========== 顶部目标门区域 (Moon Gate Style) ========== */
@@ -143,8 +237,8 @@ body {
 
 .door-container {
     position: relative;
-    width: 140px;
-    height: 140px; /* 正圆形 */
+    width: 100px;
+    height: 150px; /* 拱门形状 - 高大于宽 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -153,70 +247,125 @@ body {
     transition: transform 0.5s ease;
 }
 
-/* 门框 - 中式月洞门风格 */
+/* 门框 - 拱门风格（与开场动画一致） */
 .door-frame {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
-    /* 木质纹理感 */
-    background: #8B7355; 
-    border: 4px solid #6F5A40;
-    box-shadow: 
-        0 4px 10px rgba(0,0,0,0.2),
-        inset 0 4px 10px rgba(0,0,0,0.3);
+    border-radius: 50px 50px 0 0; /* 拱门顶部圆弧 */
+    background: transparent;
+    border: 3px solid rgba(150, 150, 150, 0.6);
+    box-sizing: border-box;
     position: relative;
     overflow: hidden;
     transition: all 0.5s ease;
     z-index: 2;
 }
 
-/* 内部空间 - 神秘感 */
+/* 内部空间 - 黑色 + 微弱荧光蓝 + 呼吸动画 */
 .door-glow {
     position: absolute;
     top: 6px;
     left: 6px;
     right: 6px;
-    bottom: 6px;
-    border-radius: 50%;
-    background: #2C241E; /* 深邃内部 */
+    bottom: 0;
+    border-radius: 44px 44px 0 0;
+    background: linear-gradient(180deg, #0a0a0a 0%, #050508 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s ease;
     overflow: hidden;
+    box-shadow: inset 0 0 30px rgba(0, 180, 200, 0.15);
+    animation: doorGlowBreath 6s ease-in-out infinite;
 }
 
-/* 窗棂纹理 (使用渐变模拟) */
+@keyframes doorGlowBreath {
+    0%, 100% {
+        box-shadow: inset 0 0 30px rgba(0, 180, 200, 0.12);
+    }
+    50% {
+        box-shadow: inset 0 0 45px rgba(0, 180, 200, 0.2);
+    }
+}
+
+/* 内部微光效果 */
 .door-glow::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-image: 
-        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%),
-        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 10px 10px;
-    opacity: 0.3;
+    background: radial-gradient(ellipse at center 30%, rgba(0, 200, 220, 0.1) 0%, transparent 60%);
+    opacity: 0.5;
     pointer-events: none;
     transition: opacity 0.5s;
+    animation: doorGlowPulse 7s ease-in-out infinite;
 }
 
-/* 目标剪影 */
+@keyframes doorGlowPulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
+/* 液态流动感（超低对比度，隐约可见） */
+.door-glow::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(ellipse at 30% 40%, rgba(200, 230, 255, 0.03) 0%, transparent 40%),
+        radial-gradient(ellipse at 70% 60%, rgba(180, 220, 240, 0.02) 0%, transparent 35%);
+    animation: liquidFlow 12s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes liquidFlow {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    33% {
+        transform: translate(5%, 3%) rotate(2deg);
+    }
+    66% {
+        transform: translate(-3%, 5%) rotate(-1deg);
+    }
+}
+
+/* 目标物品 - 呼吸动画 */
 .door-target-silhouette {
-    font-size: 56px;
-    opacity: 0.3; /* 初始非常暗 */
-    filter: blur(8px) grayscale(100%);
+    font-size: 48px;
+    opacity: 0.3; /* 初始暗淡 */
+    filter: blur(4px) grayscale(80%);
     transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 3;
-    transform: scale(0.8);
+    transform: scale(0.9);
     position: relative;
+    animation: targetBreath 2.5s ease-in-out infinite;
+}
+
+@keyframes targetBreath {
+    0%, 100% { 
+        transform: scale(0.9); 
+        filter: blur(4px) grayscale(80%);
+    }
+    50% { 
+        transform: scale(0.95); 
+        filter: blur(3px) grayscale(70%);
+    }
 }
 
 /* 门的状态光环 */
 .door-aura {
     position: absolute;
-    top: -10px; left: -10px; right: -10px; bottom: -10px;
-    border-radius: 50%;
+    top: -8px; left: -8px; right: -8px; bottom: -8px;
+    border-radius: 58px 58px 0 0;
     border: 2px solid transparent;
     transition: all 0.8s ease;
     pointer-events: none;
@@ -257,79 +406,108 @@ body {
     50% { transform: scale(1.1); opacity: 0.8; }
 }
 
-/* Stage 0: 沉睡 */
+/* Stage 0: 沉睡 - 暗淡状态 */
 .door-container.stage-0 .door-target-silhouette {
     opacity: 0.2;
-    filter: blur(10px) grayscale(100%);
+    filter: blur(8px) grayscale(100%);
+    animation: targetBreath 3s ease-in-out infinite;
 }
 
-/* Stage 1: 唤醒 (微光) */
+/* Stage 1: 唤醒 (微光) - 荧光蓝开始显现 */
 .door-container.stage-1 .door-frame {
-    border-color: #D4A574; /* 品牌色边框 */
+    border-color: rgba(0, 180, 200, 0.5);
+    box-shadow: 0 0 15px rgba(0, 180, 200, 0.2);
 }
 .door-container.stage-1 .door-glow {
-    background: #4A3B32; /* 内部变亮 */
-    box-shadow: inset 0 0 20px rgba(212, 165, 116, 0.2);
+    box-shadow: inset 0 0 40px rgba(0, 200, 220, 0.25);
+}
+.door-container.stage-1 .door-glow::before {
+    opacity: 0.7;
 }
 .door-container.stage-1 .door-target-silhouette {
     opacity: 0.5;
-    filter: blur(4px) grayscale(80%);
-    transform: scale(0.9);
+    filter: blur(3px) grayscale(60%);
+    transform: scale(0.95);
+    animation: targetBreathStage1 2.5s ease-in-out infinite;
+}
+@keyframes targetBreathStage1 {
+    0%, 100% { transform: scale(0.95); opacity: 0.5; }
+    50% { transform: scale(1); opacity: 0.6; }
 }
 .door-container.stage-1 .door-aura {
-    border-color: rgba(212, 165, 116, 0.3);
-    transform: scale(1.05);
+    border-color: rgba(0, 180, 200, 0.3);
+    transform: scale(1.02);
 }
 
-/* Stage 2: 脉动 (即将开启) */
+/* Stage 2: 脉动 (即将开启) - 荧光蓝更强 */
 .door-container.stage-2 .door-frame {
-    border-color: #FFD700;
-    box-shadow: 0 0 20px rgba(212, 165, 116, 0.4);
+    border-color: rgba(0, 220, 255, 0.7);
+    box-shadow: 0 0 25px rgba(0, 220, 255, 0.4);
 }
 .door-container.stage-2 .door-glow {
-    background: radial-gradient(circle, #5D4037 0%, #2C241E 100%);
+    box-shadow: inset 0 0 50px rgba(0, 220, 255, 0.35);
     animation: glowPulse 2s infinite;
+}
+.door-container.stage-2 .door-glow::before {
+    opacity: 1;
+    background: radial-gradient(ellipse at center 30%, rgba(0, 220, 255, 0.2) 0%, transparent 60%);
 }
 .door-container.stage-2 .door-target-silhouette {
     opacity: 0.8;
-    filter: blur(1px) grayscale(30%);
+    filter: blur(1px) grayscale(20%);
     transform: scale(1);
-    color: #FFF;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    text-shadow: 0 0 20px rgba(0, 220, 255, 0.6);
+    animation: targetBreathStage2 2s ease-in-out infinite;
+}
+@keyframes targetBreathStage2 {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 0.9; }
 }
 .door-container.stage-2 .door-aura {
-    border-color: var(--brand-color);
-    box-shadow: 0 0 30px rgba(212, 165, 116, 0.4);
-    animation: auraRotate 10s linear infinite;
+    border-color: rgba(0, 220, 255, 0.5);
+    box-shadow: 0 0 30px rgba(0, 220, 255, 0.3);
+    animation: auraGlow 2s ease-in-out infinite;
+}
+@keyframes auraGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
 }
 
-/* Stage 3: 开启 (高潮) */
+/* Stage 3: 开启 (高潮) - 充满光芒 */
 .door-container.stage-3 {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 .door-container.stage-3 .door-frame {
-    border-color: white;
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
-    background: #D4A574; /* 门框变亮 */
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 40px rgba(0, 220, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.4);
+    background: transparent;
 }
 .door-container.stage-3 .door-glow {
-    /* 内部充满光芒 */
-    background: radial-gradient(circle, #FFF8E1 0%, #FFECB3 100%);
+    background: radial-gradient(ellipse at center, rgba(0, 220, 255, 0.3) 0%, rgba(10, 10, 10, 0.9) 70%);
+    box-shadow: inset 0 0 60px rgba(0, 220, 255, 0.5);
 }
 .door-container.stage-3 .door-glow::before {
-    opacity: 0; /* 窗棂消失 */
+    opacity: 0;
 }
 .door-container.stage-3 .door-target-silhouette {
     opacity: 1;
     filter: none;
-    transform: scale(1.2);
-    text-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    /* 真实的物品颜色 */
-    color: initial; 
+    transform: scale(1.15);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    animation: targetBreathStage3 1.5s ease-in-out infinite;
+}
+@keyframes targetBreathStage3 {
+    0%, 100% { transform: scale(1.15); }
+    50% { transform: scale(1.2); }
 }
 .door-container.stage-3 .door-aura {
-    opacity: 0; /* 光环扩散消失 */
-    transform: scale(1.5);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 50px rgba(0, 220, 255, 0.5);
+    animation: auraGlowIntense 1.5s ease-in-out infinite;
+}
+@keyframes auraGlowIntense {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.03); }
 }
 
 /* 门等待献上状态 - stage-3 时提示玩家 */
@@ -338,32 +516,32 @@ body {
 }
 
 @keyframes awaitingPulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
-    50% { box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5); }
+    0%, 100% { box-shadow: 0 0 40px rgba(0, 220, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.4); }
+    50% { box-shadow: 0 0 60px rgba(0, 220, 255, 1), 0 0 80px rgba(255, 255, 255, 0.6); }
 }
 
 /* 门靠近反馈 - 拖着物品靠近门时 */
 .door-container.door-nearby {
-    transform: scale(1.08);
+    transform: scale(1.05);
 }
 
 .door-container.door-nearby .door-frame {
-    border-color: var(--brand-color);
-    box-shadow: 0 0 30px rgba(212, 165, 116, 0.6);
+    border-color: rgba(0, 220, 255, 0.8);
+    box-shadow: 0 0 35px rgba(0, 220, 255, 0.6);
 }
 
 .door-container.door-nearby .door-glow {
-    box-shadow: inset 0 0 25px rgba(212, 165, 116, 0.4);
+    box-shadow: inset 0 0 40px rgba(0, 220, 255, 0.4);
 }
 
 .door-container.door-nearby .door-aura {
-    border-color: rgba(212, 165, 116, 0.6);
+    border-color: rgba(0, 220, 255, 0.6);
     animation: nearbyAura 0.8s ease-in-out infinite;
 }
 
 @keyframes nearbyAura {
     0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 1; }
 }
 
 /* 献上提示文字 */
@@ -608,6 +786,37 @@ body {
 .game-item.in-inventory {
     position: relative;
     flex-shrink: 0;
+    animation: itemBreath 7s ease-in-out infinite;
+}
+
+/* 物品呼吸动画 - 等待被使用的感觉 */
+@keyframes itemBreath {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 6px 16px rgba(139, 115, 85, 0.15);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 8px 20px rgba(139, 115, 85, 0.18);
+    }
+}
+
+/* 错开呼吸节奏 - 每个物品有不同的延迟 */
+.game-item.in-inventory:nth-child(1) { animation-delay: 0s; }
+.game-item.in-inventory:nth-child(2) { animation-delay: -1s; }
+.game-item.in-inventory:nth-child(3) { animation-delay: -2s; }
+.game-item.in-inventory:nth-child(4) { animation-delay: -3s; }
+.game-item.in-inventory:nth-child(5) { animation-delay: -4s; }
+.game-item.in-inventory:nth-child(6) { animation-delay: -5s; }
+.game-item.in-inventory:nth-child(7) { animation-delay: -6s; }
+.game-item.in-inventory:nth-child(8) { animation-delay: -0.5s; }
+.game-item.in-inventory:nth-child(9) { animation-delay: -1.5s; }
+.game-item.in-inventory:nth-child(10) { animation-delay: -2.5s; }
+
+/* 拖动时停止呼吸 */
+.game-item.dragging,
+.game-item:active {
+    animation: none !important;
 }
 
 .game-item:active {
@@ -648,15 +857,51 @@ body {
     margin-top: 2px;
 }
 
-/* 合成成功特效 */
+/* 合成成功特效 - 柔和奶感 */
 @keyframes synthesisSuccess {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.4); }
-    50% { transform: scale(1.2); box-shadow: 0 0 20px 10px rgba(212, 165, 116, 0.6); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 165, 116, 0); }
+    0% { 
+        transform: scale(0.8) translateY(3px); 
+        box-shadow: 0 0 0 0 rgba(255, 250, 240, 0.3);
+        opacity: 0.7;
+    }
+    30% { 
+        transform: scale(1.08) translateY(-2px); 
+        box-shadow: 0 8px 25px rgba(212, 165, 116, 0.25);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1) translateY(0); 
+        box-shadow: 0 6px 16px rgba(139, 115, 85, 0.15);
+        opacity: 1;
+    }
 }
 
 .synthesis-anim {
-    animation: synthesisSuccess 0.5s ease-out;
+    animation: synthesisSuccess 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 合成柔波纹效果 */
+.synthesis-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 252, 245, 0.4) 0%, rgba(255, 250, 240, 0.1) 50%, transparent 70%);
+    pointer-events: none;
+    animation: synthesisRipple 0.8s ease-out forwards;
+}
+
+@keyframes synthesisRipple {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    100% {
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 /* 失败特效 */
@@ -678,16 +923,33 @@ body {
     z-index: 1000;
 }
 
+/* 奶酪珠粒子 - 圆润小球，缓慢向上漂浮 */
 .particle {
     position: absolute;
-    background: var(--brand-color);
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 252, 245, 0.95) 0%, 
+        rgba(255, 248, 230, 0.8) 40%,
+        rgba(240, 230, 210, 0.6) 100%);
     border-radius: 50%;
-    animation: particleFade 0.8s ease-out forwards;
+    box-shadow: 
+        0 2px 4px rgba(139, 115, 85, 0.15),
+        inset 0 -2px 4px rgba(212, 165, 116, 0.1);
+    animation: milkBallFloat 1.5s ease-out forwards;
 }
 
-@keyframes particleFade {
-    0% { transform: translate(0, 0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+@keyframes milkBallFloat {
+    0% { 
+        transform: translate(0, 0) scale(0.6); 
+        opacity: 0.8; 
+    }
+    40% {
+        transform: translate(var(--tx), calc(var(--ty) * 0.3)) scale(1);
+        opacity: 0.9;
+    }
+    100% { 
+        transform: translate(var(--tx), var(--ty)) scale(0.4); 
+        opacity: 0; 
+    }
 }
 
 /* ========== 倒计时覆盖层 ========== */
@@ -1080,15 +1342,24 @@ html, body {
 /* 小屏手机 */
 @media (max-height: 600px) {
     #door-area {
-        height: 20vh;
-        min-height: 120px;
+        height: 22vh;
+        min-height: 130px;
     }
     .door-container {
-        width: 80px;
-        height: 100px;
+        width: 70px;
+        height: 105px;
+    }
+    .door-frame {
+        border-radius: 35px 35px 0 0;
+    }
+    .door-glow {
+        border-radius: 30px 30px 0 0;
+    }
+    .door-aura {
+        border-radius: 43px 43px 0 0;
     }
     .door-target-silhouette {
-        font-size: 32px;
+        font-size: 30px;
     }
     #inventory-area {
         height: 18vh;
@@ -1109,15 +1380,24 @@ html, body {
 /* 普通手机 */
 @media (max-height: 700px) and (min-height: 601px) {
     #door-area {
-        height: 22vh;
-        min-height: 140px;
+        height: 24vh;
+        min-height: 150px;
     }
     .door-container {
-        width: 100px;
-        height: 120px;
+        width: 85px;
+        height: 128px;
+    }
+    .door-frame {
+        border-radius: 43px 43px 0 0;
+    }
+    .door-glow {
+        border-radius: 38px 38px 0 0;
+    }
+    .door-aura {
+        border-radius: 51px 51px 0 0;
     }
     .door-target-silhouette {
-        font-size: 40px;
+        font-size: 38px;
     }
     #inventory-area {
         height: 18vh;
@@ -1149,11 +1429,20 @@ html, body {
         padding: 20px 30px;
     }
     .door-container {
-        width: 140px;
-        height: 160px;
+        width: 120px;
+        height: 180px;
+    }
+    .door-frame {
+        border-radius: 60px 60px 0 0;
+    }
+    .door-glow {
+        border-radius: 54px 54px 0 0;
+    }
+    .door-aura {
+        border-radius: 68px 68px 0 0;
     }
     .door-target-silhouette {
-        font-size: 56px;
+        font-size: 52px;
     }
     .success-modal {
         max-width: 400px;
@@ -1827,5 +2116,328 @@ html, body {
     100% { 
         transform: scale(1) rotate(0deg); 
         opacity: 1;
+    }
+}
+
+/* ========== 基础关卡完成画面 ========== */
+.basic-completion-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.basic-completion-overlay.hidden {
+    display: none;
+}
+
+.completion-content {
+    width: 90%;
+    max-width: 400px;
+    background: linear-gradient(180deg, #2a2520 0%, #1a1815 100%);
+    border-radius: 24px;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.completion-section {
+    margin-bottom: 25px;
+}
+
+.completion-section:last-child {
+    margin-bottom: 0;
+}
+
+.completion-section.hidden {
+    display: none;
+}
+
+/* 完成标题 */
+.completion-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: #FFE4B5;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+}
+
+/* 统计行 */
+.stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.stats-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+.stats-value {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.stats-percent {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* 速度评级徽章 */
+.speed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+.speed-badge.tier-5 { /* 闪电 */
+    background: rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.5);
+    color: #FFD700;
+}
+
+.speed-badge.tier-4 { /* 疾风 */
+    background: rgba(156, 39, 176, 0.2);
+    border-color: rgba(156, 39, 176, 0.5);
+    color: #CE93D8;
+}
+
+.speed-badge.tier-3 { /* 稳健 */
+    background: rgba(33, 150, 243, 0.2);
+    border-color: rgba(33, 150, 243, 0.5);
+    color: #90CAF9;
+}
+
+.speed-badge.tier-2 { /* 悠然 */
+    background: rgba(76, 175, 80, 0.2);
+    border-color: rgba(76, 175, 80, 0.5);
+    color: #A5D6A7;
+}
+
+.speed-badge.tier-1 { /* 沉浸 */
+    background: rgba(158, 158, 158, 0.2);
+    border-color: rgba(158, 158, 158, 0.5);
+    color: #BDBDBD;
+}
+
+.speed-icon {
+    font-size: 14px;
+}
+
+.speed-name {
+    font-size: 12px;
+}
+
+/* 领取奖励按钮 */
+.claim-reward-btn {
+    position: relative;
+    padding: 15px 50px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1815;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.claim-reward-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+}
+
+.claim-reward-btn:active {
+    transform: translateY(0);
+}
+
+.claim-reward-btn .btn-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 70%
+    );
+    animation: btnShine 3s infinite;
+}
+
+@keyframes btnShine {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+}
+
+.btn-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* 奖励展示 */
+.reward-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.reward-content {
+    padding: 20px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.title-upgrade {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.old-title, .new-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.old-title {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: line-through;
+}
+
+.new-title {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 167, 38, 0.3) 100%);
+    color: #FFE4B5;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    animation: newTitleGlow 2s ease-in-out infinite;
+}
+
+@keyframes newTitleGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+}
+
+.title-icon {
+    font-size: 18px;
+}
+
+.title-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.upgrade-arrow {
+    color: #FFD700;
+    font-size: 20px;
+    animation: arrowPulse 1s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+    0%, 100% { opacity: 0.5; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(3px); }
+}
+
+/* 继续提示 */
+.continue-message {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 25px;
+    font-style: italic;
+}
+
+.continue-message p {
+    margin: 0;
+}
+
+.continue-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.continue-btn {
+    padding: 12px 30px;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.continue-btn.primary {
+    background: linear-gradient(135deg, var(--brand-color) 0%, #C49463 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(212, 165, 116, 0.4);
+}
+
+.continue-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 165, 116, 0.5);
+}
+
+.continue-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.continue-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+/* 奖励展示动画 */
+.completion-reward-display {
+    animation: slideUp 0.5s ease-out;
+}
+
+.completion-continue {
+    animation: slideUp 0.5s ease-out 0.2s both;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

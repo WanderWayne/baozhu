@@ -118,17 +118,26 @@ class DragSystem {
         // 记录来源
         this.fromInventory = target.classList.contains('in-inventory');
 
-        // 如果从物品栏拖出，克隆一个新的
+        // 保存原始位置信息（用于放回物品栏）
+        this.originRect = rect;
+        this.originParent = target.parentElement;
+        this.sourceElement = target; // 保存源元素引用
+
         if (this.fromInventory) {
+            // 从物品栏拖出：克隆一个拖拽用，原物品保持半透明占位
             this.activeItem = target.cloneNode(true);
             this.activeItem.classList.remove('in-inventory');
             this.activeItem.dataset.name = target.dataset.name;
-            // 直接添加到body
             document.body.appendChild(this.activeItem);
+            
+            // 原物品变成占位符（立即完全透明，无动画）
+            target.classList.add('placeholder');
+            target.style.transition = 'none'; // 确保无动画
+            target.style.opacity = '0';
+            target.style.pointerEvents = 'none';
         } else {
             // 从合成区域拖拽，直接使用原元素
             this.activeItem = target;
-            // 先从父元素移除再添加到body，避免复制
             this.activeItem.remove();
             document.body.appendChild(this.activeItem);
         }
@@ -242,6 +251,7 @@ class DragSystem {
         }
         
         const synthesisRect = this.synthesisArea.getBoundingClientRect();
+        const inventoryRect = this.inventoryArea.getBoundingClientRect();
         const itemRect = this.activeItem.getBoundingClientRect();
         const itemCenter = {
             x: itemRect.left + itemRect.width / 2,
@@ -253,12 +263,24 @@ class DragSystem {
             // 尝试献上到门
             const offered = this.game.tryOfferToDoor(this.activeItem);
             if (offered) {
-                // 献上成功，物品会被动画处理，不需要手动清除
+                // 献上成功，物品会被动画处理
+                // 恢复物品栏中的占位符
+                if (this.fromInventory) {
+                    this.removePlaceholder();
+                }
                 this.clearAllHighlights();
                 this.activeItem = null;
                 return;
             }
         }
+        
+        // 检查是否放回物品栏
+        const isInInventory = (
+            itemCenter.y >= inventoryRect.top &&
+            itemCenter.y <= inventoryRect.bottom &&
+            itemCenter.x >= inventoryRect.left &&
+            itemCenter.x <= inventoryRect.right
+        );
 
         // 检查是否在合成区域内
         const isInSynthesisArea = (
@@ -268,7 +290,10 @@ class DragSystem {
             itemCenter.x <= synthesisRect.right
         );
 
-        if (isInSynthesisArea) {
+        if (isInInventory && this.fromInventory) {
+            // 放回物品栏 - 回到原位置
+            this.returnToInventory();
+        } else if (isInSynthesisArea) {
             // 转换坐标到 synthesis-area 相对坐标
             const relX = itemRect.left - synthesisRect.left;
             const relY = itemRect.top - synthesisRect.top;
@@ -285,11 +310,19 @@ class DragSystem {
             if (this.activeItem.parentElement !== this.synthesisArea) {
                 this.synthesisArea.appendChild(this.activeItem);
             }
+            
+            // 恢复物品栏中的占位符为正常显示
+            if (this.fromInventory) {
+                this.removePlaceholder();
+            }
 
             // 检查碰撞并执行合成
             this.checkCollisionAndSynthesize();
+        } else if (this.fromInventory) {
+            // 不在任何有效区域，但是从物品栏拖出的 -> 回到物品栏
+            this.returnToInventory();
         } else {
-            // 不在合成区域，销毁
+            // 从合成区拖出且不在有效区域，销毁
             this.activeItem.remove();
         }
 
@@ -297,6 +330,44 @@ class DragSystem {
         this.clearAllHighlights();
         
         this.activeItem = null;
+        this.fromInventory = false;
+        this.originRect = null;
+        this.originParent = null;
+        this.sourceElement = null;
+    }
+    
+    // 放回物品栏（恢复占位符）
+    returnToInventory() {
+        // 恢复占位符为正常状态
+        if (this.sourceElement && this.fromInventory) {
+            this.sourceElement.classList.remove('placeholder');
+            this.sourceElement.style.opacity = '';
+            this.sourceElement.style.pointerEvents = '';
+        }
+        
+        // 移除拖拽的克隆物品
+        if (this.activeItem) {
+            this.activeItem.remove();
+        }
+    }
+    
+    // 恢复占位符显示（物品成功放到合成区后，带淡入动画）
+    removePlaceholder() {
+        if (this.sourceElement && this.fromInventory) {
+            this.sourceElement.classList.remove('placeholder');
+            this.sourceElement.style.pointerEvents = '';
+            
+            // 淡入动画 - 慢一点让玩家看清楚
+            this.sourceElement.style.transition = 'opacity 0.6s ease';
+            this.sourceElement.style.opacity = '1';
+            
+            // 动画结束后清理 transition
+            setTimeout(() => {
+                if (this.sourceElement) {
+                    this.sourceElement.style.transition = '';
+                }
+            }, 600);
+        }
     }
     
     // 检测是否命中门区域

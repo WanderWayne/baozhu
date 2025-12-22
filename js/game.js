@@ -34,14 +34,15 @@ class Game {
         this.idleTimer = null;
         this.idleTimeout = 12000; // 12秒（增加空闲等待时间）
 
-        // 检查是否需要显示教学动画（第一关且第一次玩）
-        // 101 是新的第一个教学关，1 是旧的第一关（保持兼容）
-        if ((this.levelId === 101 || this.levelId === 1) && !this.hasSeenTutorial()) {
-            this.showTutorial();
-        } else {
-            this.hideTutorialImmediately();
-            this.startGame();
+        // 如果是基础关卡，启动计时器
+        const basicLevels = window.LevelManager.getBasicLevelIds();
+        if (basicLevels.includes(this.levelId)) {
+            window.LevelManager.startBasicLevelTimer();
         }
+
+        // 不再显示教学动画，直接开始游戏
+        this.hideTutorialImmediately();
+        this.startGame();
         
         window.GameInstance = this;
     }
@@ -189,6 +190,45 @@ class Game {
         this.initUI();
         this.initDragSystem();
         this.startIdleTimer();
+        this.startSugarSparkles();
+    }
+    
+    // 糖晶微闪粒子系统
+    startSugarSparkles() {
+        // 每6-10秒创建1-2个糖晶闪光
+        const createSparkle = () => {
+            const count = Math.random() > 0.5 ? 2 : 1;
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => this.createSugarSparkle(), i * 300);
+            }
+            // 下一次闪光在6-10秒后
+            const nextDelay = 6000 + Math.random() * 4000;
+            setTimeout(createSparkle, nextDelay);
+        };
+        // 初始延迟3秒后开始
+        setTimeout(createSparkle, 3000);
+    }
+    
+    createSugarSparkle() {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sugar-sparkle';
+        
+        // 随机位置（避开底部物品栏区域）
+        const x = 10 + Math.random() * 80; // 10%-90% 水平位置
+        const y = 10 + Math.random() * 60; // 10%-70% 垂直位置
+        
+        sparkle.style.left = x + '%';
+        sparkle.style.top = y + '%';
+        
+        // 随机大小 - 更大更明显
+        const size = 10 + Math.random() * 8; // 10-18px
+        sparkle.style.width = size + 'px';
+        sparkle.style.height = size + 'px';
+        
+        document.body.appendChild(sparkle);
+        
+        // 动画结束后移除
+        setTimeout(() => sparkle.remove(), 2500);
     }
 
     getLevelFromUrl() {
@@ -204,6 +244,12 @@ class Game {
         // 设置关卡信息
         document.getElementById('level-name').textContent = this.levelData.name;
         document.getElementById('level-target').textContent = `目标：${this.levelData.target}`;
+
+        // 清空合成区（防止残留物品）
+        const synthesisArea = document.getElementById('synthesis-area');
+        if (synthesisArea) {
+            synthesisArea.innerHTML = '';
+        }
 
         // 初始化物品栏
         this.initInventory();
@@ -225,6 +271,34 @@ class Game {
         if (this.levelData.isTutorial) {
             this.showTutorialHint();
         }
+        
+        // 如果关卡有专属提示，定时显示
+        if (this.levelData.levelHints && this.levelData.levelHints.length > 0) {
+            this.showLevelHints();
+        }
+    }
+    
+    // 显示关卡专属提示（循环显示）
+    showLevelHints() {
+        const hints = this.levelData.levelHints;
+        let hintIndex = 0;
+        
+        // 先显示第一条提示（延迟3秒）
+        setTimeout(() => {
+            this.showToast('💡 ' + hints[hintIndex], 5000);
+            hintIndex++;
+        }, 3000);
+        
+        // 之后每隔15秒显示下一条提示（如果玩家还没通关）
+        this.levelHintInterval = setInterval(() => {
+            if (hintIndex < hints.length) {
+                this.showToast('💡 ' + hints[hintIndex], 5000);
+                hintIndex++;
+            } else {
+                // 循环回到第一条
+                hintIndex = 0;
+            }
+        }, 15000);
     }
     
     // 显示教学关卡特定提示
@@ -458,40 +532,56 @@ class Game {
         this.revealTimers.set(itemEl, timerId);
     }
 
-    // 粒子特效
+    // 粒子特效 - 奶酪珠风格
     showSynthesisParticles(x, y) {
-        const count = 12;
+        const synthesisArea = document.getElementById('synthesis-area');
+        const centerX = x + 45; // 90px item size, center is +45
+        const centerY = y + 45;
+        
+        // 1. 创建柔和波纹效果
+        const ripple = document.createElement('div');
+        ripple.className = 'synthesis-ripple';
+        ripple.style.left = centerX + 'px';
+        ripple.style.top = centerY + 'px';
+        synthesisArea.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 800);
+        
+        // 2. 创建奶酪珠粒子 - 缓慢向上漂浮
+        const count = 8;
         const container = document.createElement('div');
         container.className = 'particle-container';
-        // 90px item size, center is +45
-        container.style.left = (x + 45) + 'px';
-        container.style.top = (y + 45) + 'px';
+        container.style.left = centerX + 'px';
+        container.style.top = centerY + 'px';
         
         for (let i = 0; i < count; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            // 随机角度和距离
-            const angle = (i / count) * Math.PI * 2;
-            const dist = 60 + Math.random() * 20;
-            const tx = Math.cos(angle) * dist;
-            const ty = Math.sin(angle) * dist;
+            // 随机角度（主要向上），随机距离
+            const angleSpread = Math.PI * 0.6; // 约108度范围
+            const baseAngle = -Math.PI / 2; // 向上
+            const angle = baseAngle + (Math.random() - 0.5) * angleSpread;
+            const dist = 40 + Math.random() * 30;
+            const tx = Math.cos(angle) * dist * (0.6 + Math.random() * 0.4);
+            const ty = Math.sin(angle) * dist - 20; // 向上偏移更多
             
-            particle.style.width = (Math.random() * 4 + 4) + 'px';
-            particle.style.height = particle.style.width;
+            // 随机大小 - 圆润的奶酪珠
+            const size = 6 + Math.random() * 6;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
             
             // 设置CSS变量供动画使用
             particle.style.setProperty('--tx', tx + 'px');
             particle.style.setProperty('--ty', ty + 'px');
             
-            // 随机颜色
-            particle.style.background = Math.random() > 0.5 ? 'var(--brand-color)' : '#FFD700';
+            // 随机延迟，让粒子错开出现
+            particle.style.animationDelay = (i * 0.05) + 's';
             
             container.appendChild(particle);
         }
         
-        document.getElementById('synthesis-area').appendChild(container);
-        setTimeout(() => container.remove(), 1000);
+        synthesisArea.appendChild(container);
+        setTimeout(() => container.remove(), 1800);
     }
 
     // 倒计时合成
@@ -862,6 +952,18 @@ class Game {
     
     // 显示成功弹窗
     showSuccessModal() {
+        // 清理关卡提示定时器
+        if (this.levelHintInterval) {
+            clearInterval(this.levelHintInterval);
+            this.levelHintInterval = null;
+        }
+        
+        // 检查是否完成了第5个基础关卡(104)且未领取过奖励
+        if (this.levelId === 104 && !window.LevelManager.hasClaimedBasicReward()) {
+            this.showBasicCompletionScreen();
+            return;
+        }
+        
         const itemData = window.ITEMS[this.levelData.target];
         const nextLevel = this.getNextLevel();
         
@@ -931,6 +1033,78 @@ class Game {
                 window.location.href = `game.html?level=${nextLevel.id}`;
             }
         };
+    }
+    
+    // 显示基础关卡完成画面
+    showBasicCompletionScreen() {
+        const overlay = document.getElementById('basic-completion-overlay');
+        if (!overlay) return;
+        
+        // 获取耗时和评级
+        const elapsedTime = window.LevelManager.getBasicLevelElapsedTime();
+        const timeText = window.LevelManager.formatElapsedTime(elapsedTime);
+        const speedRating = window.LevelManager.getSpeedRating(elapsedTime);
+        
+        // 获取探索进度
+        const explorationProgress = window.LevelManager.getExplorationProgress();
+        
+        // 获取当前称号
+        const currentTitle = window.LevelManager.getCurrentTitle();
+        
+        // 填充数据
+        document.getElementById('completion-time').textContent = timeText;
+        document.getElementById('completion-progress').textContent = explorationProgress;
+        
+        // 设置速度评级
+        const speedBadge = document.getElementById('speed-badge');
+        speedBadge.querySelector('.speed-icon').textContent = speedRating.icon;
+        speedBadge.querySelector('.speed-name').textContent = speedRating.name;
+        speedBadge.className = `speed-badge tier-${speedRating.tier}`;
+        
+        // 设置旧称号
+        const oldTitleEl = document.getElementById('old-title');
+        oldTitleEl.querySelector('.title-icon').textContent = currentTitle.icon;
+        oldTitleEl.querySelector('.title-name').textContent = currentTitle.name;
+        
+        // 显示画面
+        overlay.classList.remove('hidden');
+        
+        // 绑定领取奖励按钮
+        const claimBtn = document.getElementById('claim-reward-btn');
+        claimBtn.onclick = () => this.claimBasicReward();
+    }
+    
+    // 领取基础关卡奖励
+    claimBasicReward() {
+        // 隐藏领取按钮区域
+        document.querySelector('.completion-reward-btn').classList.add('hidden');
+        
+        // 升级称号
+        const newTitle = window.LevelManager.upgradeTitle();
+        
+        // 显示新称号
+        const newTitleEl = document.getElementById('new-title');
+        newTitleEl.querySelector('.title-icon').textContent = newTitle.icon;
+        newTitleEl.querySelector('.title-name').textContent = newTitle.name;
+        
+        // 显示奖励区域
+        document.getElementById('reward-display').classList.remove('hidden');
+        
+        // 延迟显示继续按钮
+        setTimeout(() => {
+            document.getElementById('continue-section').classList.remove('hidden');
+            
+            // 绑定继续按钮
+            document.getElementById('continue-explore-btn').onclick = () => {
+                window.LevelManager.claimBasicReward();
+                window.location.href = 'game.html?level=3'; // 进入下一关（奶酪试炼）
+            };
+            
+            document.getElementById('rest-btn').onclick = () => {
+                window.LevelManager.claimBasicReward();
+                window.location.href = 'index.html';
+            };
+        }, 800);
     }
 
     // 检查世界完成成就

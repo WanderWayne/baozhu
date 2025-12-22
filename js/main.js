@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLevelDoors(currentWorldId);
     updateStorySection(currentWorldId);
     updateProgressPanel();
+    startSugarSparkles();
 
     // 自由探索模式按钮
     const freeModeBtn = document.getElementById('free-mode-btn');
@@ -204,4 +205,42 @@ function updateProgressPanel() {
     
     fragmentFill.style.width = fragmentPercent + '%';
     fragmentText.textContent = `${fragments.length}/${totalFragments}`;
+}
+
+// 糖晶微闪粒子系统
+function startSugarSparkles() {
+    // 每6-10秒创建1-2个糖晶闪光
+    const createSparkle = () => {
+        const count = Math.random() > 0.5 ? 2 : 1;
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => createSugarSparkle(), i * 300);
+        }
+        // 下一次闪光在6-10秒后
+        const nextDelay = 6000 + Math.random() * 4000;
+        setTimeout(createSparkle, nextDelay);
+    };
+    // 初始延迟2秒后开始
+    setTimeout(createSparkle, 2000);
+}
+
+function createSugarSparkle() {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sugar-sparkle';
+    
+    // 随机位置
+    const x = 10 + Math.random() * 80; // 10%-90% 水平位置
+    const y = 15 + Math.random() * 70; // 15%-85% 垂直位置
+    
+    sparkle.style.left = x + '%';
+    sparkle.style.top = y + '%';
+    
+    // 随机大小 - 更大更明显
+    const size = 10 + Math.random() * 8; // 10-18px
+    sparkle.style.width = size + 'px';
+    sparkle.style.height = size + 'px';
+    
+    document.body.appendChild(sparkle);
+    
+    // 动画结束后移除
+    setTimeout(() => sparkle.remove(), 2500);
 }

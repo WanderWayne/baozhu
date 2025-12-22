@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
+    <!-- 奶雾粒子背景 -->
+    <div class="milk-fog-container">
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+        <div class="milk-fog-particle"></div>
+    </div>
+
     <!-- 第一关教学动画覆盖层 -->
     <div id="tutorial-overlay" class="tutorial-overlay hidden">
         <div class="tutorial-content">
@@ -72,6 +84,70 @@
     <!-- 底部原料带 -->
     <div id="inventory-area">
         <!-- 由JS动态生成 -->
+    </div>
+
+    <!-- 基础关卡完成画面 -->
+    <div id="basic-completion-overlay" class="basic-completion-overlay hidden">
+        <div class="completion-content">
+            <!-- 第一阶段：完成信息 -->
+            <div class="completion-section completion-stats">
+                <h2 class="completion-title">✨ 你已完成所有基础关卡 ✨</h2>
+                
+                <div class="stats-row">
+                    <span class="stats-label">耗时</span>
+                    <span class="stats-value" id="completion-time">--分--秒</span>
+                    <span class="speed-badge" id="speed-badge">
+                        <span class="speed-icon">⚡</span>
+                        <span class="speed-name">闪电</span>
+                    </span>
+                </div>
+                
+                <div class="stats-row">
+                    <span class="stats-label">探索了宝珠</span>
+                    <span class="stats-value" id="completion-progress">--</span>
+                    <span class="stats-percent">%</span>
+                </div>
+            </div>
+            
+            <!-- 第二阶段：领取奖励按钮 -->
+            <div class="completion-section completion-reward-btn">
+                <button class="claim-reward-btn" id="claim-reward-btn">
+                    <span class="btn-glow"></span>
+                    <span class="btn-text">领取奖励</span>
+                </button>
+            </div>
+            
+            <!-- 第三阶段：奖励展示（初始隐藏） -->
+            <div class="completion-section completion-reward-display hidden" id="reward-display">
+                <div class="reward-label">你已获得</div>
+                <div class="reward-content">
+                    <div class="title-upgrade">
+                        <span class="old-title" id="old-title">
+                            <span class="title-icon">🌱</span>
+                            <span class="title-name">酿造学徒</span>
+                        </span>
+                        <span class="upgrade-arrow">→</span>
+                        <span class="new-title" id="new-title">
+                            <span class="title-icon">🌿</span>
+                            <span class="title-name">初级酿造师</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 第四阶段：继续提示（初始隐藏） -->
+            <div class="completion-section completion-continue hidden" id="continue-section">
+                <div class="continue-message">
+                    <p>前方的迷雾正在散去，</p>
+                    <p>更深的酿造秘境在等待着你......</p>
+                </div>
+                
+                <div class="continue-buttons">
+                    <button class="continue-btn primary" id="continue-explore-btn">继续探索</button>
+                    <button class="continue-btn secondary" id="rest-btn">暂时休息</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 脚本引入 -->

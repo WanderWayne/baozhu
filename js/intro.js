@@ -16,21 +16,21 @@ class IntroSystem {
         this.breathCount = 0;
         this.lastTime = 0;
         this.cyanOverlayAlpha = 0;
-        this.expandRadius = 0; // 扩散圆半径
         this.pulseWaves = [];
         
         // 配置 - 调整参数
         this.config = {
-            minParticles: 150, // 最少粒子数（用于拼字）
-            ambientParticles: 35, // 环境漂浮粒子（减少）
-            linkedClusterCount: 6, // 连线粒子组数量（减少）
-            linkedClusterSpacing: 25, // 连线粒子间距（缩小）
-            doorBreathDuration: 2000, // 呼吸周期 ms（更慢更温柔）
+            minParticles: 180, // 拼字用（再增加）
+            ambientParticles: 130, // 初始环境粒子（再增加）
+            linkedClusterCount: 8, // 连线粒子组数量
+            linkedClusterSpacing: 25, // 连线粒子间距
+            extraParticlesForText: 60, // 拼字时额外飞入的粒子（再增加）
+            doorBreathDuration: 2000, // 呼吸周期 ms
             doorBreathCount: 3,
-            particleBaseSize: 1.5, // 基础粒子大小（缩小）
+            particleBaseSize: 1.5, // 基础粒子大小（漂浮时小）
             particleMaxSize: 2.5, // 最大粒子大小
-            textParticleSize: 3, // 拼字粒子大小
-            particleAlpha: 0.4, // 粒子透明度（降低）
+            textParticleSize: 9, // 拼字粒子大小（缩小1/4）
+            particleAlpha: 0.4, // 粒子透明度
         };
         
         this.init();
@@ -73,60 +73,117 @@ class IntroSystem {
         window.addEventListener('resize', resize);
     }
     
-    // 生成文字点阵目标坐标（直接绘制文字采样，更可靠）
+    // 手动定义点阵数据 - "宝珠奶酪" 四个字
     loadTextDots() {
-        // 等待 DOM 加载完成后再采样
-        setTimeout(() => {
-            this.generateTextDots();
-        }, 100);
+        // 每个字 10x10 点阵，0=无点，1=有点
+        const dotMatrices = {
+            '宝': [
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,2,0,0,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,0,0,0,0,0,0,1,0],
+                [0,0,2,2,2,2,2,0,0,0],
+                [0,0,0,0,2,0,0,0,0,0],
+                [0,0,2,2,2,2,2,0,0,0],
+                [0,0,0,0,2,0,0,0,0,0],
+                [0,2,2,2,2,2,2,2,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                
+            ],
+            '珠': [
+                [0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,1,0,0],
+                [4,4,4,0,1,0,1,0,0],
+                [0,4,0,0,1,1,1,1,0],
+                [4,4,4,0,0,0,1,0,0],
+                [0,4,0,0,1,1,1,1,1],
+                [4,4,4,0,0,3,1,0,0],
+                [0,0,0,4,1,0,1,1,1],
+                [0,0,0,0,0,0,1,0,0],
+                [0,0,0,0,0,0,0,0,0],
+                
+            ],
+            '奶': [
+                [0,0,0,0,0,0,0,0,0,0],
+                [0,3,0,0,0,0,0,0,0,0],
+                [0,3,0,3,2,2,2,2,0,0],
+                [3,3,3,3,3,2,0,2,0,0],
+                [0,3,0,3,0,2,0,2,2,0],
+                [0,3,0,3,0,2,0,0,2,0],
+                [0,3,0,3,0,2,0,0,2,0],
+                [0,3,3,3,3,2,0,0,2,0],
+                [0,0,0,3,0,0,0,2,2,0],
+                [0,0,0,0,0,0,0,0,0,0],
+                
+            ],
+            '酪': [
+                [0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0],
+                [0,1,1,1,1,1,0,2,0,0,0],
+                [0,0,1,0,1,0,0,1,1,0,0],
+                [0,1,1,1,1,1,2,3,4,-2,0],
+                [0,1,0,1,0,1,0,0,1,0,0],
+                [0,1,1,0,1,1,2,2,0,1,1],
+                [0,1,3,3,3,1,0,3,3,3,0],
+                [0,1,0,0,0,1,0,3,0,3,0],
+                [0,0,0,0,0,0,0,3,3,3,0],
+                
+            ],
+        };
+        
+        this.generateDotsFromMatrices(dotMatrices);
     }
     
-    generateTextDots() {
-        const text = '宝珠奶酪';
-        const fontSize = Math.min(72, window.innerWidth / 6);
+    generateDotsFromMatrices(matrices) {
+        const chars = ['宝', '珠', '奶', '酪'];
+        const dotSize = 12;      // 每个点的间距（缩小1/4）
+        const charGap = 20;      // 字之间的间隔（缩小）
+        const gridSize = 10;     // 点阵网格大小（与矩阵匹配）
         
-        // 创建离屏 canvas
-        const offCanvas = document.createElement('canvas');
-        const offCtx = offCanvas.getContext('2d');
-        
-        // 设置画布大小
-        offCanvas.width = fontSize * text.length + 40;
-        offCanvas.height = fontSize + 40;
-        
-        // 绘制文字
-        offCtx.fillStyle = '#fff';
-        offCtx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-        offCtx.textAlign = 'center';
-        offCtx.textBaseline = 'middle';
-        offCtx.fillText(text, offCanvas.width / 2, offCanvas.height / 2);
-        
-        // 采样像素
-        const imageData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-        const data = imageData.data;
-        
-        // 降采样步长
-        const step = 4;
-        const offsetX = this.centerX - offCanvas.width / 2;
-        const offsetY = this.centerY - offCanvas.height / 2;
+        const charWidth = gridSize * dotSize;
+        const totalWidth = chars.length * charWidth + (chars.length - 1) * charGap;
+        const startX = this.centerX - totalWidth / 2;
+        const startY = this.centerY - (gridSize * dotSize) / 2;
         
         this.textDotTargets = [];
         
-        for (let y = 0; y < offCanvas.height; y += step) {
-            for (let x = 0; x < offCanvas.width; x += step) {
-                const i = (y * offCanvas.width + x) * 4;
-                const a = data[i + 3]; // alpha 通道
-                
-                // 检测有内容的像素
-                if (a > 50) {
-                    this.textDotTargets.push({
-                        x: offsetX + x,
-                        y: offsetY + y
-                    });
+        chars.forEach((char, charIndex) => {
+            const matrix = matrices[char];
+            if (!matrix) return;
+            
+            const charOffsetX = startX + charIndex * (charWidth + charGap);
+            
+            for (let row = 0; row < matrix.length; row++) {
+                for (let col = 0; col < matrix[row].length; col++) {
+                    const val = matrix[row][col];
+                    if (val === 0) continue; // 无点
+                    
+                    let x = charOffsetX + col * dotSize;
+                    let y = startY + row * dotSize;
+                    
+                    const absVal = Math.abs(val);
+                    const sign = val < 0 ? -1 : 1;
+                    
+                    if (absVal === 1) {
+                        // 正常位置
+                    } else if (absVal === 2) {
+                        // 往右偏移半格（负数往左）
+                        x += sign * dotSize / 2;
+                    } else if (absVal === 3) {
+                        // 往下偏移半格（负数往上）
+                        y += sign * dotSize / 2;
+                    } else if (absVal === 4) {
+                        // 往右+往下各偏移半格（负数反向）
+                        x += sign * dotSize / 2;
+                        y += sign * dotSize / 2;
+                    }
+                    
+                    this.textDotTargets.push({ x, y });
                 }
             }
-        }
+        });
         
-        console.log(`生成了 ${this.textDotTargets.length} 个文字点阵目标`);
+        console.log(`点阵生成了 ${this.textDotTargets.length} 个目标点`);
     }
     
     bindEvents() {
@@ -148,7 +205,7 @@ class IntroSystem {
         // 开始游戏按钮
         if (this.startBtnEl) {
             this.startBtnEl.addEventListener('click', () => {
-                this.finishIntro();
+                this.setState('storyTransition');
             });
         }
     }
@@ -168,9 +225,6 @@ class IntroSystem {
                 break;
             case 'doorBreath':
                 this.initDoorBreath();
-                break;
-            case 'zoomOutWithUI':
-                this.initZoomOutWithUI();
                 break;
             case 'spawnRice':
                 this.initSpawnRice();
@@ -200,11 +254,17 @@ class IntroSystem {
             case 'blueWash':
                 this.initBlueWash();
                 break;
+            case 'riseUp':
+                this.initRiseUp();
+                break;
             case 'gatherToText':
                 this.initGatherToText();
                 break;
             case 'showStartButton':
                 this.initShowStartButton();
+                break;
+            case 'storyTransition':
+                this.initStoryTransition();
                 break;
         }
     }
@@ -218,36 +278,53 @@ class IntroSystem {
     }
     
     initDoorExpand() {
-        // 隐藏白点
+        // 白点渐隐
         const dotEl = document.getElementById('intro-dot');
         if (dotEl) {
-            dotEl.classList.add('expanding');
+            dotEl.style.transition = 'opacity 0.2s ease';
+            dotEl.style.opacity = '0';
         }
         
-        // 开始扩散动画
-        this.expandRadius = 10;
-        this.expandPhase = 'expanding';
+        // 屏幕闪白
+        const flashEl = document.getElementById('intro-flash');
+        if (flashEl) {
+            flashEl.classList.add('flash');
+        }
         
-        // 一开始门就是放大的状态
-        const screen = document.getElementById('intro-screen');
-        if (screen) screen.classList.add('zoomed');
+        // 闪白期间，门和粒子先隐藏
+        if (this.doorEl) {
+            this.doorEl.style.opacity = '0';
+        }
         
-        // 延迟显示门（等扩散到一定程度）
+        // 0.7秒后白色开始渐变消失，同时显示门和粒子
         setTimeout(() => {
-            if (dotEl) dotEl.style.opacity = '0';
+            // 显示门和粒子
             if (this.doorEl) {
-                this.doorEl.classList.add('expanding');
+                this.doorEl.style.opacity = '1';
             }
-            // 开始生成粒子
-            this.startParticleSpawning();
-        }, 600);
+            this.createAllParticles();
+            
+            if (flashEl) {
+                flashEl.classList.remove('flash');
+                flashEl.classList.add('fade-out');
+            }
+        }, 700);
         
-        // 扩散完成后进入呼吸
+        // 渐变完成后（2.2秒），开始呼吸
         setTimeout(() => {
-            this.expandPhase = 'done';
             this.showNarrative('这是...?');
             this.setState('doorBreath');
-        }, 1800);
+        }, 2200);
+    }
+    
+    createAllParticles() {
+        // 一次性创建所有粒子（无动画）
+        for (let i = 0; i < this.config.ambientParticles; i++) {
+            this.addParticle(false);
+        }
+        for (let i = 0; i < this.config.linkedClusterCount; i++) {
+            this.addLinkedCluster();
+        }
     }
     
     startParticleSpawning() {
@@ -270,36 +347,23 @@ class IntroSystem {
     }
     
     initDoorBreath() {
-        this.breathCount = 0;
+        // 开始呼吸
         if (this.doorEl) {
             this.doorEl.classList.add('breathing');
         }
         
-        // 开始呼吸计数
-        const breathInterval = setInterval(() => {
-            this.breathCount++;
-            if (this.breathCount >= this.config.doorBreathCount) {
-                clearInterval(breathInterval);
-                this.hideNarrative();
-                this.setState('zoomOutWithUI');
-            }
-        }, this.config.doorBreathDuration);
-    }
-    
-    initZoomOutWithUI() {
-        // 镜头缩小的同时，物品栏从底部冒出
-        const screen = document.getElementById('intro-screen');
-        if (screen) screen.classList.remove('zoomed');
-        
-        // 同时显示物品栏
-        if (this.inventoryEl) {
-            this.inventoryEl.classList.add('visible');
-        }
-        
-        // 缩小动画时长约1.5s，结束后弹出糯米
+        // 呼吸3次后显示物品栏
         setTimeout(() => {
-            this.setState('spawnRice');
-        }, 1500);
+            this.hideNarrative();
+            if (this.inventoryEl) {
+                this.inventoryEl.classList.add('visible');
+            }
+            
+            // 物品栏出现后弹出糯米
+            setTimeout(() => {
+                this.setState('spawnRice');
+            }, 800);
+        }, 6000); // 3次呼吸 = 6秒
     }
     
     initSpawnRice() {
@@ -366,8 +430,8 @@ class IntroSystem {
         this.synthesisCenterX = centerX;
         this.synthesisCenterY = centerY;
         
-        // 阶段1：弹开
-        const popDistance = 80;
+        // 阶段1：弹开（距离缩小）
+        const popDistance = 50;
         const angle = Math.atan2(brewingCenterY - riceCenterY, brewingCenterX - riceCenterX);
         
         rice.animTarget = {
@@ -383,14 +447,14 @@ class IntroSystem {
         rice.spinAngle = 0;
         brewing.spinAngle = 0;
         
-        // 300ms 后开始旋转
+        // 250ms 后开始旋转
         setTimeout(() => {
             rice.animPhase = 'spinning';
             brewing.animPhase = 'spinning';
             rice.spinStart = performance.now();
             brewing.spinStart = performance.now();
             
-            // 旋转结束后（800ms）冲刺
+            // 旋转结束后（600ms，2圈）冲刺
             setTimeout(() => {
                 rice.animPhase = 'dash';
                 brewing.animPhase = 'dash';
@@ -418,8 +482,8 @@ class IntroSystem {
                         this.setState('waitOffer');
                     }, 300);
                 }, 200);
-            }, 800);
-        }, 350);
+            }, 600);  // 改为600ms匹配旋转时间
+        }, 250);  // 改为250ms
     }
     
     initOfferToDoor() {
@@ -470,23 +534,29 @@ class IntroSystem {
     }
     
     initBlueWash() {
-        // 背景荧光蓝渐变 - 然后再变回黑色
+        // 背景荧光蓝渐变 - 更亮更温柔，有力量感
         this.blueWashPhase = 'fadeIn';
         this.cyanOverlayAlpha = 0;
+        this.blueWashMaxAlpha = 0.5; // 更亮
         
-        // 1秒后开始消退
+        // 1.5秒慢慢变亮
+        setTimeout(() => {
+            this.blueWashPhase = 'hold';
+        }, 1500);
+        
+        // 保持0.5秒后开始消退
         setTimeout(() => {
             this.blueWashPhase = 'fadeOut';
             
-            // 再过1秒后进入拼字
+            // 再过1.5秒后进入上升动画
             setTimeout(() => {
-                this.setState('gatherToText');
-            }, 1000);
-        }, 1000);
+                this.setState('riseUp');
+            }, 1500);
+        }, 2000);
     }
     
-    initGatherToText() {
-        // 隐藏门和物品栏
+    initRiseUp() {
+        // 第一步：先让门和物品栏彻底消失
         if (this.doorEl) {
             this.doorEl.style.transition = 'opacity 0.8s ease';
             this.doorEl.style.opacity = '0';
@@ -496,108 +566,165 @@ class IntroSystem {
             this.inventoryEl.style.opacity = '0';
         }
         
-        // 重新生成文字点阵（确保坐标正确）
-        this.generateTextDots();
-        
-        // 等待一帧确保点阵生成完成
+        // 等待门和物品栏完全消失后，等0.3秒，然后开始动画
         setTimeout(() => {
-            const needed = this.textDotTargets.length;
-            
-            // 如果没有足够点阵，创建简单的备用文字
-            if (needed < 50) {
-                console.warn('点阵数量不足，使用备用方案');
-                this.createFallbackTextDots();
-            }
-            
-            // 确保有足够粒子
-            while (this.particles.length < needed) {
-                // 从屏幕边缘随机位置生成新粒子
+            this.startRiseAnimation();
+        }, 1100); // 0.8秒消失 + 0.3秒等待
+    }
+    
+    startRiseAnimation() {
+        // 粒子往上飞
+        this.risePhase = 'rising'; // 上升阶段
+        this.riseOffset = 0;
+        this.riseTargetOffset = this.canvas.height * 4; // 飞4屏的距离
+        this.riseSpeed = 0;
+        this.targetRiseSpeed = 0; // 目标镜头速度（用于平滑加减速）
+        this.cameraScale = 1;
+        this.riseStartTime = performance.now();
+        this.riseDuration = 6000; // 总上升时间（ms）- 翻倍
+        this.riseAccelTime = 1600; // 加速时间（ms）- 翻倍
+        this.riseDecelTime = 2000; // 减速时间（ms）- 翻倍
+        
+        // 给所有粒子赋予上升属性 - 初始速度为0，会加速
+        this.particles.forEach(p => {
+            p.riseStartX = p.x;
+            p.riseStartY = p.y;
+            p.risingSpeed = 0; // 初始为0，会逐渐加速
+            p.maxRisingSpeed = 10 + Math.random() * 10; // 最大速度（更快）
+            p.originalSize = p.size;
+            p.driftSpeed = (Math.random() - 0.5) * 0.4;
+        });
+        
+        // 镜头放大动画 - 一开始就放大（时长翻倍）
+        const screen = document.getElementById('intro-screen');
+        if (screen) {
+            screen.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            screen.style.transform = 'scale(1.3)';
+        }
+        
+        // 动画完成后进入组成文字阶段
+        setTimeout(() => {
+            this.risePhase = 'stopped';
+            this.setState('gatherToText');
+        }, this.riseDuration);
+    }
+    
+    initGatherToText() {
+        // 重新加载点阵目标
+        this.loadTextDots();
+        
+        // 渲染时：renderY = p.y + riseOffset
+        // 我们想让文字显示在屏幕中央偏上一点（约 centerY * 0.65 的位置）
+        // "开始游戏"按钮会在中央偏下一点
+        // 所以：目标渲染位置 = centerY * 0.65
+        //       p.targetY + riseOffset = centerY * 0.65
+        //       p.targetY = centerY * 0.65 - riseOffset
+        const riseY = this.riseOffset || 0;
+        const displayCenterY = this.centerY * 0.65; // 屏幕显示位置：中央偏上
+        const actualCenterY = displayCenterY - riseY; // 粒子实际坐标
+        
+        // 调整目标位置（将文字从 centerY 移动到 actualCenterY）
+        const offsetY = actualCenterY - this.centerY;
+        this.textDotTargets.forEach(t => {
+            t.y = t.y + offsetY;
+        });
+        
+        console.log(`riseOffset: ${riseY}, 显示位置: ${displayCenterY}, 实际目标Y偏移: ${offsetY}, 需要 ${this.textDotTargets.length} 个点`);
+
+        const needed = this.textDotTargets.length;
+        const currentCount = this.particles.length;
+        
+        // 如果粒子不够，从四面八方添加额外粒子飞入
+        const extraNeeded = Math.max(0, needed - currentCount);
+        if (extraNeeded > 0) {
+            console.log(`需要额外 ${extraNeeded} 个粒子从四面八方飞入`);
+            for (let i = 0; i < extraNeeded; i++) {
+                // 从屏幕四边外面生成（考虑当前可见区域，即考虑 riseOffset）
+                const side = Math.floor(Math.random() * 4);
+                let x, y;
+                // 可见区域的 y 范围：实际 y 在 [-riseY, canvas.height - riseY] 之间
+                const visibleTop = -riseY - 100;
+                const visibleBottom = this.canvas.height - riseY + 100;
+                const visibleMidY = (visibleTop + visibleBottom) / 2;
+                
+                switch (side) {
+                    case 0: // 上
+                        x = Math.random() * this.canvas.width;
+                        y = visibleTop;
+                        break;
+                    case 1: // 右
+                        x = this.canvas.width + 50;
+                        y = visibleMidY + (Math.random() - 0.5) * this.canvas.height;
+                        break;
+                    case 2: // 下
+                        x = Math.random() * this.canvas.width;
+                        y = visibleBottom;
+                        break;
+                    case 3: // 左
+                        x = -50;
+                        y = visibleMidY + (Math.random() - 0.5) * this.canvas.height;
+                        break;
+                }
+                
                 const p = {
-                    x: Math.random() * this.canvas.width,
-                    y: Math.random() * this.canvas.height,
-                    vx: 0,
-                    vy: 0,
-                    size: this.config.particleBaseSize,
-                    alpha: 0.3,
-                    targetAlpha: null,
+                    x, y,
+                    vx: 0, vy: 0,
+                    size: this.config.textParticleSize,
+                    alpha: 0.8,
+                    visualSize: this.config.textParticleSize,
+                    visualAlpha: 0.8,
                     linkedTo: null,
                     gathering: false,
-                    targetX: null,
-                    targetY: null,
-                    targetSize: null,
-                    isTextDot: false,
-                    pulseOffset: 0,
-                    pulseDecay: 0,
-                    pulseAngle: 0
+                    isExtraParticle: true
                 };
                 this.particles.push(p);
             }
-            
-            // 打乱目标顺序，让粒子随机分配
-            const shuffledTargets = [...this.textDotTargets].sort(() => Math.random() - 0.5);
-            
-            // 断开所有连线
-            this.particles.forEach(p => {
-                p.linkedTo = null;
-            });
-            
-            // 分配目标
-            this.particles.forEach((p, i) => {
-                if (i < shuffledTargets.length) {
-                    p.targetX = shuffledTargets[i].x;
-                    p.targetY = shuffledTargets[i].y;
-                    p.targetSize = this.config.textParticleSize;
-                    p.isTextDot = true;
-                    p.targetAlpha = 0.95;
-                    p.gathering = true;
-                } else {
-                    // 多余粒子淡出
-                    p.targetAlpha = 0;
-                    p.isTextDot = false;
-                    p.gathering = true;
-                    // 飞向屏幕外
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = Math.max(this.canvas.width, this.canvas.height);
-                    p.targetX = this.centerX + Math.cos(angle) * dist;
-                    p.targetY = this.centerY + Math.sin(angle) * dist;
-                }
-            });
-            
-            console.log(`开始聚合，共 ${this.particles.length} 个粒子，目标 ${shuffledTargets.length} 个`);
-            
-            // 3秒后显示开始按钮
-            setTimeout(() => {
-                this.setState('showStartButton');
-            }, 3500);
-        }, 100);
-    }
-    
-    // 备用方案：用简单的方式生成文字点阵
-    createFallbackTextDots() {
-        const text = '宝珠奶酪';
-        this.textDotTargets = [];
-        
-        // 每个字的大概位置
-        const charWidth = 60;
-        const startX = this.centerX - (text.length * charWidth) / 2;
-        const y = this.centerY;
-        
-        // 为每个字生成一些点
-        for (let i = 0; i < text.length; i++) {
-            const cx = startX + i * charWidth + charWidth / 2;
-            // 用圆形分布模拟每个字
-            for (let j = 0; j < 25; j++) {
-                const angle = Math.random() * Math.PI * 2;
-                const r = Math.random() * 25;
-                this.textDotTargets.push({
-                    x: cx + Math.cos(angle) * r,
-                    y: y + Math.sin(angle) * r
-                });
-            }
         }
         
-        console.log(`备用方案生成了 ${this.textDotTargets.length} 个点`);
+        // 按照粒子当前位置排序（靠近文字中心的优先）
+        const sortedParticles = [...this.particles].sort((a, b) => {
+            const distA = Math.hypot(a.x - this.centerX, a.y - actualCenterY);
+            const distB = Math.hypot(b.x - this.centerX, b.y - actualCenterY);
+            return distA - distB;
+        });
+        
+        // 打乱目标顺序
+        const shuffledTargets = [...this.textDotTargets].sort(() => Math.random() - 0.5);
+        
+        // 断开所有连线，停止漂移
+        this.particles.forEach(p => {
+            p.linkedTo = null;
+            p.driftSpeed = 0;
+        });
+        
+        // 分配目标
+        sortedParticles.forEach((p, i) => {
+            if (i < shuffledTargets.length) {
+                // 这个粒子会变成文字的一部分
+                p.targetX = shuffledTargets[i].x;
+                p.targetY = shuffledTargets[i].y;
+                p.targetSize = this.config.textParticleSize;
+                p.isTextDot = true;
+                p.targetAlpha = 1;
+                p.gathering = true;
+            } else {
+                // 多余粒子慢慢淡出
+                p.targetAlpha = 0;
+                p.isTextDot = false;
+                p.gathering = true;
+                p.targetX = p.x + (Math.random() - 0.5) * 300;
+                p.targetY = p.y - 200;
+            }
+        });
+        
+        console.log(`开始聚合，共 ${this.particles.length} 个粒子，${needed} 个目标点`);
+        
+        // 4秒后显示开始按钮（拼字更慢，需要更长时间）
+        setTimeout(() => {
+            this.setState('showStartButton');
+        }, 4000);
     }
+    
     
     initShowStartButton() {
         // 粒子停止移动，固定位置
@@ -615,6 +742,98 @@ class IntroSystem {
                 this.startBtnEl.classList.add('visible');
             }
         }, 500);
+    }
+    
+    initStoryTransition() {
+        // 隐藏按钮和文字粒子
+        if (this.startBtnEl) {
+            this.startBtnEl.style.transition = 'opacity 0.8s ease';
+            this.startBtnEl.style.opacity = '0';
+            this.startBtnEl.style.pointerEvents = 'none';
+        }
+        
+        // 粒子淡出
+        this.particles.forEach(p => {
+            p.targetAlpha = 0;
+            p.gathering = true;
+        });
+        
+        // 创建故事文字容器
+        const storyContainer = document.createElement('div');
+        storyContainer.id = 'story-text-container';
+        storyContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 50;
+            pointer-events: none;
+        `;
+        document.getElementById('intro-screen').appendChild(storyContainer);
+        
+        // 故事文字序列
+        const storySequence = [
+            { text: '十三年前，一位酿造师在田子坊的小巷里\n点燃了第一盏灯，开始了酿造的旅程。', delay: 1000, duration: 6000 },
+            { text: '十三年后，这些配方被时间打碎成了记忆碎片，\n散落在酿造宇宙的各个角落。', delay: 600, duration: 6000 },
+            { text: '你的任务：找回这些碎片，\n重建完整的"宝珠配方图谱"。', delay: 600, duration: 6000, isGoal: true },
+            { text: '当最后一块碎片归位，\n传说中的"天赐宝珠酪"将再次被唤醒。', delay: 600, duration: 7500, isGoal: true }
+        ];
+        
+        let currentDelay = 800; // 初始等待粒子淡出
+        
+        storySequence.forEach((item, index) => {
+            currentDelay += item.delay;
+            
+            setTimeout(() => {
+                this.showStoryText(storyContainer, item.text, item.duration, item.isGoal);
+            }, currentDelay);
+            
+            currentDelay += item.duration;
+        });
+        
+        // 所有文字显示完后进入主界面
+        setTimeout(() => {
+            this.finishIntro();
+        }, currentDelay + 500);
+    }
+    
+    showStoryText(container, text, duration, isGoal = false) {
+        const textEl = document.createElement('div');
+        textEl.className = 'story-text' + (isGoal ? ' goal-text' : '');
+        textEl.innerHTML = text.replace(/\n/g, '<br>'); // 支持换行
+        textEl.style.cssText = `
+            font-size: ${isGoal ? '22px' : '24px'};
+            line-height: 1.8;
+            color: ${isGoal ? '#FFD700' : '#E0F7FA'};
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            letter-spacing: 4px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 1s ease, transform 1s ease;
+            text-shadow: ${isGoal 
+                ? '0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3)' 
+                : '0 0 15px rgba(0, 200, 255, 0.6), 0 0 30px rgba(0, 200, 255, 0.3)'};
+            margin: 20px 0;
+            max-width: 80vw;
+        `;
+        
+        container.innerHTML = ''; // 清除之前的文字
+        container.appendChild(textEl);
+        
+        // 淡入
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                textEl.style.opacity = '1';
+                textEl.style.transform = 'scale(1)';
+            });
+        });
+        
+        // 淡出
+        setTimeout(() => {
+            textEl.style.opacity = '0';
+            textEl.style.transform = 'scale(1.02)';
+        }, duration - 1000);
     }
     
     // ==================== 粒子系统 ====================
@@ -670,27 +889,102 @@ class IntroSystem {
     }
     
     updateParticles(dt) {
+        // 上升偏移影响粒子y轴
+        const riseY = (this.state === 'riseUp' || this.state === 'gatherToText' || this.state === 'showStartButton') 
+            ? (this.riseOffset || 0) : 0;
+            
         this.particles.forEach(p => {
+            // 上升逻辑 - 从原位置往上飞
+            if (this.state === 'riseUp' && !p.gathering) {
+                const elapsed = performance.now() - (this.riseStartTime || 0);
+                const totalDuration = this.riseDuration || 3000;
+                const accelTime = this.riseAccelTime || 800;
+                const decelTime = this.riseDecelTime || 1000;
+                const steadyEnd = totalDuration - decelTime;
+                
+                // 计算速度倍数（使用与镜头相同的加减速曲线）
+                let speedMultiplier = 1;
+                if (elapsed < accelTime) {
+                    // 加速阶段
+                    const accelProgress = elapsed / accelTime;
+                    speedMultiplier = this.easeOutCubic(accelProgress);
+                } else if (elapsed < steadyEnd) {
+                    // 匀速阶段
+                    speedMultiplier = 1;
+                } else if (elapsed < totalDuration) {
+                    // 减速阶段
+                    const decelProgress = (elapsed - steadyEnd) / decelTime;
+                    speedMultiplier = this.easeInCubic(1 - decelProgress);
+                } else {
+                    speedMultiplier = 0;
+                }
+                
+                p.risingSpeed = (p.maxRisingSpeed || 10) * speedMultiplier;
+                
+                // 往上飞
+                const speed = p.risingSpeed || 0;
+                p.y -= speed;
+                
+                // 轻微水平漂移（保持自然感）
+                if (p.driftSpeed) {
+                    p.x += p.driftSpeed * speedMultiplier;
+                }
+                
+                // 计算上升进度（限制在 0-1）
+                const startY = p.riseStartY || this.canvas.height / 2;
+                const totalRise = Math.max(0, startY - p.y);
+                const maxRise = this.canvas.height * 1.5;
+                const riseProgress = Math.min(1, Math.max(0, totalRise / maxRise));
+                
+                // 上升过程中粒子逐渐变大到文字点大小
+                const targetSize = this.config.textParticleSize || 12;
+                const startSize = p.originalSize || p.size || 2;
+                // 确保 size 始终为正数
+                p.visualSize = Math.max(1, startSize + (targetSize - startSize) * riseProgress);
+                
+                // 透明度也逐渐增加
+                p.visualAlpha = Math.max(0.1, (p.alpha || 0.5) * (0.6 + riseProgress * 0.4));
+                
+                // 更新实际 size（用于后续组成文字）
+                p.size = p.visualSize;
+            } else {
+                p.visualSize = Math.max(1, p.size || 2);
+                p.visualAlpha = p.alpha || 0.5;
+            }
+            
+            // ... existing update logic ...
+            // 已经到达目标位置并固定的粒子不再移动
+            if (p.settled) {
+                return;
+            }
+            
             if (p.gathering && p.targetX !== null) {
-                // 向目标聚合
+                // 向目标聚合 - 慢慢靠近
                 const dx = p.targetX - p.x;
                 const dy = p.targetY - p.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
-                if (dist > 0.5) {
-                    // 使用缓动，越近越慢
-                    const speed = Math.max(dist * 0.06, 1);
+                if (dist > 1) {
+                    // 使用更慢的缓动
+                    const speed = Math.max(dist * 0.03, 1); // 更慢：0.08 -> 0.03
                     p.x += (dx / dist) * speed;
                     p.y += (dy / dist) * speed;
+                } else {
+                    // 到达目标，固定位置
+                    p.x = p.targetX;
+                    p.y = p.targetY;
+                    if (p.isTextDot) {
+                        p.settled = true; // 标记为已固定
+                    }
                 }
                 
                 if (p.targetSize !== null) {
                     p.size += (p.targetSize - p.size) * 0.08;
                 }
                 if (p.targetAlpha !== null) {
-                    p.alpha += (p.targetAlpha - p.alpha) * 0.05;
+                    p.alpha += (p.targetAlpha - p.alpha) * 0.06;
                 }
-            } else {
+            } else if (this.state !== 'riseUp') { // 非上升状态下的自由漂浮
                 // 自由漂浮
                 p.x += p.vx;
                 p.y += p.vy;
@@ -718,11 +1012,15 @@ class IntroSystem {
     drawParticles() {
         const ctx = this.ctx;
         
+        // 上升偏移已在 update 中处理了粒子坐标，这里只需要处理尾巴
+        const riseY = (this.state === 'riseUp' || this.state === 'gatherToText' || this.state === 'showStartButton') 
+            ? (this.riseOffset || 0) : 0;
+        
         // 先画连线（更细更透明）
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 0.5;
         this.particles.forEach(p => {
-            if (p.linkedTo && !p.gathering) {
+            if (p.linkedTo && !p.gathering && this.state !== 'riseUp') {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(p.linkedTo.x, p.linkedTo.y);
@@ -736,9 +1034,53 @@ class IntroSystem {
             const offsetX = Math.cos(p.pulseAngle) * p.pulseOffset * p.pulseDecay;
             const offsetY = Math.sin(p.pulseAngle) * p.pulseOffset * p.pulseDecay;
             
+            // 绘制拖尾（仅在上升时）
+            if (this.state === 'riseUp' && !p.gathering) {
+                const speed = p.risingSpeed || 4;
+                const trailLength = speed * 4 + (this.riseSpeed || 6) * 1.5;
+                const renderY = p.y + riseY;
+                
+                const gradient = ctx.createLinearGradient(p.x, renderY, p.x, renderY + trailLength);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${(p.visualAlpha || p.alpha) * 0.8})`);
+                gradient.addColorStop(0.4, `rgba(200, 230, 255, ${(p.visualAlpha || p.alpha) * 0.4})`);
+                gradient.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                
+                ctx.beginPath();
+                ctx.moveTo(p.x, renderY);
+                ctx.lineTo(p.x, renderY + trailLength);
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = (p.visualSize || p.size) * 0.5;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+            
+            // 绘制粒子本体
+            // 注意：riseY 只在 update 没有处理 y 轴时才需要减去，但我们的 update 逻辑对于上升是直接修改 p.y 的
+            // 只有 gatherToText 阶段，由于重新计算了 targets 并减去了 riseY，所以粒子本身不需要再减
+            // 但为了统一，我们在 update 里修改 y，draw 里只画当前 x,y
+            
+            // 修正：riseUp 阶段 update 已经改了 y，所以直接画
+            // gatherToText 阶段 target 已经减了 riseY，p.y 也会飞向那个位置，所以也直接画
+            // 唯独 spiral 时，我们计算的是绝对位置，所以需要减去 riseOffset 带来的视觉移动？
+            // 不，画面往上飞 = 所有物体 y 坐标增加（下移）？不对，画面往上 = 物体相对画面下移。
+            // 我们让 riseOffset 增加，然后渲染时 y + riseOffset 吗？
+            // 之前的逻辑是 riseOffset 增加，然后 draw 时 y - riseY 不对，应该是 y + riseY 模拟相机上移
+            // 或者：粒子真实 y 坐标减小（上移），相机不动。
+            // 采用方案：粒子真实 y 减小（上飞），同时相机上移（riseOffset 增加）
+            // 最终渲染 y = p.y + riseOffset
+            
+            let renderY = p.y;
+            if (this.state === 'riseUp' || this.state === 'gatherToText' || this.state === 'showStartButton') {
+                renderY += riseY;
+            }
+            
+            // 确保半径为正数
+            const radius = Math.max(0.5, p.visualSize || p.size || 2);
+            const alpha = Math.max(0, Math.min(1, p.visualAlpha || p.alpha || 0.5));
+            
             ctx.beginPath();
-            ctx.arc(p.x + offsetX, p.y + offsetY, p.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+            ctx.arc(p.x + offsetX, renderY + offsetY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.fill();
         });
     }
@@ -814,21 +1156,30 @@ class IntroSystem {
     // ==================== 物品系统 ====================
     
     createItem(name, icon, isGolden = false) {
-        const itemWidth = 75;
-        const itemHeight = 75;
+        // 根据屏幕尺寸调整物品大小（iPad Air: 1180x820）
+        const isLargeScreen = window.innerWidth >= 800 && window.innerHeight >= 700;
+        const itemWidth = isLargeScreen ? 70 : 75;
+        const itemHeight = isLargeScreen ? 70 : 75;
         
-        // 计算物品栏中的位置
+        // 物品栏高度
+        const inventoryHeight = isLargeScreen ? 180 : 110;
+        
+        // 计算物品栏中的位置 - 左上角开始排列
         const itemIndex = this.items.length;
-        const gap = 15;
-        const totalWidth = (this.items.length + 1) * itemWidth + this.items.length * gap;
-        const startX = this.centerX - totalWidth / 2;
+        const gap = 12;
+        const padding = 20;
+        const startX = padding;
+        const startY = this.canvas.height - inventoryHeight + padding;
         
         const item = {
             name,
             icon,
             isGolden,
             x: startX + itemIndex * (itemWidth + gap),
-            y: this.canvas.height - 100,
+            y: startY,
+            // 保存原始位置，用于放回
+            originX: startX + itemIndex * (itemWidth + gap),
+            originY: startY,
             width: itemWidth,
             height: itemHeight,
             isDragging: false,
@@ -910,13 +1261,17 @@ class IntroSystem {
     }
     
     createSynthesisResult(name, icon, x, y) {
+        // 根据屏幕尺寸调整
+        const isLargeScreen = window.innerWidth >= 800 && window.innerHeight >= 700;
+        const size = isLargeScreen ? 75 : 80;
+        
         const item = {
             name,
             icon,
-            x: x - 40,
-            y: y - 40,
-            width: 80,
-            height: 80,
+            x: x - size / 2,
+            y: y - size / 2,
+            width: size,
+            height: size,
             isDragging: false,
             animPhase: null,
             animTarget: null,
@@ -984,12 +1339,29 @@ class IntroSystem {
         });
         
         if (clickedItem) {
+            const rect = clickedItem.el.getBoundingClientRect();
+            
+            // 检查是否在物品栏区域（用原始位置判断）
+            const isLargeScreen = window.innerWidth >= 800 && window.innerHeight >= 700;
+            const inventoryHeight = isLargeScreen ? 180 : 110;
+            const isInInventory = clickedItem.originY !== undefined;
+            
+            // 直接拖动原物品（开场关物品拖出后不生成新的）
             this.draggedItem = clickedItem;
             this.draggedItem.isDragging = true;
-            
-            const rect = clickedItem.el.getBoundingClientRect();
             this.draggedItem.dragOffsetX = x - rect.left;
             this.draggedItem.dragOffsetY = y - rect.top;
+            this.draggedItem.isClone = false;
+            
+            // 如果是金色物品，拖出时去掉金边和光波
+            if (clickedItem.isGolden) {
+                clickedItem.el.classList.remove('golden');
+                if (clickedItem.pulseInterval) {
+                    clearInterval(clickedItem.pulseInterval);
+                    clickedItem.pulseInterval = null;
+                }
+                clickedItem.isGolden = false;
+            }
             
             if (clickedItem.el) {
                 clickedItem.el.classList.add('dragging');
@@ -1036,6 +1408,14 @@ class IntroSystem {
         if (!this.draggedItem) return;
         
         const item = this.draggedItem;
+        const isLargeScreen = window.innerWidth >= 800 && window.innerHeight >= 700;
+        const inventoryHeight = isLargeScreen ? 180 : 110;
+        const inventoryTop = this.canvas.height - inventoryHeight;
+        
+        // 检查是否放在合成区域（屏幕中央偏上）
+        const isInSynthesisArea = item.y < this.canvas.height - 200;
+        // 检查是否放回物品栏
+        const isInInventoryArea = item.y > inventoryTop - 50;
         
         if (item.el) {
             item.el.classList.remove('dragging');
@@ -1044,7 +1424,7 @@ class IntroSystem {
         // 状态判断
         if (this.state === 'waitRicePlaced' && item.name === '糯米') {
             // 检查是否放在合成区域（屏幕中央偏上）
-            if (item.y < this.canvas.height - 200) {
+            if (isInSynthesisArea) {
                 item.isInSynthesisArea = true;
                 this.setState('ricePlacedPulse');
             }
@@ -1063,7 +1443,8 @@ class IntroSystem {
                 const dy = riceCenterY - brewingCenterY;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
-                if (dist < 120) {
+                // 必须真正触碰（距离小于两个物品半径之和的50%）
+                if (dist < (rice.width + brewing.width) / 2 * 0.5) {
                     this.setState('firstSynthesis');
                 }
             }
@@ -1096,44 +1477,63 @@ class IntroSystem {
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // 绘制扩散圆（门扩张阶段）
-        if (this.expandPhase === 'expanding' && this.state === 'doorExpand') {
-            this.expandRadius += 4;
-            const maxRadius = Math.max(this.canvas.width, this.canvas.height);
-            const alpha = Math.max(0, 1 - this.expandRadius / (maxRadius * 0.3));
+        // 荧光蓝覆层（献上后的效果）- 更亮更温柔
+        if (this.state === 'blueWash' || this.state === 'riseUp') {
+            const maxAlpha = this.blueWashMaxAlpha || 0.25;
             
-            // 绘制扩散光环
-            this.ctx.beginPath();
-            this.ctx.arc(this.centerX, this.centerY, this.expandRadius, 0, Math.PI * 2);
-            this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
-            this.ctx.lineWidth = 3;
-            this.ctx.stroke();
-            
-            // 内部填充渐变
-            if (this.expandRadius < 150) {
-                const gradient = this.ctx.createRadialGradient(
-                    this.centerX, this.centerY, 0,
-                    this.centerX, this.centerY, this.expandRadius
-                );
-                gradient.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.3})`);
-                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                this.ctx.fillStyle = gradient;
-                this.ctx.fill();
-            }
-        }
-        
-        // 荧光蓝覆层（献上后的效果）
-        if (this.state === 'blueWash') {
             if (this.blueWashPhase === 'fadeIn') {
-                this.cyanOverlayAlpha = Math.min(this.cyanOverlayAlpha + 0.015, 0.25);
+                this.cyanOverlayAlpha = Math.min(this.cyanOverlayAlpha + 0.008, maxAlpha);
+            } else if (this.blueWashPhase === 'hold') {
+                // 保持
             } else if (this.blueWashPhase === 'fadeOut') {
-                this.cyanOverlayAlpha = Math.max(this.cyanOverlayAlpha - 0.01, 0);
+                this.cyanOverlayAlpha = Math.max(this.cyanOverlayAlpha - 0.006, 0);
             }
             
             if (this.cyanOverlayAlpha > 0) {
-                this.ctx.fillStyle = `rgba(0, 180, 220, ${this.cyanOverlayAlpha})`;
+                this.ctx.fillStyle = `rgba(0, 200, 255, ${this.cyanOverlayAlpha})`;
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             }
+        }
+        
+        // 上升动画 - 镜头与粒子同步，带加速和减速
+        if (this.risePhase === 'rising') {
+            const elapsed = performance.now() - this.riseStartTime;
+            const totalDuration = this.riseDuration;
+            const accelTime = this.riseAccelTime;
+            const decelTime = this.riseDecelTime;
+            const steadyStart = accelTime;
+            const steadyEnd = totalDuration - decelTime;
+            
+            // 计算目标镜头速度（基于阶段）
+            let maxCameraSpeed = 15; // 最大镜头速度
+            
+            if (elapsed < accelTime) {
+                // 加速阶段：使用缓动函数平滑加速
+                const accelProgress = elapsed / accelTime;
+                const eased = this.easeOutCubic(accelProgress);
+                this.targetRiseSpeed = maxCameraSpeed * eased;
+            } else if (elapsed < steadyEnd) {
+                // 匀速阶段
+                this.targetRiseSpeed = maxCameraSpeed;
+            } else if (elapsed < totalDuration) {
+                // 减速阶段：使用缓动函数平滑减速
+                const decelProgress = (elapsed - steadyEnd) / decelTime;
+                const eased = this.easeInCubic(1 - decelProgress);
+                this.targetRiseSpeed = maxCameraSpeed * eased;
+            } else {
+                this.targetRiseSpeed = 0;
+            }
+            
+            // 镜头速度平滑过渡
+            this.riseSpeed += (this.targetRiseSpeed - this.riseSpeed) * 0.15;
+            this.riseOffset += this.riseSpeed;
+            
+            // 限制最大偏移
+            if (this.riseOffset > this.riseTargetOffset) {
+                this.riseOffset = this.riseTargetOffset;
+            }
+        } else if (this.risePhase === 'stopped') {
+            // 停止后保持位置
         }
         
         // 更新和绘制粒子
@@ -1156,9 +1556,9 @@ class IntroSystem {
                 this.updateItemPosition(item);
             } else if (item.animPhase === 'spinning') {
                 const elapsed = performance.now() - item.spinStart;
-                const progress = Math.min(elapsed / 800, 1);
+                const progress = Math.min(elapsed / 600, 1); // 600ms
                 const eased = this.easeInOutCubic(progress);
-                item.spinAngle = eased * Math.PI * 6; // 3圈
+                item.spinAngle = eased * Math.PI * 4; // 2圈
                 this.updateItemPosition(item);
             } else if (item.animPhase === 'dash' && item.animTarget) {
                 item.x += (item.animTarget.x - item.x) * 0.3;
@@ -1195,12 +1595,24 @@ class IntroSystem {
         return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
     
+    easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+    
+    easeInCubic(t) {
+        return t * t * t;
+    }
+    
     // ==================== 辅助方法 ====================
     
     showNarrative(text) {
         if (this.narrativeEl) {
             this.narrativeEl.textContent = text;
             this.narrativeEl.classList.add('visible');
+            
+            // 荧光蓝色，发光效果，像灵魂的低语
+            this.narrativeEl.style.color = '#E0F7FA';
+            this.narrativeEl.style.textShadow = '0 0 10px rgba(0, 200, 255, 0.8), 0 0 20px rgba(0, 200, 255, 0.4)';
         }
     }
     

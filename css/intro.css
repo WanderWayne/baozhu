@@ -14,6 +14,29 @@
     overflow: hidden;
 }
 
+/* 白色闪屏遮罩 */
+#intro-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+#intro-flash.flash {
+    opacity: 1;
+}
+
+#intro-flash.fade-out {
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+
 #intro-screen.fade-out {
     animation: fadeOut 1s ease forwards;
 }
@@ -24,7 +47,7 @@
     }
 }
 
-/* ========== Canvas 层 ========== */
+/* ========== Canvas 层（粒子在门后面）========== */
 #intro-canvas {
     position: absolute;
     top: 0;
@@ -32,20 +55,21 @@
     width: 100%;
     height: 100%;
     z-index: 1;
+    pointer-events: none;
 }
 
 /* ========== 白点（初始状态）========== */
 #intro-dot {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 20px;
+    height: 20px;
     background: #fff;
     border-radius: 50%;
-    z-index: 10;
+    z-index: 200; /* 在遮罩层之上 */
     opacity: 0;
     cursor: pointer;
     transition: opacity 0.5s ease, transform 0.3s ease;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
 }
 
 #intro-dot.visible {
@@ -90,17 +114,10 @@
     margin-top: -110px;
     z-index: 5;
     opacity: 0;
-    transform: scale(0.3);
-    transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-#intro-door.expanding {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* 简单的拱门形状 - 只有基础轮廓 */
-.door-frame {
+/* 简单的拱门形状 - 只有基础轮廓（仅限开场动画的门） */
+#intro-door .door-frame {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -111,7 +128,7 @@
 }
 
 /* 门内部 - 黑色 + 微弱荧光蓝 */
-.door-inner {
+#intro-door .door-inner {
     position: absolute;
     left: 8px;
     right: 8px;
@@ -257,36 +274,22 @@
     }
 }
 
-/* 放大效果 - 门从放大状态开始，然后慢慢缩小 */
-#intro-door {
-    transition: opacity 1.2s ease, transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-
-#intro-screen.zoomed #intro-door {
-    transform: scale(1.8);
-}
-
-#intro-screen.zoomed #intro-canvas {
-    transform: scale(1.3);
-    transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-
-#intro-canvas {
-    transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
+/* 开始时正常显示（黑底白点），点击后才开始扩散 */
 
 /* ========== 物品栏 ========== */
 #intro-inventory {
     position: absolute;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%) translateY(100%);
-    width: 90%;
-    max-width: 400px;
+    left: 0;
+    right: 0;
+    transform: translateY(100%);
+    width: 100%;
     height: 110px;
     background: rgba(30, 30, 35, 0.85);
     border: 1px solid rgba(100, 100, 110, 0.5);
     border-bottom: none;
+    border-left: none;
+    border-right: none;
     border-radius: 20px 20px 0 0;
     z-index: 20;
     display: flex;
@@ -301,7 +304,7 @@
 
 #intro-inventory.visible {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
 }
 
 /* ========== 物品卡片 ========== */
@@ -389,23 +392,24 @@
     height: 200px;
     margin-left: -100px;
     margin-top: -100px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(200, 240, 255, 0.8) 40%, rgba(255, 255, 255, 0) 70%);
     border-radius: 50%;
     z-index: 50;
     pointer-events: none;
-    animation: flashBurst 0.4s ease-out forwards;
+    animation: flashBurst 0.6s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
 }
 
 @keyframes flashBurst {
     0% {
-        transform: scale(0.3);
+        transform: scale(0.1);
         opacity: 1;
     }
-    50% {
-        opacity: 0.8;
+    10% {
+        transform: scale(1.5);
+        opacity: 1;
     }
     100% {
-        transform: scale(2);
+        transform: scale(2.5);
         opacity: 0;
     }
 }
@@ -441,7 +445,7 @@
     color: #fff;
     font-family: "PingFang SC", "Microsoft YaHei", serif;
     font-weight: 300;
-    letter-spacing: 12px;
+    letter-spacing: 24px;
     z-index: 30;
     opacity: 0;
     transition: opacity 1s ease;
@@ -456,33 +460,158 @@
 /* ========== 开始按钮 ========== */
 #intro-start-btn {
     position: absolute;
-    bottom: 20%;
+    top: 55%; /* 中央偏下一点 */
     left: 50%;
     transform: translateX(-50%);
-    padding: 12px 40px;
+    padding: 8px 4px;
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(50, 50, 55, 0.8);
-    border: 1px solid rgba(150, 150, 160, 0.5);
-    border-radius: 25px;
+    color: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     cursor: pointer;
     z-index: 35;
     opacity: 0;
-    transition: opacity 0.8s ease, transform 0.3s ease, background 0.3s ease;
+    pointer-events: none; /* 隐藏时不可点击 */
+    transition: opacity 0.8s ease, color 0.3s ease, border-color 0.3s ease;
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
     letter-spacing: 4px;
 }
 
 #intro-start-btn.visible {
     opacity: 1;
+    pointer-events: auto; /* 可见时可点击 */
 }
 
 #intro-start-btn:hover {
-    background: rgba(70, 70, 75, 0.9);
-    transform: translateX(-50%) scale(1.05);
+    color: rgba(255, 255, 255, 1);
+    border-bottom-color: rgba(255, 255, 255, 0.8);
 }
 
 #intro-start-btn:active {
-    transform: translateX(-50%) scale(0.98);
+    opacity: 0.7;
+}
+
+/* ========== iPad Air (1180 x 820) 适配 ========== */
+@media (min-width: 800px) and (min-height: 700px) {
+    /* 拱门 - 缩小30% */
+    #intro-door {
+        width: 135px;
+        height: 200px;
+        margin-left: -68px;
+        margin-top: -120px;
+    }
+    
+    #intro-door .door-frame {
+        border-width: 3px;
+        border-radius: 68px 68px 0 0;
+    }
+    
+    #intro-door .door-inner {
+        left: 9px;
+        right: 9px;
+        top: 9px;
+        border-radius: 59px 59px 0 0;
+    }
+    
+    /* 物品栏 - 全宽，可放两行 */
+    #intro-inventory {
+        width: 100%;
+        max-width: 100%;
+        height: 180px;
+        border-radius: 20px 20px 0 0;
+        gap: 12px;
+        padding: 15px 20px;
+        flex-wrap: wrap;
+        align-content: flex-start;
+    }
+    
+    /* 物品卡片 - 缩小 */
+    .intro-item {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+    }
+    
+    .intro-item .item-icon {
+        font-size: 30px;
+    }
+    
+    .intro-item .item-name {
+        font-size: 11px;
+        margin-top: 4px;
+    }
+    
+    /* 叙事文字 - 缩小30% */
+    #intro-narrative {
+        font-size: 18px;
+        letter-spacing: 3px;
+    }
+    
+    /* 标题 - 缩小30% */
+    #intro-title {
+        font-size: 48px;
+        letter-spacing: 24px;
+    }
+    
+    /* 开始按钮 */
+    #intro-start-btn {
+        padding: 8px 4px;
+        font-size: 16px;
+        letter-spacing: 4px;
+    }
+    
+    /* 白点 - 缩小30% */
+    #intro-dot {
+        width: 22px;
+        height: 22px;
+        box-shadow: 0 0 32px rgba(255, 255, 255, 0.6);
+    }
+    
+    /* 合成闪光 - 缩小30% */
+    .synthesis-flash {
+        width: 210px;
+        height: 210px;
+        margin-left: -105px;
+        margin-top: -105px;
+    }
+}
+
+/* 横屏模式额外调整 */
+@media (min-width: 1000px) and (orientation: landscape) {
+    #intro-door {
+        width: 140px;
+        height: 210px;
+        margin-left: -70px;
+        margin-top: -125px;
+    }
+    
+    #intro-door .door-frame {
+        border-radius: 70px 70px 0 0;
+    }
+    
+    #intro-door .door-inner {
+        border-radius: 61px 61px 0 0;
+    }
+    
+    /* 物品栏 - 全宽，可放两行 */
+    #intro-inventory {
+        width: 100%;
+        max-width: 100%;
+        height: 180px;
+    }
+    
+    .intro-item {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .intro-item .item-icon {
+        font-size: 30px;
+    }
+    
+    #intro-narrative {
+        font-size: 19px;
+    }
 }
 

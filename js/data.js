@@ -13,7 +13,7 @@ const WORLDS = [
         color: "#FFF5E6",
         icon: "🥛",
         unlocked: true,
-        levels: [101, 102, 103, 1, 2, 3]  // 新增3个基础关在最前面
+        levels: [101, 102, 2, 1, 104, 3]  // 唤醒之手 -> 时间的答案 -> 酸奶阶梯 -> 冰酥门廊 -> 双酪启程 -> 奶酪试炼
     },
     {
         id: 2,
@@ -119,29 +119,6 @@ const LEVELS = [
         isTutorial: true,
         tutorialFocus: "pause_wait"  // 教学重点：静置等待
     },
-    {
-        id: 103,
-        worldId: 1,
-        name: "抽丝剥茧",
-        target: "桂花酒酿",
-        targetId: "tutorial_3",
-        description: "长按物品，发现它的秘密。",
-        storyIntro: "有些原料藏着更多的可能。",
-        icon: "🔮",
-        duration: "30-60秒",
-        initialItems: ["酒酿原浆", "香气封印"],
-        doorTriggers: {
-            stage1: [],
-            stage2: ["桂花原浆"],
-            stage3: ["桂花酒酿"]
-        },
-        completionText: "你学会了探索物品的奥秘。",
-        cultureNote: "提取，是发现隐藏可能的方法。",
-        realProductNote: "桂花酒酿：酒酿的甘洌与桂花的清香。",
-        isTutorial: true,
-        tutorialFocus: "extract_longpress"  // 教学重点：长按提取
-    },
-    
     // ========== 世界1：奶酪谷 ==========
     {
         id: 1,
@@ -183,6 +160,32 @@ const LEVELS = [
         completionText: "四步两次发酵，浓郁绵醇。",
         cultureNote: "酸奶饮以宝珠雪域酸奶为基础原料，传承经典手工酸奶制作方法。",
         realProductNote: "雪域酸奶：牛奶、菌种、冰糖碎，四步两次发酵。"
+    },
+    {
+        id: 104,
+        worldId: 1,
+        name: "双酪启程",
+        target: "双酪底",
+        targetId: "shuanglao",
+        description: "两种酪底的相遇，开启新的可能。",
+        storyIntro: "奶酪与雪酪，两种质地，一个基底。",
+        icon: "🧀",
+        duration: "1-2分钟",
+        initialItems: ["牛奶", "酿造", "冰糖碎", "酒酿原浆", "冰块"],
+        doorTriggers: {
+            stage1: ["奶酪"],
+            stage2: ["雪酪"],
+            stage3: ["双酪底"]
+        },
+        completionText: "双酪底，是许多经典的起点。",
+        cultureNote: "奶酪与雪酪的融合，是宝珠饮品的核心基底。",
+        realProductNote: "双酪底：奶酪与雪酪的完美融合。",
+        levelHints: [
+            "所谓的双酪，是奶酪和雪酪。",
+            "雪酪尝起来很甜啊！",
+            "奶酪需要牛奶和酿造...",
+            "雪酪需要甜牛奶和冰块..."
+        ]
     },
     {
         id: 3,
