@@ -1,0 +1,390 @@
+/* 主界面样式 V3 - 黑色背景 + 粒子拼字风格 */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ========== 主界面容器 ========== */
+.main-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* ========== Canvas 层（粒子背景）========== */
+#main-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ========== 主菜单容器 ========== */
+.main-menu-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 90%;
+    max-width: 320px;
+    margin-top: 35vh; /* 把菜单往下推，给粒子文字留空间 */
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 主按钮样式 ========== */
+.main-btn {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+/* 主按钮 - 开始游戏 */
+.main-btn.primary {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 10px 4px;
+}
+
+.main-btn.primary:hover {
+    color: #fff;
+    border-top-color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.main-btn.primary:active {
+    opacity: 0.7;
+}
+
+/* 次要按钮 - 设置 */
+.main-btn.secondary {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 4px;
+    font-size: 14px;
+}
+
+.main-btn.secondary:hover {
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ========== 进度条样式 ========== */
+.main-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-progress-row:hover {
+    opacity: 0.8;
+}
+
+.main-progress-row:active {
+    opacity: 0.6;
+}
+
+.main-progress-row .progress-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    min-width: 60px;
+    letter-spacing: 2px;
+}
+
+.main-progress-row .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.main-progress-row .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(176, 245, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.main-progress-row .progress-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    min-width: 40px;
+    text-align: right;
+    letter-spacing: 1px;
+}
+
+/* ========== 底部小字行 ========== */
+.main-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.main-link-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 8px;
+    transition: color 0.3s ease;
+}
+
+.main-link-btn:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.main-footer-divider {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+}
+
+/* ========== 弹出面板通用样式 ========== */
+.panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.panel-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.panel {
+    width: 90%;
+    max-width: 450px;
+    max-height: 85vh;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.panel-overlay.visible .panel {
+    transform: translateY(0) scale(1);
+}
+
+.panel-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.panel-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.panel-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 4px;
+}
+
+/* ========== 设置面板 ========== */
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.settings-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    min-width: 70px;
+}
+
+.volume-slider {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: rgba(176, 245, 255, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(176, 245, 255, 0.4);
+    transition: transform 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: rgba(176, 245, 255, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.volume-value {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    min-width: 40px;
+    text-align: right;
+}
+
+.settings-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+.settings-info {
+    text-align: center;
+    padding: 16px 0;
+}
+
+.settings-info p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 4px 0;
+}
+
+.settings-info .info-sub {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* ========== 关卡选择面板 ========== */
+.level-select-panel {
+    max-height: 90vh;
+}
+
+.level-select-panel .world-map {
+    margin-bottom: 16px;
+}
+
+.level-select-panel .level-doors {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+/* ========== 动画 ========== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

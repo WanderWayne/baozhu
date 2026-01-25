@@ -1,0 +1,318 @@
+/* 游戏界面样式 - 发现和提取弹窗 */
+
+/* ========== 碎片发现弹窗 ========== */
+.fragment-discovery-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.fragment-discovery-modal.visible {
+    opacity: 1;
+}
+
+.fragment-discovery-content {
+    width: 85%;
+    max-width: 320px;
+    background: linear-gradient(180deg, #FFFDF8 0%, #FFF8F0 100%);
+    border-radius: 24px;
+    padding: 28px 24px;
+    text-align: center;
+    transform: scale(0.8) translateY(30px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(212, 165, 116, 0.3);
+}
+
+.fragment-discovery-modal.visible .fragment-discovery-content {
+    transform: scale(1) translateY(0);
+}
+
+.discovery-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.discovery-star {
+    font-size: 24px;
+    animation: starPulse 1s ease-in-out infinite;
+}
+
+@keyframes starPulse {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(10deg); }
+}
+
+.discovery-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--brand-color);
+    letter-spacing: 2px;
+}
+
+.discovery-item {
+    margin-bottom: 24px;
+}
+
+.discovery-item .item-icon {
+    font-size: 64px;
+    margin-bottom: 8px;
+    animation: itemBounce 0.6s ease-out;
+}
+
+@keyframes itemBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.discovery-item .item-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.fragment-unlock {
+    background: linear-gradient(135deg, #FFF5E8 0%, #FFE8D5 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px dashed var(--brand-color);
+    animation: fragmentReveal 0.8s ease-out 0.3s both;
+}
+
+@keyframes fragmentReveal {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.fragment-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.fragment-image {
+    font-size: 28px;
+}
+
+.fragment-label {
+    font-size: 12px;
+    color: var(--brand-color);
+    font-weight: 600;
+    letter-spacing: 1px;
+    background: rgba(212, 165, 116, 0.15);
+    padding: 4px 10px;
+    border-radius: 10px;
+}
+
+.fragment-text {
+    font-size: 14px;
+    color: var(--text-color);
+    font-style: italic;
+    line-height: 1.8;
+}
+
+.discovery-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+.discovery-progress .progress-icon {
+    font-size: 16px;
+}
+
+.discovery-continue-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--brand-color) 0%, #C49466 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(212, 165, 116, 0.4);
+}
+
+.discovery-continue-btn:active {
+    transform: scale(0.98);
+}
+
+/* ========== 提取卡（长按物品弹出） ========== */
+.extract-card-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.extract-card-modal.visible {
+    opacity: 1;
+}
+
+.extract-card {
+    width: 85%;
+    max-width: 320px;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.extract-card-modal.visible .extract-card {
+    transform: scale(1) translateY(0);
+}
+
+.extract-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.extract-item-icon {
+    font-size: 48px;
+}
+
+.extract-item-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.extract-desc {
+    font-size: 13px;
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.extract-section {
+    margin-bottom: 16px;
+}
+
+.extract-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-color);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--brand-color-light);
+}
+
+.extract-section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.extract-recipe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #F9F7F2;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.recipe-item {
+    color: var(--text-color);
+}
+
+.recipe-plus {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.recipe-result {
+    color: var(--brand-color);
+    font-weight: 500;
+}
+
+.extract-unknown {
+    font-size: 12px;
+    color: var(--text-light);
+    font-style: italic;
+    text-align: center;
+    padding: 8px;
+}
+
+.extract-action-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #9C88FF 0%, #7B68EE 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(156, 136, 255, 0.4);
+}
+
+.extract-action-btn:active {
+    transform: scale(0.98);
+}
+
+.extract-icon {
+    font-size: 18px;
+}
+
+.extract-close-btn {
+    width: 100%;
+    padding: 12px;
+    background: #f0f0f0;
+    color: var(--text-color);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.extract-close-btn:active {
+    background: #e0e0e0;
+}
+

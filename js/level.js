@@ -250,7 +250,8 @@ class LevelManager {
             discoveredItems: [],
             fragments: [],
             achievements: [],
-            titleLevel: 1  // 重置称号等级
+            titleLevel: 1,  // 重置称号等级
+            chapterProgress: {}  // 章节进度
         };
         this.saveProgress();
         
@@ -329,6 +330,51 @@ class LevelManager {
         localStorage.setItem('baozhu_basic_completed', 'true');
         // 清除计时器
         sessionStorage.removeItem('baozhu_session_start');
+    }
+    
+    // ========== 章节系统进度 ==========
+    
+    // 保存章节目标进度
+    saveObjectiveProgress(chapterId, objectiveIndex) {
+        if (!this.currentProgress.chapterProgress) {
+            this.currentProgress.chapterProgress = {};
+        }
+        
+        // 记录该章节已完成的最高目标索引
+        const currentProgress = this.currentProgress.chapterProgress[chapterId] || -1;
+        if (objectiveIndex > currentProgress) {
+            this.currentProgress.chapterProgress[chapterId] = objectiveIndex;
+            this.saveProgress();
+        }
+    }
+    
+    // 获取章节当前目标索引（用于恢复进度）
+    getChapterProgress(chapterId) {
+        if (!this.currentProgress.chapterProgress) return 0;
+        const completedIndex = this.currentProgress.chapterProgress[chapterId];
+        // 返回下一个目标的索引（已完成+1）
+        return completedIndex !== undefined ? completedIndex + 1 : 0;
+    }
+    
+    // 获取章节应该开始的关卡ID
+    getChapterStartLevelId(chapterId) {
+        const chapter = window.CHAPTERS[chapterId];
+        if (!chapter) return null;
+        
+        const objectiveIndex = this.getChapterProgress(chapterId);
+        // 如果已完成所有目标，返回最后一个
+        if (objectiveIndex >= chapter.objectives.length) {
+            return chapter.objectives[chapter.objectives.length - 1];
+        }
+        return chapter.objectives[objectiveIndex];
+    }
+    
+    // 重置章节进度（调试用）
+    resetChapterProgress(chapterId) {
+        if (this.currentProgress.chapterProgress) {
+            delete this.currentProgress.chapterProgress[chapterId];
+            this.saveProgress();
+        }
     }
     
     // 获取探索进度百分比

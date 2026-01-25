@@ -1,22 +1,75 @@
-// 主界面逻辑（V2 - 世界地图）
-let currentWorldId = 1;
+// 主界面逻辑（V4 - 黑色粒子风格）
 
 document.addEventListener('DOMContentLoaded', () => {
-    initWorldMap();
-    initLevelDoors(currentWorldId);
-    updateStorySection(currentWorldId);
+    // 更新进度面板
     updateProgressPanel();
-    startSugarSparkles();
 
-    // 自由探索模式按钮
-    const freeModeBtn = document.getElementById('free-mode-btn');
-    if (freeModeBtn) {
-        freeModeBtn.addEventListener('click', () => {
-            window.location.href = 'game.html?mode=free';
+    // 绑定主菜单按钮
+    bindMenuButtons();
+    
+    // 绑定面板事件
+    bindPanelEvents();
+    
+    // 检查是否需要播放主界面BGM（如果不是从开场动画过来的话）
+    // 开场动画会在 finishIntro 时切换到主界面，那时会播放BGM
+    const mainScreen = document.getElementById('main-screen');
+    if (mainScreen && mainScreen.style.display !== 'none') {
+        // 主界面已显示，播放BGM
+        if (window.AudioManager) {
+            window.AudioManager.playBGM('bgm-menu');
+        }
+    }
+});
+
+// ==================== 主菜单按钮绑定 ====================
+
+function bindMenuButtons() {
+    // 开始游戏按钮 - 跳转到章节选择页面
+    const continueBtn = document.getElementById('continue-btn');
+    if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickEnter();
+            window.navigateTo('levels.html');
         });
     }
 
-    // 重置按钮逻辑
+    // 配方图谱进度条 - 点击进入
+    const codexRow = document.getElementById('codex-row');
+    if (codexRow) {
+        codexRow.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickEnter();
+            window.navigateTo('codex.html');
+        });
+    }
+
+    // 记忆碎片进度条 - 点击进入
+    const fragmentRow = document.getElementById('fragment-row');
+    if (fragmentRow) {
+        fragmentRow.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickEnter();
+            window.navigateTo('gallery.html');
+        });
+    }
+
+    // 自由世界按钮
+    const freeModeBtn = document.getElementById('free-mode-btn');
+    if (freeModeBtn) {
+        freeModeBtn.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickEnter();
+            window.navigateTo('game.html?mode=free');
+        });
+    }
+
+    // 设置按钮 - 打开设置面板
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickEnter();
+            openPanel('settings-overlay');
+        });
+    }
+
+    // 重置按钮
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
@@ -36,152 +89,83 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
-
-// 初始化世界地图
-function initWorldMap() {
-    const worldMap = document.querySelector('.world-map');
-    if (!worldMap) return;
-    
-    worldMap.innerHTML = '';
-    
-    window.WORLDS.forEach(world => {
-        const node = createWorldNode(world);
-        worldMap.appendChild(node);
-    });
 }
 
-// 创建世界节点
-function createWorldNode(world) {
-    const node = document.createElement('div');
-    const isUnlocked = window.LevelManager.isWorldUnlocked(world.id);
-    const progress = window.LevelManager.getWorldProgress(world.id);
-    const isCompleted = progress.percentage === 100;
-    const isActive = world.id === currentWorldId;
-    
-    node.className = `world-node ${isUnlocked ? 'unlocked' : 'locked'} ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`;
-    node.dataset.worldId = world.id;
-    
-    // 获取解锁需求
-    const fragmentReq = window.LevelManager.getWorldUnlockRequirement(world.id);
-    const currentFragments = window.LevelManager.currentProgress.fragments?.length || 0;
-    
-    if (isUnlocked) {
-        node.innerHTML = `
-            <div class="icon">${world.icon}</div>
-            <div class="name">${world.name}</div>
-        `;
-        node.addEventListener('click', () => {
-            selectWorld(world.id);
+// ==================== 面板控制 ====================
+
+function bindPanelEvents() {
+    // 设置面板关闭按钮
+    const settingsClose = document.getElementById('settings-close');
+    if (settingsClose) {
+        settingsClose.addEventListener('click', () => {
+            closePanel('settings-overlay');
         });
-    } else {
-        // 显示解锁需求
-        node.innerHTML = `
-            <div class="icon" style="filter: grayscale(100%); opacity: 0.5;">🔒</div>
-            <div class="name">${currentFragments}/${fragmentReq}🧩</div>
-        `;
-        node.title = `收集${fragmentReq}个碎片解锁`;
     }
-    
-    return node;
-}
 
-// 选择世界
-function selectWorld(worldId) {
-    currentWorldId = worldId;
-    
-    // 更新世界节点状态
-    document.querySelectorAll('.world-node').forEach(node => {
-        node.classList.remove('active');
-        if (parseInt(node.dataset.worldId) === worldId) {
-            node.classList.add('active');
-        }
+    // 点击遮罩关闭面板
+    document.querySelectorAll('.panel-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closePanel(overlay.id);
+            }
+        });
     });
-    
-    // 更新关卡门
-    initLevelDoors(worldId);
-    
-    // 更新故事文本
-    updateStorySection(worldId);
-}
 
-// 初始化关卡门
-function initLevelDoors(worldId) {
-    const world = window.LevelManager.getWorldData(worldId);
-    const doorsContainer = document.querySelector('.level-doors');
-    if (!doorsContainer || !world) return;
-    
-    const levels = window.LevelManager.getWorldLevels(worldId);
-    
-    doorsContainer.innerHTML = `
-        <div class="world-title">
-            <h2>${world.name}</h2>
-            <div class="world-subtitle">${world.subtitle}</div>
-        </div>
-        <div class="doors-grid"></div>
-    `;
-    
-    const grid = doorsContainer.querySelector('.doors-grid');
-    
-    levels.forEach((level, index) => {
-        const door = createLevelDoor(level);
-        door.style.animationDelay = `${0.1 + index * 0.1}s`;
-        grid.appendChild(door);
-    });
-}
+    // BGM 音量滑块
+    const bgmSlider = document.getElementById('bgm-volume-slider');
+    const bgmValue = document.getElementById('bgm-volume-value');
+    if (bgmSlider && bgmValue) {
+        // 加载保存的音量
+        const savedBGM = localStorage.getItem('baozhu_bgm_volume') || '80';
+        bgmSlider.value = savedBGM;
+        bgmValue.textContent = savedBGM + '%';
 
-// 创建关卡门
-function createLevelDoor(level) {
-    const door = document.createElement('div');
-    const isUnlocked = window.LevelManager.isLevelUnlocked(level.id);
-    const isCompleted = window.LevelManager.isLevelCompleted(level.id);
-    
-    door.className = `level-door ${isUnlocked ? 'unlocked' : 'locked'} ${isCompleted ? 'completed' : ''}`;
-    door.style.animation = 'slideUp 0.6s ease-out both';
-    
-    door.innerHTML = `
-        ${isCompleted ? '<div class="completed-badge">✓</div>' : ''}
-        <div class="door-frame">
-            <div class="door-icon">${isUnlocked ? level.icon : '🔒'}</div>
-        </div>
-        <div class="door-info">
-            <div class="door-name">${isUnlocked ? level.name : '???'}</div>
-            <div class="door-target">${isUnlocked ? level.target : '未解锁'}</div>
-        </div>
-    `;
-    
-    if (isUnlocked) {
-        door.addEventListener('click', () => {
-            enterLevel(level.id);
+        bgmSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            bgmValue.textContent = value + '%';
+            if (window.AudioManager) {
+                window.AudioManager.setBGMVolume(value / 100);
+            }
         });
     }
     
-    return door;
-}
+    // SFX 音量滑块
+    const sfxSlider = document.getElementById('sfx-volume-slider');
+    const sfxValue = document.getElementById('sfx-volume-value');
+    if (sfxSlider && sfxValue) {
+        // 加载保存的音量
+        const savedSFX = localStorage.getItem('baozhu_sfx_volume') || '80';
+        sfxSlider.value = savedSFX;
+        sfxValue.textContent = savedSFX + '%';
 
-// 进入关卡
-function enterLevel(levelId) {
-    const container = document.querySelector('.container');
-    if (container) {
-        container.style.opacity = '0';
-        container.style.transition = 'opacity 0.5s ease';
+        sfxSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            sfxValue.textContent = value + '%';
+            if (window.AudioManager) {
+                window.AudioManager.setSFXVolume(value / 100);
+            }
+        });
     }
-    
-    setTimeout(() => {
-        window.location.href = `game.html?level=${levelId}`;
-    }, 500);
 }
 
-// 更新故事文本
-function updateStorySection(worldId) {
-    const storySection = document.querySelector('.story-section');
-    if (!storySection) return;
-    
-    const storyText = window.STORY.worlds[worldId] || '';
-    storySection.innerHTML = `<p class="story-text">${storyText}</p>`;
+function openPanel(panelId) {
+    const panel = document.getElementById(panelId);
+    if (panel) {
+        panel.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
-// 更新进度面板
+function closePanel(panelId) {
+    const panel = document.getElementById(panelId);
+    if (panel) {
+        panel.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+}
+
+// ==================== 进度面板 ====================
+
 function updateProgressPanel() {
     const codexFill = document.getElementById('codex-progress-fill');
     const codexText = document.getElementById('codex-progress-text');
@@ -207,40 +191,3 @@ function updateProgressPanel() {
     fragmentText.textContent = `${fragments.length}/${totalFragments}`;
 }
 
-// 糖晶微闪粒子系统
-function startSugarSparkles() {
-    // 每6-10秒创建1-2个糖晶闪光
-    const createSparkle = () => {
-        const count = Math.random() > 0.5 ? 2 : 1;
-        for (let i = 0; i < count; i++) {
-            setTimeout(() => createSugarSparkle(), i * 300);
-        }
-        // 下一次闪光在6-10秒后
-        const nextDelay = 6000 + Math.random() * 4000;
-        setTimeout(createSparkle, nextDelay);
-    };
-    // 初始延迟2秒后开始
-    setTimeout(createSparkle, 2000);
-}
-
-function createSugarSparkle() {
-    const sparkle = document.createElement('div');
-    sparkle.className = 'sugar-sparkle';
-    
-    // 随机位置
-    const x = 10 + Math.random() * 80; // 10%-90% 水平位置
-    const y = 15 + Math.random() * 70; // 15%-85% 垂直位置
-    
-    sparkle.style.left = x + '%';
-    sparkle.style.top = y + '%';
-    
-    // 随机大小 - 更大更明显
-    const size = 10 + Math.random() * 8; // 10-18px
-    sparkle.style.width = size + 'px';
-    sparkle.style.height = size + 'px';
-    
-    document.body.appendChild(sparkle);
-    
-    // 动画结束后移除
-    setTimeout(() => sparkle.remove(), 2500);
-}

@@ -1,0 +1,264 @@
+/* 游戏界面样式 - 第一关教学动画 */
+
+/* ========== 第一关教学动画 ========== */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d15 100%);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+}
+
+.tutorial-overlay.hidden {
+    display: none;
+}
+
+.tutorial-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tutorial-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    animation: tutorialFadeIn 1s ease forwards;
+}
+
+@keyframes tutorialFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 门特写区域 - 与游戏中的门保持一致 */
+.tutorial-door-spotlight {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    animation: tutorialDoorPulse 3s ease-in-out infinite;
+}
+
+@keyframes tutorialDoorPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.tutorial-door-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 光环 - 与游戏中 .door-aura 一致 */
+.tutorial-door-aura {
+    position: absolute;
+    top: -15px; 
+    left: -15px; 
+    right: -15px; 
+    bottom: -15px;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 165, 116, 0.3);
+    animation: tutorialAuraPulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes tutorialAuraPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* 门框 - 与游戏中 .door-frame 一致（中式月洞门风格） */
+.tutorial-door-frame {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    /* 木质纹理感 - 与游戏一致 */
+    background: #8B7355; 
+    border: 5px solid #6F5A40;
+    box-shadow: 
+        0 4px 10px rgba(0,0,0,0.2),
+        inset 0 4px 10px rgba(0,0,0,0.3),
+        0 0 40px rgba(212, 165, 116, 0.3);
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* 内部空间 - 与游戏中 .door-glow 一致 */
+.tutorial-door-glow {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border-radius: 50%;
+    background: #2C241E; /* 深邃内部 - 与游戏一致 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 窗棂纹理 - 与游戏中 .door-glow::before 一致 */
+.tutorial-door-glow::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%),
+        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* 雾气效果 */
+.tutorial-door-fog {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(ellipse at 30% 30%, rgba(212, 165, 116, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(212, 165, 116, 0.1) 0%, transparent 40%);
+    animation: tutorialFogDrift 8s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes tutorialFogDrift {
+    0%, 100% { transform: translate(-10%, -10%) rotate(0deg); }
+    50% { transform: translate(10%, 10%) rotate(180deg); }
+}
+
+/* 目标图标 - 与游戏中 .door-target-silhouette 一致 */
+.tutorial-door-icon {
+    font-size: 72px;
+    opacity: 0.3; /* 初始非常暗 - 与游戏stage-0一致 */
+    filter: blur(10px) grayscale(100%);
+    z-index: 3;
+    transform: scale(0.8);
+    position: relative;
+    animation: tutorialIconFlicker 4s ease-in-out infinite;
+}
+
+@keyframes tutorialIconFlicker {
+    0%, 100% { opacity: 0.4; filter: blur(4px) brightness(0.5); }
+    50% { opacity: 0.6; filter: blur(2px) brightness(0.7); }
+}
+
+/* 教学文字 */
+.tutorial-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.tutorial-text {
+    color: #fff;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.tutorial-text-1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(212, 165, 116, 0.5);
+    animation: tutorialTextIn 0.8s ease 0.5s forwards;
+}
+
+.tutorial-text-2 {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: tutorialTextIn 0.8s ease 1.2s forwards;
+}
+
+.tutorial-text-2 .highlight {
+    color: var(--brand-color);
+    font-weight: 600;
+    padding: 2px 8px;
+    background: rgba(212, 165, 116, 0.2);
+    border-radius: 4px;
+}
+
+.tutorial-hint-icon {
+    font-size: 20px;
+    animation: tutorialHintBounce 1s ease-in-out infinite;
+}
+
+@keyframes tutorialHintBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes tutorialTextIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 跳过/继续按钮 */
+.tutorial-skip-btn {
+    margin-top: 40px;
+    padding: 14px 40px;
+    background: transparent;
+    border: 1px solid rgba(212, 165, 116, 0.5);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 30px;
+    cursor: pointer;
+    opacity: 0;
+    animation: tutorialBtnIn 0.8s ease 2s forwards;
+    transition: all 0.3s ease;
+}
+
+.tutorial-skip-btn:hover {
+    background: rgba(212, 165, 116, 0.2);
+    border-color: var(--brand-color);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.tutorial-skip-btn:active {
+    transform: scale(0.98);
+}
+
+@keyframes tutorialBtnIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 画面拉开动画 */
+.tutorial-overlay.zoom-out .tutorial-content {
+    animation: tutorialZoomOut 1s ease forwards;
+}
+
+@keyframes tutorialZoomOut {
+    0% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(0.3) translateY(-50vh); 
+    }
+}
+

@@ -1,0 +1,358 @@
+/* 主界面样式 V3 - 世界和关卡样式（暗色主题）*/
+
+/* ========== CSS 变量（暗色主题）========== */
+:root {
+    --bg-dark: #000;
+    --card-bg-dark: rgba(30, 30, 35, 0.9);
+    --card-shadow-dark: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --text-color-dark: rgba(255, 255, 255, 0.9);
+    --text-light-dark: rgba(255, 255, 255, 0.5);
+    --brand-color-dark: rgba(176, 245, 255, 0.8);
+    --border-color-dark: rgba(255, 255, 255, 0.1);
+}
+
+/* ========== 世界地图区域 ========== */
+.world-map {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 4vh;
+    padding: 0 10px;
+    animation: slideUp 0.8s ease-out 0.2s both;
+}
+
+.world-node {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--card-bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: var(--card-shadow-dark);
+    position: relative;
+}
+
+.world-node.active {
+    border-color: var(--brand-color-dark);
+    transform: scale(1.1);
+}
+
+.world-node.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.world-node.completed::after {
+    content: '✓';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 18px;
+    height: 18px;
+    background: var(--brand-color-dark);
+    color: #000;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.world-node .icon {
+    font-size: 24px;
+}
+
+.world-node .name {
+    font-size: 8px;
+    color: var(--text-light-dark);
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+/* ========== 关卡门阵列区域 ========== */
+.level-doors {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.world-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.world-title h2 {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-color-dark);
+    letter-spacing: 4px;
+}
+
+.world-title .world-subtitle {
+    font-size: 12px;
+    color: var(--text-light-dark);
+    margin-top: 4px;
+}
+
+.doors-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    padding: 0 10px;
+}
+
+/* 关卡门卡片 */
+.level-door {
+    width: 140px;
+    height: 160px;
+    background: var(--card-bg-dark);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 15px;
+    cursor: pointer;
+    box-shadow: var(--card-shadow-dark);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-color-dark);
+}
+
+.level-door:active {
+    transform: scale(0.95);
+}
+
+.level-door.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.level-door.locked .door-icon {
+    filter: grayscale(100%);
+}
+
+.level-door.completed {
+    border-color: var(--brand-color-dark);
+}
+
+.level-door.completed::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(176, 245, 255, 0.05));
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 关卡封面 */
+.door-frame {
+    width: 100px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(50, 50, 55, 0.9) 0%, rgba(30, 30, 35, 0.9) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.05);
+    animation: cardBreath 7s ease-in-out infinite;
+}
+
+/* 错开呼吸节奏 */
+.level-door:nth-child(1) .door-frame { animation-delay: 0s; }
+.level-door:nth-child(2) .door-frame { animation-delay: -1.2s; }
+.level-door:nth-child(3) .door-frame { animation-delay: -2.4s; }
+.level-door:nth-child(4) .door-frame { animation-delay: -3.6s; }
+.level-door:nth-child(5) .door-frame { animation-delay: -4.8s; }
+.level-door:nth-child(6) .door-frame { animation-delay: -6s; }
+
+@keyframes cardBreath {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    50% {
+        transform: scale(1.015);
+        box-shadow: 0 4px 12px rgba(176, 245, 255, 0.1);
+    }
+}
+
+.level-door.locked .door-frame {
+    animation: none;
+}
+
+.door-frame::after {
+    content: none;
+    border-radius: 30px 30px 0 0;
+}
+
+.door-icon {
+    font-size: 36px;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.level-door.locked .door-icon::before {
+    content: '🔒';
+    position: absolute;
+    font-size: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.door-info {
+    text-align: center;
+}
+
+.door-name {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-color-dark);
+    margin-bottom: 4px;
+}
+
+.door-target {
+    font-size: 11px;
+    color: var(--text-light-dark);
+}
+
+/* 完成标记 */
+.completed-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background: var(--brand-color-dark);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 15;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+/* ========== 底部故事文本区域 ========== */
+.story-section {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    margin-top: auto;
+}
+
+.story-text {
+    font-size: 13px;
+    color: var(--text-light-dark);
+    line-height: 1.8;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+/* ========== 快捷入口按钮 ========== */
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 20px;
+    margin-top: 10px;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    background: var(--card-bg-dark);
+    border: 1px solid var(--border-color-dark);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--card-shadow-dark);
+    min-width: 80px;
+}
+
+.quick-action-btn:active {
+    transform: scale(0.95);
+    background: rgba(176, 245, 255, 0.1);
+}
+
+.quick-action-btn .btn-icon {
+    font-size: 24px;
+}
+
+.quick-action-btn .btn-text {
+    font-size: 11px;
+    color: var(--text-color-dark);
+    white-space: nowrap;
+}
+
+/* ========== 动画 ========== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ========== 移动端优化 ========== */
+
+/* 防止iOS上的橡皮筋效果 */
+html, body {
+    overscroll-behavior: none;
+}
+
+/* 触摸时的视觉反馈 */
+.world-node, .level-door {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 防止文本选择 */
+.world-node, .level-door, .door-frame {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* 安全区域适配 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .main-screen {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}

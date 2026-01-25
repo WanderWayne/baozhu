@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>章节选择 - 宝珠酿造</title>
+    <link rel="stylesheet" href="css/levels.css">
+    <link rel="stylesheet" href="css/transitions.css">
+</head>
+<body>
+    <div class="container" id="container">
+        <header>
+            <button class="back-btn" id="back-btn">←</button>
+            <h1 id="page-title">选择章节</h1>
+            <div class="header-spacer"></div>
+        </header>
+
+        <!-- 章节选择 + 简介 合并区域 -->
+        <div class="chapter-selector" id="chapter-selector">
+            <!-- 章节图标行 -->
+            <div class="world-map" id="world-map">
+                <!-- 由JS动态生成 -->
+            </div>
+            <!-- 章节简介 -->
+            <div class="chapter-intro" id="chapter-intro">
+                <p class="intro-text" id="story-text"></p>
+            </div>
+        </div>
+
+        <!-- 选择关卡提示 -->
+        <div class="section-title">
+            <span class="title-icon" id="world-icon">🥛</span>
+            <span class="title-text" id="world-name">奶酪谷</span>
+            <span class="title-hint">- 上下滑动选择关卡</span>
+        </div>
+
+        <!-- 关卡滑动选择器 -->
+        <div class="level-carousel-container">
+            <div class="level-carousel" id="level-doors">
+                <!-- 由JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 音频管理器 -->
+    <script src="js/audio-manager.js"></script>
+    
+    <!-- 数据模块 -->
+    <script src="js/data/data-worlds.js"></script>
+    <script src="js/data/data-items.js"></script>
+    <script src="js/data.js"></script>
+    
+    <script src="js/level.js"></script>
+    <script src="js/levels-page.js"></script>
+    
+    <!-- 页面过渡系统 -->
+    <script src="js/page-transitions.js"></script>
+</body>
+</html>
+

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>宝珠酿造 - 游戏</title>
     <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/transitions.css">
 </head>
 <body>
     <!-- 奶雾粒子背景 -->
@@ -69,7 +70,10 @@
         
         <div class="level-info">
             <div class="level-name" id="level-name">冰酥门廊</div>
-            <div class="level-target-text" id="level-target">目标：冰酥酪</div>
+            <div class="level-target-display" id="level-target">
+                <span class="target-label">目标</span>
+                <span class="target-name" id="target-name">冰酥酪</span>
+            </div>
         </div>
         
         <div class="door-status" id="door-status"></div>
@@ -151,10 +155,25 @@
     </div>
 
     <!-- 脚本引入 -->
+    <!-- 音频管理器 -->
+    <script src="js/audio-manager.js"></script>
+    
+    <!-- 数据模块 -->
+    <script src="js/data/data-worlds.js"></script>
+    <script src="js/data/data-items.js"></script>
     <script src="js/data.js"></script>
+    
     <script src="js/level.js"></script>
     <script src="js/synthesis.js"></script>
     <script src="js/drag-drop.js"></script>
+    
+    <!-- 游戏模块 -->
+    <script src="js/game/game-core.js"></script>
+    <script src="js/game/game-synthesis.js"></script>
+    <script src="js/game/game-ui.js"></script>
     <script src="js/game.js"></script>
+    
+    <!-- 页面过渡系统 -->
+    <script src="js/page-transitions.js"></script>
 </body>
 </html>

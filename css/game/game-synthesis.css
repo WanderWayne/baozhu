@@ -1,0 +1,436 @@
+/* 游戏界面样式 - 合成区域 */
+
+/* ========== 合成工作台区域 ========== */
+#synthesis-area {
+    position: absolute;
+    top: 25vh;
+    bottom: 20vh;
+    left: 0;
+    right: 0;
+    min-height: 300px;
+    /* 更加柔和的木纹/纸质质感 */
+    background-color: var(--bg-color);
+    background-image: 
+        linear-gradient(rgba(212, 165, 116, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 165, 116, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    overflow: hidden;
+    touch-action: none;
+}
+
+/* 工作台装饰 - 中心聚焦感 */
+.workbench-texture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(249, 247, 242, 0) 70%);
+    pointer-events: none;
+}
+
+/* 放置引导点（视觉装饰） */
+#synthesis-area::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 2px dashed rgba(212, 165, 116, 0.2);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* ========== 游戏元素 ========== */
+.game-item {
+    width: 90px;
+    height: 90px;
+    background: white;
+    border-radius: 50%; /* 改为圆形，更柔和 */
+    box-shadow: 0 6px 16px rgba(139, 115, 85, 0.15); /* 更暖的阴影 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    cursor: grab;
+    position: absolute;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, border-color 0.2s;
+    border: 3px solid white; /* 内描边 */
+    z-index: 5;
+    touch-action: none;
+    overflow: hidden; /* 确保内容不溢出圆形 */
+}
+
+/* 类型样式 */
+.game-item.type-base { background: var(--color-base); }
+.game-item.type-floral { background: var(--color-floral); border-color: #FFF0F5; }
+.game-item.type-fruit { background: var(--color-fruit); border-color: #F0FFF4; }
+.game-item.type-grain { background: var(--color-grain); border-color: #FFF8E1; }
+.game-item.type-special { background: var(--color-special); border-color: #E3F2FD; }
+.game-item.type-mid { background: var(--color-mid); border-color: #F3E5F5; }
+.game-item.type-final { 
+    background: var(--color-final); 
+    border-color: #FFE0B2;
+    box-shadow: 0 8px 20px rgba(255, 167, 38, 0.25);
+}
+.game-item.type-ultimate { 
+    background: var(--color-ultimate); 
+    border-color: #FFD54F;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+/* 目标物品荧光蓝效果 */
+.game-item.target-item {
+    border: 4px solid rgba(0, 220, 255, 0.9) !important;
+    box-shadow: 
+        0 0 15px rgba(0, 220, 255, 0.6),
+        0 0 30px rgba(0, 220, 255, 0.3),
+        inset 0 0 10px rgba(0, 220, 255, 0.2);
+    animation: targetGlow 2s ease-in-out infinite;
+}
+
+@keyframes targetGlow {
+    0%, 100% { 
+        box-shadow: 
+            0 0 15px rgba(0, 220, 255, 0.6),
+            0 0 30px rgba(0, 220, 255, 0.3),
+            inset 0 0 10px rgba(0, 220, 255, 0.2);
+    }
+    50% { 
+        box-shadow: 
+            0 0 25px rgba(0, 220, 255, 0.9),
+            0 0 50px rgba(0, 220, 255, 0.5),
+            inset 0 0 15px rgba(0, 220, 255, 0.3);
+    }
+}
+
+.game-item:active {
+    cursor: grabbing;
+    transform: scale(1.15);
+    box-shadow: 0 15px 30px rgba(139, 115, 85, 0.25);
+    z-index: 100;
+}
+
+.game-item.highlight {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 4px rgba(212, 165, 116, 0.3), 0 8px 20px rgba(139, 115, 85, 0.2);
+    transform: scale(1.1);
+}
+
+.game-item .icon {
+    font-size: 40px;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+    transition: transform 0.2s;
+}
+
+.game-item:active .icon {
+    transform: scale(1.1);
+}
+
+.game-item .name {
+    font-size: 11px;
+    color: var(--text-color);
+    text-align: center;
+    width: 90%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 2px 4px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 8px;
+    margin-top: 2px;
+}
+
+/* 合成成功特效 - 柔和奶感 */
+@keyframes synthesisSuccess {
+    0% { 
+        transform: scale(0.8) translateY(3px); 
+        box-shadow: 0 0 0 0 rgba(255, 250, 240, 0.3);
+        opacity: 0.7;
+    }
+    30% { 
+        transform: scale(1.08) translateY(-2px); 
+        box-shadow: 0 8px 25px rgba(212, 165, 116, 0.25);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1) translateY(0); 
+        box-shadow: 0 6px 16px rgba(139, 115, 85, 0.15);
+        opacity: 1;
+    }
+}
+
+.synthesis-anim {
+    animation: synthesisSuccess 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 合成柔波纹效果 */
+.synthesis-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 252, 245, 0.4) 0%, rgba(255, 250, 240, 0.1) 50%, transparent 70%);
+    pointer-events: none;
+    animation: synthesisRipple 0.8s ease-out forwards;
+}
+
+@keyframes synthesisRipple {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    100% {
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* 失败特效 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.shake-anim {
+    animation: shake 0.4s ease-in-out;
+    border-color: #ff8a80 !important;
+}
+
+/* 粒子特效容器 */
+.particle-container {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* 奶酪珠粒子 - 圆润小球，缓慢向上漂浮 */
+.particle {
+    position: absolute;
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 252, 245, 0.95) 0%, 
+        rgba(255, 248, 230, 0.8) 40%,
+        rgba(240, 230, 210, 0.6) 100%);
+    border-radius: 50%;
+    box-shadow: 
+        0 2px 4px rgba(139, 115, 85, 0.15),
+        inset 0 -2px 4px rgba(212, 165, 116, 0.1);
+    animation: milkBallFloat 1.5s ease-out forwards;
+}
+
+@keyframes milkBallFloat {
+    0% { 
+        transform: translate(0, 0) scale(0.6); 
+        opacity: 0.8; 
+    }
+    40% {
+        transform: translate(var(--tx), calc(var(--ty) * 0.3)) scale(1);
+        opacity: 0.9;
+    }
+    100% { 
+        transform: translate(var(--tx), var(--ty)) scale(0.4); 
+        opacity: 0; 
+    }
+}
+
+/* ========== 倒计时覆盖层 ========== */
+.timer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.95);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 6;
+}
+
+.timer-circle {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #eee;
+    border-top-color: var(--brand-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 8px;
+}
+
+.timer-text {
+    font-size: 10px;
+    color: var(--text-light);
+    text-align: center;
+    padding: 0 5px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== 静置揭晓（Mystery Item） ========== */
+.game-item.mystery-item {
+    position: relative;
+}
+
+.game-item.mystery-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+    animation: mysteryPulse 1.5s ease-in-out infinite;
+}
+
+.game-item.mystery-item .icon {
+    filter: blur(8px) grayscale(100%);
+    opacity: 0.5;
+}
+
+.game-item.mystery-item .name {
+    filter: blur(4px);
+    opacity: 0.3;
+}
+
+@keyframes mysteryPulse {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 0.7; }
+}
+
+/* 揭晓动画 */
+.game-item.revealed-item {
+    animation: revealFlash 0.5s ease-out;
+}
+
+@keyframes revealFlash {
+    0% { 
+        transform: scale(1); 
+        box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.8);
+    }
+    50% { 
+        transform: scale(1.15); 
+        box-shadow: 0 0 30px 10px rgba(212, 165, 116, 0.6);
+    }
+    100% { 
+        transform: scale(1); 
+        box-shadow: 0 6px 16px rgba(139, 115, 85, 0.15);
+    }
+}
+
+/* 提取出的物品动画 */
+.game-item.extracted-item {
+    animation: extractPop 0.5s ease-out;
+}
+
+@keyframes extractPop {
+    0% { 
+        transform: scale(0) rotate(-180deg); 
+        opacity: 0;
+    }
+    60% { 
+        transform: scale(1.2) rotate(10deg); 
+    }
+    100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 1;
+    }
+}
+
+/* ========== 章节过渡动画 - 星星效果 ========== */
+
+/* 物品变成星星的动画 */
+.game-item.star-transform {
+    animation: itemToStar 0.8s ease-in-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+@keyframes itemToStar {
+    0% { 
+        transform: scale(1); 
+        filter: brightness(1);
+        border-radius: 50%;
+    }
+    40% { 
+        transform: scale(1.3); 
+        filter: brightness(1.5) blur(2px);
+    }
+    100% { 
+        transform: scale(0.25); 
+        filter: brightness(3) blur(0);
+        background: radial-gradient(circle, #fff 0%, #ffe4b5 60%, transparent 100%);
+        border-color: transparent;
+        box-shadow: 0 0 30px 15px rgba(255, 255, 255, 0.9), 
+                    0 0 60px 30px rgba(255, 228, 181, 0.6);
+    }
+}
+
+/* 飞行的星星 */
+.flying-star {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, 
+        #fff 0%, 
+        #ffe4b5 40%, 
+        rgba(255, 228, 181, 0.5) 70%,
+        transparent 100%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 20px 10px rgba(255, 255, 255, 0.8), 
+        0 0 40px 20px rgba(255, 228, 181, 0.5),
+        0 0 60px 30px rgba(255, 215, 0, 0.3);
+    z-index: 2000;
+    pointer-events: none;
+    animation: starTwinkle 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes starTwinkle {
+    0% { 
+        transform: scale(1);
+        box-shadow: 
+            0 0 20px 10px rgba(255, 255, 255, 0.8), 
+            0 0 40px 20px rgba(255, 228, 181, 0.5),
+            0 0 60px 30px rgba(255, 215, 0, 0.3);
+    }
+    100% { 
+        transform: scale(1.15);
+        box-shadow: 
+            0 0 25px 12px rgba(255, 255, 255, 0.9), 
+            0 0 50px 25px rgba(255, 228, 181, 0.6),
+            0 0 70px 35px rgba(255, 215, 0, 0.4);
+    }
+}
+
+/* 星星飞行轨迹尾巴 */
+.flying-star::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 40px;
+    background: linear-gradient(to bottom, 
+        rgba(255, 255, 255, 0.8) 0%, 
+        rgba(255, 228, 181, 0.4) 50%,
+        transparent 100%);
+    transform-origin: top center;
+    transform: translate(-50%, 0);
+    border-radius: 50%;
+    filter: blur(2px);
+}
+

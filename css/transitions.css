@@ -1,0 +1,167 @@
+/* 页面过渡动画系统 - 慢而有生命力 */
+/* ================================================ */
+
+/* 页面过渡遮罩 */
+.page-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease-out;
+}
+
+/* 淡入黑色 */
+.page-transition-overlay.fade-to-black {
+    background: linear-gradient(
+        135deg,
+        #0a0a0a 0%,
+        #1a1a1a 50%,
+        #0a0a0a 100%
+    );
+    pointer-events: all;
+    opacity: 1;
+}
+
+/* 淡入白色（温暖） */
+.page-transition-overlay.fade-to-warm {
+    background: linear-gradient(
+        135deg,
+        #FDF8F0 0%,
+        #FFF5E6 50%,
+        #FDF8F0 100%
+    );
+    pointer-events: all;
+    opacity: 1;
+}
+
+/* 页面进入动画 */
+body.page-entering {
+    animation: pageEnter 0.8s ease-out forwards;
+}
+
+@keyframes pageEnter {
+    0% {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 页面离开动画 */
+body.page-leaving {
+    animation: pageLeave 0.5s ease-in forwards;
+}
+
+@keyframes pageLeave {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+}
+
+/* ========== 元素进入动画 ========== */
+
+/* 淡入上浮 */
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 缩放淡入 */
+.animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes scaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 呼吸光晕（用于按钮等） */
+.animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(212, 165, 116, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(212, 165, 116, 0.5);
+    }
+}
+
+/* ========== 渐进式加载动画（stagger） ========== */
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+
+/* 初始隐藏（用于stagger动画） */
+.stagger-hidden {
+    opacity: 0;
+}
+
+/* ========== 颜色过渡背景 ========== */
+
+.bg-transition-warm {
+    background: linear-gradient(
+        135deg,
+        #FAF6EE 0%,
+        #FFF8F0 50%,
+        #FAF6EE 100%
+    );
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease-in-out infinite;
+}
+
+.bg-transition-dark {
+    background: linear-gradient(
+        135deg,
+        #0a0a0a 0%,
+        #1a1a1a 50%,
+        #0a0a0a 100%
+    );
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+

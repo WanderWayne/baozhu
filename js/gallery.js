@@ -16,7 +16,11 @@ class Gallery {
     bindEvents() {
         // 返回按钮
         document.getElementById('back-btn').addEventListener('click', () => {
-            window.location.href = 'index.html';
+            if (window.AudioManager) {
+                window.AudioManager.playClickBack();
+            }
+            if (window.navigateTo) window.navigateTo('index.html');
+            else window.location.href = 'index.html';
         });
 
         // 分类按钮
@@ -163,6 +167,10 @@ class Gallery {
 
 // 启动
 document.addEventListener('DOMContentLoaded', () => {
+    // 播放主界面BGM
+    if (window.AudioManager) {
+        window.AudioManager.playBGM('bgm-menu');
+    }
     new Gallery();
 });
 

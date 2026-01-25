@@ -24,19 +24,26 @@ class DragSystem {
         // 防止触摸后的鼠标事件重复
         this.lastTouchTime = 0;
         this.touchMouseDelay = 500; // 触摸后500ms内忽略鼠标事件
+        this.userHasInteracted = false; // 用户是否已交互（用于振动API）
 
         this.initEvents();
     }
 
     // 触觉反馈（如果支持）
     vibrate(duration = 10) {
-        if (this.hapticFeedback) {
+        // 只有在用户已交互且设备支持时才调用
+        if (this.hapticFeedback && this.userHasInteracted && navigator.vibrate) {
             try {
                 navigator.vibrate(duration);
             } catch (e) {
                 // 忽略错误
             }
         }
+    }
+    
+    // 标记用户已交互（首次触摸/点击后启用振动）
+    markUserInteracted() {
+        this.userHasInteracted = true;
     }
 
     initEvents() {
@@ -67,6 +74,9 @@ class DragSystem {
     }
 
     dragStart(e) {
+        // 标记用户已交互（启用振动反馈）
+        this.markUserInteracted();
+        
         // 防止重复触发（触摸+鼠标事件同时触发的情况）
         if (this.isDragging || this.activeItem) return;
         
@@ -104,6 +114,11 @@ class DragSystem {
         }, this.longPressDelay);
         
         this.isDragging = true;
+        
+        // 播放拿起音效
+        if (window.AudioManager) {
+            window.AudioManager.playSFX('pickup');
+        }
         
         // 触觉反馈
         this.vibrate(5);
@@ -294,6 +309,11 @@ class DragSystem {
             // 放回物品栏 - 回到原位置
             this.returnToInventory();
         } else if (isInSynthesisArea) {
+            // 播放放下音效
+            if (window.AudioManager) {
+                window.AudioManager.playSFX('drop');
+            }
+            
             // 转换坐标到 synthesis-area 相对坐标
             const relX = itemRect.left - synthesisRect.left;
             const relY = itemRect.top - synthesisRect.top;

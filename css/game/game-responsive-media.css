@@ -1,0 +1,134 @@
+/* 游戏界面样式 - 响应式媒体查询 */
+
+/* ========== 响应式 ========== */
+
+/* 小屏手机 */
+@media (max-height: 600px) {
+    #door-area {
+        height: 22vh;
+        min-height: 130px;
+    }
+    .door-container {
+        width: 70px;
+        height: 105px;
+    }
+    .door-frame {
+        border-radius: 35px 35px 0 0;
+    }
+    .door-glow {
+        border-radius: 30px 30px 0 0;
+    }
+    .door-aura {
+        border-radius: 43px 43px 0 0;
+    }
+    .door-target-silhouette {
+        font-size: 30px;
+    }
+    #inventory-area {
+        height: 18vh;
+        min-height: 110px;
+    }
+    .game-item {
+        width: 70px;
+        height: 70px;
+    }
+    .game-item .icon {
+        font-size: 28px;
+    }
+    .game-item .name {
+        font-size: 10px;
+    }
+}
+
+/* 普通手机 */
+@media (max-height: 700px) and (min-height: 601px) {
+    #door-area {
+        height: 24vh;
+        min-height: 150px;
+    }
+    .door-container {
+        width: 85px;
+        height: 128px;
+    }
+    .door-frame {
+        border-radius: 43px 43px 0 0;
+    }
+    .door-glow {
+        border-radius: 38px 38px 0 0;
+    }
+    .door-aura {
+        border-radius: 51px 51px 0 0;
+    }
+    .door-target-silhouette {
+        font-size: 38px;
+    }
+    #inventory-area {
+        height: 18vh;
+        min-height: 120px;
+    }
+    .game-item {
+        width: 80px;
+        height: 80px;
+    }
+    .game-item .icon {
+        font-size: 32px;
+    }
+}
+
+/* iPad / 平板 */
+@media (min-width: 768px) {
+    .game-item {
+        width: 100px;
+        height: 100px;
+    }
+    .game-item .icon {
+        font-size: 44px;
+    }
+    .game-item .name {
+        font-size: 13px;
+    }
+    #inventory-area {
+        gap: 20px;
+        padding: 20px 30px;
+    }
+    .door-container {
+        width: 120px;
+        height: 180px;
+    }
+    .door-frame {
+        border-radius: 60px 60px 0 0;
+    }
+    .door-glow {
+        border-radius: 54px 54px 0 0;
+    }
+    .door-aura {
+        border-radius: 68px 68px 0 0;
+    }
+    .door-target-silhouette {
+        font-size: 52px;
+    }
+    .success-modal {
+        max-width: 400px;
+        padding: 40px 30px;
+    }
+}
+
+/* 横屏提示（可选） */
+@media (orientation: landscape) and (max-height: 500px) {
+    body::before {
+        content: '请旋转设备至竖屏模式';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: var(--text-color);
+        z-index: 9999;
+    }
+}
+

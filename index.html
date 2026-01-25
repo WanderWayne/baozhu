@@ -6,6 +6,7 @@
     <title>宝珠酿造 - 唤醒酿造之力</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/intro.css">
+    <link rel="stylesheet" href="css/transitions.css">
 </head>
 <body>
     <!-- ========== 开场序列容器 ========== -->
@@ -40,86 +41,104 @@
         <button id="intro-start-btn">开始游戏</button>
     </div>
 
-    <!-- 奶雾粒子背景 -->
-    <div class="milk-fog-container">
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-        <div class="milk-fog-particle"></div>
-    </div>
-
     <!-- ========== 主界面容器 ========== -->
-    <div class="container" style="display: none;">
-        <header>
-            <h1>宝珠酿造</h1>
-            <div class="subtitle">唤醒酿造之力</div>
-        </header>
-
-        <!-- 进度指示器 -->
-        <div class="progress-panel" id="progress-panel">
-            <div class="progress-row" onclick="window.location.href='codex.html'">
-                <span class="progress-icon">📖</span>
+    <div class="main-screen" id="main-screen" style="display: none;">
+        <!-- 粒子 Canvas 层 -->
+        <canvas id="main-canvas"></canvas>
+        
+        <!-- 主菜单 -->
+        <div class="main-menu-container">
+            <!-- 开始游戏按钮 -->
+            <button class="main-btn primary" id="continue-btn">开始游戏</button>
+            
+            <!-- 配方图谱进度条 -->
+            <div class="main-progress-row" id="codex-row">
                 <span class="progress-label">配方图谱</span>
                 <div class="progress-bar">
                     <div class="progress-fill" id="codex-progress-fill"></div>
                 </div>
                 <span class="progress-text" id="codex-progress-text">0/50</span>
             </div>
-            <div class="progress-row" onclick="window.location.href='gallery.html'">
-                <span class="progress-icon">🧩</span>
+            
+            <!-- 记忆碎片进度条 -->
+            <div class="main-progress-row" id="fragment-row">
                 <span class="progress-label">记忆碎片</span>
                 <div class="progress-bar">
                     <div class="progress-fill" id="fragment-progress-fill"></div>
                 </div>
                 <span class="progress-text" id="fragment-progress-text">0/30</span>
             </div>
+            
+            <!-- 设置按钮 -->
+            <button class="main-btn secondary" id="settings-btn">设置</button>
+            
+            <!-- 底部小字行 -->
+            <div class="main-footer-row">
+                <button class="main-link-btn" id="reset-btn">重置进度</button>
+                <span class="main-footer-divider">·</span>
+                <button class="main-link-btn" id="free-mode-btn">自由世界</button>
+            </div>
         </div>
+    </div>
 
-        <!-- 世界地图节点 -->
-        <div class="world-map">
-            <!-- 由JS动态生成 -->
-        </div>
-
-        <!-- 关卡门阵列 -->
-        <div class="level-doors">
-            <!-- 由JS动态生成 -->
-        </div>
-
-        <!-- 故事文本 -->
-        <div class="story-section">
-            <p class="story-text"></p>
-        </div>
-
-        <!-- 快捷入口 -->
-        <div class="quick-actions">
-            <button class="quick-action-btn" id="free-mode-btn">
-                <span class="btn-icon">🧪</span>
-                <span class="btn-text">自由探索</span>
-            </button>
-            <button class="quick-action-btn" id="codex-btn" onclick="window.location.href='codex.html'">
-                <span class="btn-icon">📖</span>
-                <span class="btn-text">配方图鉴</span>
-            </button>
-            <button class="quick-action-btn" id="gallery-btn" onclick="window.location.href='gallery.html'">
-                <span class="btn-icon">🧩</span>
-                <span class="btn-text">记忆长廊</span>
-            </button>
-        </div>
-
-        <!-- 设置区域 -->
-        <div class="settings-area" style="text-align: center; margin-top: 20px; opacity: 0.6;">
-            <button id="reset-btn" style="background: none; border: 1px solid #8d6e63; color: #8d6e63; padding: 5px 15px; border-radius: 15px; cursor: pointer; font-size: 12px;">重置进度</button>
+    <!-- ========== 设置面板（弹出层） ========== -->
+    <div class="panel-overlay" id="settings-overlay">
+        <div class="panel settings-panel">
+            <button class="panel-close" id="settings-close">✕</button>
+            <h2 class="panel-title">设置</h2>
+            
+            <div class="settings-content">
+                <!-- BGM 音量控制 -->
+                <div class="settings-row">
+                    <span class="settings-label">🎵 背景音乐</span>
+                    <input type="range" id="bgm-volume-slider" class="volume-slider" min="0" max="100" value="80">
+                    <span class="volume-value" id="bgm-volume-value">80%</span>
+                </div>
+                
+                <!-- SFX 音量控制 -->
+                <div class="settings-row">
+                    <span class="settings-label">🔊 音效</span>
+                    <input type="range" id="sfx-volume-slider" class="volume-slider" min="0" max="100" value="80">
+                    <span class="volume-value" id="sfx-volume-value">80%</span>
+                </div>
+                
+                <div class="settings-divider"></div>
+                
+                <!-- 游戏信息 -->
+                <div class="settings-info">
+                    <p>宝珠酿造 v1.0</p>
+                    <p class="info-sub">唤醒酿造之力</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- 脚本引入 -->
+    <!-- 音频管理器 -->
+    <script src="js/audio-manager.js"></script>
+    
+    <!-- 数据模块 -->
+    <script src="js/data/data-worlds.js"></script>
+    <script src="js/data/data-items.js"></script>
     <script src="js/data.js"></script>
+    
     <script src="js/level.js"></script>
+    
+    <!-- 开场模块 -->
+    <script src="js/intro/intro-core.js"></script>
+    <script src="js/intro/intro-text.js"></script>
+    <script src="js/intro/intro-states-early.js"></script>
+    <script src="js/intro/intro-states-late.js"></script>
+    <script src="js/intro/intro-particles.js"></script>
+    <script src="js/intro/intro-items.js"></script>
+    <script src="js/intro/intro-render.js"></script>
     <script src="js/intro.js"></script>
+    
+    <!-- 主界面模块 -->
+    <script src="js/main-particles.js"></script>
     <script src="js/main.js"></script>
+    
+    <!-- 页面过渡系统 -->
+    <script src="js/page-transitions.js"></script>
 </body>
 </html>

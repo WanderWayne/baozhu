@@ -14,7 +14,11 @@ class Codex {
     bindEvents() {
         // 返回按钮
         document.getElementById('back-btn').addEventListener('click', () => {
-            window.location.href = 'index.html';
+            if (window.AudioManager) {
+                window.AudioManager.playClickBack();
+            }
+            if (window.navigateTo) window.navigateTo('index.html');
+            else window.location.href = 'index.html';
         });
 
         // 关闭弹窗
@@ -177,6 +181,10 @@ class Codex {
 
 // 启动
 document.addEventListener('DOMContentLoaded', () => {
+    // 播放主界面BGM
+    if (window.AudioManager) {
+        window.AudioManager.playBGM('bgm-menu');
+    }
     new Codex();
 });
 
