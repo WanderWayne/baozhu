@@ -57,16 +57,20 @@ function createWorldNode(world) {
     
     // 获取解锁需求
     const fragmentReq = window.LevelManager.getWorldUnlockRequirement(world.id);
-    const currentFragments = window.LevelManager.currentProgress.fragments?.length || 0;
     
     if (isUnlocked) {
         node.innerHTML = `<div class="icon">${world.icon}</div>`;
         node.title = world.name;
         node.addEventListener('click', () => {
-            selectWorld(world.id);
+            // 点击时添加微妙的动画反馈
+            node.style.transform = 'scale(0.92)';
+            setTimeout(() => {
+                node.style.transform = '';
+                selectWorld(world.id);
+            }, 150);
         });
     } else {
-        node.innerHTML = `<div class="icon" style="filter: grayscale(100%); opacity: 0.5;">🔒</div>`;
+        node.innerHTML = `<div class="icon">🔒</div>`;
         node.title = `收集${fragmentReq}个碎片解锁 ${world.name}`;
     }
     
@@ -198,16 +202,21 @@ function createLevelDoor(level, index) {
     door.dataset.index = index;
     door.dataset.levelId = level.id;
     
+    // 目标文字格式化
+    const targetText = isUnlocked 
+        ? `目标 · ${level.target}` 
+        : '尚未解锁';
+    
     door.innerHTML = `
         ${isCompleted ? '<div class="completed-badge">✓</div>' : ''}
         <div class="door-frame">
             <div class="door-icon">${isUnlocked ? level.icon : '🔒'}</div>
         </div>
         <div class="door-info">
-            <div class="door-name">${isUnlocked ? level.name : '???'}</div>
-            <div class="door-target">${isUnlocked ? '目标: ' + level.target : '未解锁'}</div>
+            <div class="door-name">${isUnlocked ? level.name : '· · ·'}</div>
+            <div class="door-target">${targetText}</div>
         </div>
-        ${isUnlocked ? '<button class="door-enter-btn">进入</button>' : ''}
+        ${isUnlocked ? '<button class="door-enter-btn">进 入</button>' : ''}
     `;
     
     // 点击关卡卡片选中
@@ -305,15 +314,24 @@ function enterLevel(levelId) {
         window.AudioManager.stopBGM();
     }
     
+    // 宝珠风格的淡出过渡
     const container = document.getElementById('container');
+    const bubbleCanvas = document.getElementById('bubble-canvas');
+    
     if (container) {
+        container.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         container.style.opacity = '0';
-        container.style.transition = 'opacity 0.4s ease';
+        container.style.transform = 'scale(1.02)';
+    }
+    
+    if (bubbleCanvas) {
+        bubbleCanvas.style.transition = 'opacity 0.6s ease';
+        bubbleCanvas.style.opacity = '0';
     }
     
     setTimeout(() => {
         window.navigateTo(`game.html?level=${levelId}`);
-    }, 400);
+    }, 500);
 }
 
 // ==================== 故事文本 ====================

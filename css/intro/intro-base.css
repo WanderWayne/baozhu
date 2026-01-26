@@ -12,20 +12,12 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    transition: background 4s ease-out;
+    transition: background-color 5s ease-out;
 }
 
-/* 粒子上升时背景渐变到宝珠品牌色（温暖的黄棕白色） */
+/* 粒子上升时背景颜色渐变到宝珠米黄色 */
 #intro-screen.warm-transition {
-    background: linear-gradient(
-        180deg,
-        #1a1510 0%,      /* 深棕黑 */
-        #2d261f 20%,     /* 暖棕色 */
-        #3d3228 40%,     /* 奶茶棕 */
-        #4a3d2f 60%,     /* 焦糖色 */
-        #5c4b3a 80%,     /* 浅棕 */
-        #6d5a47 100%     /* 暖米色 */
-    );
+    background-color: #FAF8F5;
 }
 
 /* 白色闪屏遮罩 */

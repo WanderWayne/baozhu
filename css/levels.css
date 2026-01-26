@@ -1,57 +1,74 @@
-/* 章节选择页面样式 - 每章独特背景色 */
+/* ========================================
+   章节选择页面 - 宝珠酿造风格 V2
+   基于 docs/baozhu-style-guide.md
+   主题：弄堂 · 慢酿 · 生机
+======================================== */
 
 :root {
-    /* 默认主题色（第一章：奶酪谷） */
-    --bg-color: #FFF5E6;
-    --bg-pattern-color: rgba(212, 165, 116, 0.08);
-    --brand-color: #D4A574;
-    --text-color: #5A4A42;
-    --text-light: #9C8C74;
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --card-shadow: 0 4px 16px rgba(139, 115, 85, 0.1);
+    /* ===== 晨曦系 ===== */
+    --dawn-pink: #F5E6E0;
+    --sunrise-orange: #E8A87C;
+    --dusk-purple: #B8A5C7;
+    --dawn-gold: #F0D9A0;
+    
+    /* ===== 酿造系 ===== */
+    --rice-wine-gold: #E8C873;
+    --caramel-brown: #A67C52;
+    --old-wood: #6B5344;
+    --milk-foam: #FFFDF7;
+    --yeast-beige: #F5F0E6;
+    
+    /* ===== 生机系 ===== */
+    --moss-green: #7BA37B;
+    --sprout-green: #A8C686;
+    --spring-blue: #89B4C8;
+    --berry-red: #C4727A;
+    
+    /* ===== 食材色 ===== */
+    --strawberry: #E8B4B8;
+    --blueberry: #8B7BA3;
+    --honey-amber: #D4A03A;
+    --sticky-rice: #F8F4EC;
+    --cocoa: #5D4E46;
+    
+    /* ===== 语义化 ===== */
+    --bg-primary: var(--yeast-beige);
+    --bg-card: var(--milk-foam);
+    --text-primary: var(--old-wood);
+    --text-secondary: var(--caramel-brown);
+    --accent-primary: var(--rice-wine-gold);
+    --accent-life: var(--moss-green);
+    
+    /* ===== 效果 ===== */
+    --glow-gold: rgba(232, 200, 115, 0.2);
+    --glow-warm: rgba(232, 168, 124, 0.15);
+    --shadow-warm: 0 4px 24px rgba(107, 83, 68, 0.08);
 }
 
-/* 各章节主题色 */
-.theme-dairy {
-    --bg-color: #FFF5E6;
-    --bg-pattern-color: rgba(212, 165, 116, 0.08);
-    --brand-color: #D4A574;
-    --accent-color: #C49A6C;
+/* 各章节主题色 - 食材灵感 */
+.theme-dairy { 
+    --chapter-accent: var(--rice-wine-gold);
+    --chapter-glow: rgba(232, 200, 115, 0.15);
 }
-
-.theme-floral {
-    --bg-color: #FFF0F3;
-    --bg-pattern-color: rgba(255, 182, 193, 0.12);
-    --brand-color: #E8A0B0;
-    --accent-color: #D4869A;
+.theme-floral { 
+    --chapter-accent: var(--strawberry);
+    --chapter-glow: rgba(232, 180, 184, 0.15);
 }
-
-.theme-fruit {
-    --bg-color: #F0FFF4;
-    --bg-pattern-color: rgba(100, 200, 130, 0.08);
-    --brand-color: #6ABF8A;
-    --accent-color: #4DAD70;
+.theme-fruit { 
+    --chapter-accent: var(--moss-green);
+    --chapter-glow: rgba(123, 163, 123, 0.15);
 }
-
-.theme-grain {
-    --bg-color: #FFFBF0;
-    --bg-pattern-color: rgba(200, 160, 80, 0.08);
-    --brand-color: #C8A050;
-    --accent-color: #B08830;
+.theme-grain { 
+    --chapter-accent: var(--honey-amber);
+    --chapter-glow: rgba(212, 160, 58, 0.15);
 }
-
-.theme-temperature {
-    --bg-color: #F0F8FF;
-    --bg-pattern-color: rgba(100, 180, 230, 0.08);
-    --brand-color: #6BB4E6;
-    --accent-color: #4A9BD0;
+.theme-temperature { 
+    --chapter-accent: var(--spring-blue);
+    --chapter-glow: rgba(137, 180, 200, 0.15);
 }
-
-.theme-ultimate {
-    --bg-color: #FFF8F0;
-    --bg-pattern-color: rgba(212, 165, 116, 0.12);
-    --brand-color: #D4A574;
-    --accent-color: #B8895A;
+.theme-ultimate { 
+    --chapter-accent: var(--sunrise-orange);
+    --chapter-glow: rgba(232, 168, 124, 0.15);
 }
 
 * {
@@ -60,22 +77,49 @@
     padding: 0;
 }
 
-body {
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: var(--bg-color);
-    color: var(--text-color);
-    min-height: 100vh;
-    background-image: radial-gradient(var(--bg-pattern-color) 1px, transparent 1px);
-    background-size: 25px 25px;
-    transition: background-color 0.5s ease;
+html, body {
+    overscroll-behavior: none;
 }
 
+body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    
+    /* 多层背景：营造弄堂午后的温暖氛围 */
+    background:
+        /* 顶部晨光 */
+        radial-gradient(ellipse 80% 50% at 70% -10%, var(--dawn-pink) 0%, transparent 50%),
+        /* 右侧暖光 */
+        radial-gradient(ellipse 60% 80% at 110% 30%, rgba(232, 200, 115, 0.08) 0%, transparent 50%),
+        /* 左下暮色 */
+        radial-gradient(ellipse 70% 60% at -10% 90%, rgba(184, 165, 199, 0.06) 0%, transparent 50%),
+        /* 基础色 */
+        var(--yeast-beige);
+}
+
+/* ========== 发酵气泡背景 Canvas ========== */
+#bubble-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ========== 主容器 ========== */
 .container {
+    position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-    padding: 20px;
-    padding-bottom: 40px;
+    padding: 24px 20px;
+    padding-bottom: 60px;
     min-height: 100vh;
 }
 
@@ -84,157 +128,232 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 10px 0;
+    margin-bottom: 32px;
+    padding: 8px 0;
 }
 
 .back-btn {
-    width: 40px;
-    height: 40px;
-    background: var(--card-bg);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 44px;
+    height: 44px;
+    background: var(--milk-foam);
+    border: 1px solid rgba(166, 124, 82, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    color: var(--brand-color);
+    font-size: 18px;
+    color: var(--caramel-brown);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.4s ease;
+    box-shadow: 0 2px 8px rgba(107, 83, 68, 0.06);
+}
+
+.back-btn:hover {
+    border-color: var(--rice-wine-gold);
+    box-shadow: 0 4px 16px var(--glow-gold);
+    color: var(--old-wood);
 }
 
 .back-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.92);
 }
 
+/* 页面标题 - 衬线体，有温度 */
 h1 {
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: 3px;
-    color: var(--brand-color);
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: 6px;
+    color: var(--old-wood);
+    font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", serif;
 }
 
 .header-spacer {
-    width: 40px;
+    width: 44px;
 }
 
-/* ========== 章节选择 + 简介 合并区域 ========== */
+/* ========== 章节选择器 ========== */
 .chapter-selector {
-    background: var(--card-bg);
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 20px;
-    padding: 16px;
+    position: relative;
+    background: var(--milk-foam);
+    border: 1px solid rgba(166, 124, 82, 0.08);
+    border-radius: 20px;
+    margin-bottom: 36px;
+    padding: 24px;
+    box-shadow: 
+        0 4px 24px rgba(107, 83, 68, 0.05),
+        0 1px 3px rgba(107, 83, 68, 0.03);
 }
 
-/* ========== 世界地图（单行排列） ========== */
+/* 卡片内的温暖光效 */
+.chapter-selector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(
+        180deg,
+        rgba(245, 230, 224, 0.5) 0%,
+        transparent 100%
+    );
+    border-radius: 20px 20px 0 0;
+    pointer-events: none;
+}
+
+/* ========== 世界地图 ========== */
 .world-map {
+    position: relative;
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
-    gap: 10px;
-    padding: 0;
-    margin-bottom: 12px;
+    gap: 14px;
+    padding: 8px 0;
+    margin-bottom: 20px;
 }
 
 .world-node {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(145deg, var(--sticky-rice) 0%, var(--yeast-beige) 100%);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s ease;
     border: 2px solid transparent;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     position: relative;
+    box-shadow: 0 2px 8px rgba(107, 83, 68, 0.06);
+}
+
+.world-node .icon {
+    font-size: 22px;
+    transition: transform 0.4s ease;
+}
+
+.world-node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 83, 68, 0.1);
+}
+
+.world-node:hover .icon {
+    transform: scale(1.1);
 }
 
 .world-node.active {
-    border-color: var(--brand-color);
-    transform: scale(1.15);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-color: var(--rice-wine-gold);
+    box-shadow: 0 0 0 4px var(--glow-gold);
+    animation: nodeBreath 4s ease-in-out infinite;
+}
+
+@keyframes nodeBreath {
+    0%, 100% { 
+        box-shadow: 0 0 0 4px rgba(232, 200, 115, 0.15);
+    }
+    50% { 
+        box-shadow: 0 0 0 8px rgba(232, 200, 115, 0.25);
+    }
 }
 
 .world-node.locked {
     opacity: 0.4;
     cursor: not-allowed;
-    filter: grayscale(80%);
+    filter: grayscale(30%);
 }
 
 .world-node.completed::after {
     content: '✓';
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 14px;
-    height: 14px;
-    background: var(--brand-color);
+    top: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: var(--moss-green);
     color: white;
     border-radius: 50%;
-    font-size: 8px;
+    font-size: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.world-node .icon {
-    font-size: 20px;
+    box-shadow: 0 2px 4px rgba(123, 163, 123, 0.3);
 }
 
 .world-node .name {
-    display: none; /* 隐藏章节名称，只显示图标 */
+    display: none;
 }
 
 /* ========== 章节简介 ========== */
 .chapter-intro {
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+    padding-top: 20px;
+}
+
+/* 分隔线 - 米酒金渐变 */
+.chapter-intro::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--caramel-brown) 30%,
+        var(--rice-wine-gold) 50%,
+        var(--caramel-brown) 70%,
+        transparent 100%
+    );
+    opacity: 0.25;
 }
 
 .chapter-intro .intro-text {
     font-size: 13px;
-    color: var(--text-light);
-    line-height: 1.7;
+    color: var(--caramel-brown);
+    line-height: 2;
     text-align: center;
+    letter-spacing: 1px;
     margin: 0;
 }
 
-/* ========== 选择关卡标题 ========== */
+/* ========== 章节标题区域 ========== */
 .section-title {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 20px;
     padding: 0 8px;
 }
 
 .section-title .title-icon {
-    font-size: 24px;
+    font-size: 36px;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 2px 4px rgba(107, 83, 68, 0.1));
 }
 
 .section-title .title-text {
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--text-color);
-    letter-spacing: 2px;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--old-wood);
+    letter-spacing: 10px;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", serif;
 }
 
 .section-title .title-hint {
-    font-size: 14px;
-    color: var(--text-light);
-    letter-spacing: 1px;
+    font-size: 12px;
+    color: var(--caramel-brown);
+    letter-spacing: 3px;
+    margin-top: 6px;
+    opacity: 0.7;
 }
 
 /* ========== 关卡滑动选择器 ========== */
 .level-carousel-container {
     position: relative;
-    height: 420px; /* 固定高度，显示3个关卡 */
+    height: 400px;
     overflow: hidden;
     margin-bottom: 24px;
 }
@@ -242,12 +361,11 @@ h1 {
 .level-carousel {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 0 20px;
+    gap: 18px;
+    padding: 0 12px;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     height: 100%;
-    /* 隐藏滚动条 */
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -256,49 +374,81 @@ h1 {
     display: none;
 }
 
+/* ========== 关卡卡片 - 宝珠酿造风格 ========== */
 .level-door {
-    background: var(--card-bg);
+    position: relative;
+    background: var(--milk-foam);
     border-radius: 16px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 16px;
+    padding: 18px;
     cursor: pointer;
-    box-shadow: var(--card-shadow);
-    position: relative;
     overflow: hidden;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
+    border: 1px solid rgba(166, 124, 82, 0.08);
+    transition: all 0.5s ease;
     scroll-snap-align: center;
-    min-height: 120px;
+    min-height: 108px;
     flex-shrink: 0;
     opacity: 0.5;
-    filter: brightness(0.85);
-    transform: scale(0.95);
+    transform: scale(0.96);
+    box-shadow: 0 2px 12px rgba(107, 83, 68, 0.04);
 }
 
-/* 选中状态（中间的关卡） */
+/* 卡片内柔和光效 - 像阳光照进来 */
+.level-door::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(
+        160deg,
+        rgba(245, 230, 224, 0.6) 0%,
+        rgba(240, 217, 160, 0.2) 30%,
+        transparent 60%
+    );
+    pointer-events: none;
+    border-radius: 16px 16px 0 0;
+}
+
+/* 选中状态 - 米酒金边框 */
 .level-door.selected {
-    border-color: #E8B930;
+    border-color: var(--rice-wine-gold);
     opacity: 1;
-    filter: brightness(1);
     transform: scale(1);
-    box-shadow: 0 6px 24px rgba(232, 185, 48, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(232, 200, 115, 0.15),
+        0 0 0 1px rgba(232, 200, 115, 0.2);
+    animation: cardGlow 4s ease-in-out infinite;
+}
+
+@keyframes cardGlow {
+    0%, 100% { 
+        box-shadow: 
+            0 8px 28px rgba(232, 200, 115, 0.12),
+            0 0 0 1px rgba(232, 200, 115, 0.15);
+    }
+    50% { 
+        box-shadow: 
+            0 8px 36px rgba(232, 200, 115, 0.2),
+            0 0 0 2px rgba(232, 200, 115, 0.25);
+    }
 }
 
 .level-door:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
 }
 
 /* 未解锁状态 */
 .level-door.locked {
     cursor: not-allowed;
-    opacity: 0.4;
-    filter: brightness(0.6);
+    opacity: 0.35;
 }
 
 .level-door.locked .door-frame {
-    filter: grayscale(100%) brightness(0.7);
+    filter: grayscale(80%) brightness(0.9);
 }
 
 .level-door.locked .door-icon {
@@ -306,35 +456,38 @@ h1 {
 }
 
 /* 已完成状态 */
-.level-door.completed {
-    /* 已完成的关卡保持正常样式 */
-}
-
 .level-door.completed.selected {
-    border-color: var(--brand-color);
+    border-color: var(--chapter-accent, var(--moss-green));
 }
 
-/* 关卡封面 */
+/* ========== 关卡封面 ========== */
 .door-frame {
-    width: 80px;
-    height: 80px;
-    min-width: 80px;
-    background: linear-gradient(135deg, #F8F5F0 0%, #F0EBE5 100%);
-    border-radius: 12px;
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    background: linear-gradient(
+        145deg,
+        var(--sticky-rice) 0%,
+        var(--dawn-pink) 50%,
+        var(--yeast-beige) 100%
+    );
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid rgba(0,0,0,0.04);
-    margin-right: 16px;
+    border: 1px solid rgba(166, 124, 82, 0.06);
+    margin-right: 14px;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        0 2px 8px rgba(107, 83, 68, 0.06);
 }
 
 .door-icon {
-    font-size: 36px;
+    font-size: 30px;
     position: relative;
     z-index: 1;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
+    filter: drop-shadow(0 1px 2px rgba(107, 83, 68, 0.1));
 }
 
 .door-info {
@@ -343,31 +496,36 @@ h1 {
 }
 
 .door-name {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text-color);
-    margin-bottom: 4px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--old-wood);
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
 }
 
 .door-target {
     font-size: 12px;
-    color: var(--text-light);
+    color: var(--caramel-brown);
+    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
-/* 进入按钮 */
+/* ========== 进入按钮 - 米酒金风格 ========== */
 .door-enter-btn {
     display: none;
-    padding: 8px 16px;
-    background: var(--brand-color);
-    color: white;
+    padding: 10px 20px;
+    background: var(--rice-wine-gold);
+    color: var(--old-wood);
     border: none;
     border-radius: 20px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 400;
     cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 1px;
+    transition: all 0.4s ease;
+    letter-spacing: 3px;
     margin-left: auto;
+    box-shadow: 0 4px 12px rgba(232, 200, 115, 0.3);
 }
 
 .level-door.selected .door-enter-btn {
@@ -375,59 +533,70 @@ h1 {
 }
 
 .door-enter-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background: var(--honey-amber);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(232, 200, 115, 0.4);
 }
 
 .door-enter-btn:active {
-    transform: scale(0.98);
+    transform: scale(0.96) translateY(0);
 }
 
-/* 完成标记 */
+/* ========== 完成标记 ========== */
 .completed-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 24px;
-    height: 24px;
-    background: var(--brand-color);
+    top: 12px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    background: var(--moss-green);
     color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 11px;
     z-index: 15;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(123, 163, 123, 0.3);
 }
 
-/* 上下渐变遮罩，增强视觉层次 */
+/* ========== 上下渐变遮罩 ========== */
 .level-carousel-container::before,
 .level-carousel-container::after {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
-    height: 60px;
+    height: 70px;
     pointer-events: none;
     z-index: 10;
 }
 
 .level-carousel-container::before {
     top: 0;
-    background: linear-gradient(to bottom, var(--bg-color) 0%, transparent 100%);
+    background: linear-gradient(
+        to bottom,
+        var(--yeast-beige) 0%,
+        rgba(245, 240, 230, 0.9) 30%,
+        transparent 100%
+    );
 }
 
 .level-carousel-container::after {
     bottom: 0;
-    background: linear-gradient(to top, var(--bg-color) 0%, transparent 100%);
+    background: linear-gradient(
+        to top,
+        var(--yeast-beige) 0%,
+        rgba(245, 240, 230, 0.9) 30%,
+        transparent 100%
+    );
 }
 
-/* 保留story-text类用于JS更新 */
+/* ========== 故事文字 ========== */
 .story-text {
     font-size: 13px;
-    color: var(--text-light);
-    line-height: 1.8;
+    color: var(--caramel-brown);
+    line-height: 2;
     letter-spacing: 1px;
     text-align: center;
 }
@@ -449,72 +618,118 @@ h1 {
     }
 }
 
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* 呼吸动画 - 像生命在呼吸 */
+@keyframes living-breath {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+}
+
 /* ========== 响应式 ========== */
 @media (max-width: 360px) {
+    .container {
+        padding: 20px 16px;
+    }
+    
     .level-carousel-container {
-        height: 380px;
+        height: 360px;
     }
+    
     .level-door {
-        min-height: 100px;
-        padding: 12px;
+        min-height: 96px;
+        padding: 14px;
     }
+    
     .door-frame {
-        width: 64px;
-        height: 64px;
-        min-width: 64px;
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
     }
+    
     .door-icon {
-        font-size: 28px;
+        font-size: 26px;
     }
+    
     .door-name {
         font-size: 14px;
     }
+    
     .door-enter-btn {
-        padding: 6px 12px;
+        padding: 8px 14px;
         font-size: 12px;
+    }
+    
+    .world-node {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+    }
+    
+    .world-node .icon {
+        font-size: 18px;
+    }
+    
+    .section-title .title-text {
+        font-size: 18px;
+        letter-spacing: 6px;
     }
 }
 
 @media (min-width: 768px) {
     .container {
-        max-width: 600px;
+        max-width: 560px;
+        padding: 32px 24px;
     }
+    
     .level-carousel-container {
         height: 480px;
     }
+    
     .level-door {
-        min-height: 140px;
-        padding: 20px;
+        min-height: 124px;
+        padding: 22px;
     }
+    
     .door-frame {
-        width: 100px;
-        height: 100px;
-        min-width: 100px;
+        width: 84px;
+        height: 84px;
+        min-width: 84px;
     }
+    
     .door-icon {
-        font-size: 42px;
+        font-size: 36px;
     }
+    
     .door-name {
-        font-size: 18px;
+        font-size: 17px;
+    }
+    
+    .world-node {
+        width: 58px;
+        height: 58px;
     }
 }
 
-/* 安全区域适配 */
+/* ========== 安全区域适配 ========== */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
     .container {
-        padding-bottom: calc(40px + env(safe-area-inset-bottom));
+        padding-bottom: calc(60px + env(safe-area-inset-bottom));
     }
 }
 
-/* 触摸优化 */
-.world-node, .level-door {
+/* ========== 触摸优化 ========== */
+.world-node, .level-door, .back-btn, .door-enter-btn {
     -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none;
     user-select: none;
 }
-
-/* 防止iOS橡皮筋效果 */
-html, body {
-    overscroll-behavior: none;
-}
-

@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="css/transitions.css">
 </head>
 <body>
+    <!-- 发酵气泡背景 -->
+    <canvas id="bubble-canvas"></canvas>
+    
     <div class="container" id="container">
         <header>
             <button class="back-btn" id="back-btn">←</button>
@@ -27,11 +30,11 @@
             </div>
         </div>
 
-        <!-- 选择关卡提示 -->
+        <!-- 章节标题 -->
         <div class="section-title">
             <span class="title-icon" id="world-icon">🥛</span>
             <span class="title-text" id="world-name">奶酪谷</span>
-            <span class="title-hint">- 上下滑动选择关卡</span>
+            <span class="title-hint">上下滑动选择关卡</span>
         </div>
 
         <!-- 关卡滑动选择器 -->
@@ -53,8 +56,10 @@
     <script src="js/level.js"></script>
     <script src="js/levels-page.js"></script>
     
+    <!-- 发酵气泡系统 -->
+    <script src="js/levels-bubbles.js"></script>
+    
     <!-- 页面过渡系统 -->
     <script src="js/page-transitions.js"></script>
 </body>
 </html>
-
