@@ -223,8 +223,10 @@ Game.prototype.showSuccessModal = function() {
     document.body.appendChild(modal);
 
     window.goToMap = () => {
-        if (window.navigateTo) window.navigateTo('index.html');
-        else window.location.href = 'index.html';
+        const worldId = this.levelData.worldId || 1;
+        const url = `levels.html?world=${worldId}`;
+        if (window.navigateTo) window.navigateTo(url);
+        else window.location.href = url;
     };
 
     window.nextLevel = () => {
@@ -303,8 +305,10 @@ Game.prototype.claimBasicReward = function() {
         
         document.getElementById('rest-btn').onclick = () => {
             window.LevelManager.claimBasicReward();
-            if (window.navigateTo) window.navigateTo('index.html');
-            else window.location.href = 'index.html';
+            const worldId = this.levelData?.worldId || 1;
+            const url = `levels.html?world=${worldId}`;
+            if (window.navigateTo) window.navigateTo(url);
+            else window.location.href = url;
         };
     }, 800);
 };

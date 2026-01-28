@@ -1,119 +1,233 @@
-/* 游戏界面样式 - 响应式媒体查询 */
+/* ========================================
+   游戏界面样式 - 响应式媒体查询
+   宝珠酿造风格 V3
+======================================== */
 
-/* ========== 响应式 ========== */
-
-/* 小屏手机 */
+/* ========== 小屏手机 ========== */
 @media (max-height: 600px) {
     #door-area {
-        height: 22vh;
-        min-height: 130px;
+        height: 32vh;
+        min-height: 200px;
+        padding-top: 45px;
+        padding-bottom: 10px;
     }
+    
     .door-container {
-        width: 70px;
-        height: 105px;
+        width: 90px;
+        height: 135px;
+        margin-bottom: 10px;
     }
+    
     .door-frame {
-        border-radius: 35px 35px 0 0;
+        border-radius: 45px 45px 0 0;
     }
+    
     .door-glow {
-        border-radius: 30px 30px 0 0;
+        border-radius: 40px 40px 0 0;
     }
+    
     .door-aura {
-        border-radius: 43px 43px 0 0;
+        border-radius: 55px 55px 0 0;
     }
+    
     .door-target-silhouette {
-        font-size: 30px;
+        font-size: 38px;
     }
+    
+    .level-name {
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+    
+    .level-target-display {
+        padding: 4px 10px;
+    }
+    
+    .target-label {
+        font-size: 9px;
+    }
+    
+    .target-name {
+        font-size: 11px;
+    }
+    
+    #synthesis-area {
+        top: 30vh;
+        bottom: 16vh;
+    }
+    
     #inventory-area {
-        height: 18vh;
-        min-height: 110px;
+        height: 16vh;
+        min-height: 100px;
+        padding: 10px 16px;
+        gap: 14px;
     }
+    
     .game-item {
         width: 70px;
         height: 70px;
     }
+    
     .game-item .icon {
         font-size: 28px;
     }
+    
     .game-item .name {
-        font-size: 10px;
+        font-size: 9px;
     }
 }
 
-/* 普通手机 */
-@media (max-height: 700px) and (min-height: 601px) {
+/* ========== 普通手机 ========== */
+@media (max-height: 750px) and (min-height: 601px) {
     #door-area {
-        height: 24vh;
-        min-height: 150px;
+        height: 35vh;
+        min-height: 230px;
+        padding-top: 50px;
     }
+    
     .door-container {
-        width: 85px;
-        height: 128px;
+        width: 105px;
+        height: 158px;
+        margin-bottom: 12px;
     }
+    
     .door-frame {
-        border-radius: 43px 43px 0 0;
+        border-radius: 53px 53px 0 0;
     }
+    
     .door-glow {
-        border-radius: 38px 38px 0 0;
+        border-radius: 48px 48px 0 0;
     }
+    
     .door-aura {
-        border-radius: 51px 51px 0 0;
+        border-radius: 63px 63px 0 0;
     }
+    
     .door-target-silhouette {
-        font-size: 38px;
+        font-size: 45px;
     }
+    
+    .level-name {
+        font-size: 16px;
+        letter-spacing: 3px;
+    }
+    
+    #synthesis-area {
+        top: 33vh;
+        bottom: 17vh;
+    }
+    
     #inventory-area {
-        height: 18vh;
-        min-height: 120px;
+        height: 17vh;
+        min-height: 115px;
     }
+    
     .game-item {
-        width: 80px;
-        height: 80px;
+        width: 78px;
+        height: 78px;
     }
+    
     .game-item .icon {
         font-size: 32px;
     }
 }
 
-/* iPad / 平板 */
-@media (min-width: 768px) {
-    .game-item {
-        width: 100px;
-        height: 100px;
+/* ========== 大屏手机 ========== */
+@media (min-height: 800px) {
+    #door-area {
+        height: 40vh;
+        min-height: 300px;
     }
-    .game-item .icon {
-        font-size: 44px;
-    }
-    .game-item .name {
-        font-size: 13px;
-    }
-    #inventory-area {
-        gap: 20px;
-        padding: 20px 30px;
-    }
+    
     .door-container {
-        width: 120px;
-        height: 180px;
+        width: 130px;
+        height: 195px;
     }
+    
     .door-frame {
-        border-radius: 60px 60px 0 0;
+        border-radius: 65px 65px 0 0;
     }
+    
     .door-glow {
-        border-radius: 54px 54px 0 0;
+        border-radius: 59px 59px 0 0;
     }
+    
     .door-aura {
-        border-radius: 68px 68px 0 0;
+        border-radius: 80px 80px 0 0;
     }
+    
     .door-target-silhouette {
-        font-size: 52px;
+        font-size: 58px;
     }
-    .success-modal {
-        max-width: 400px;
-        padding: 40px 30px;
+    
+    .level-name {
+        font-size: 20px;
     }
 }
 
-/* 横屏提示（可选） */
+/* ========== iPad / 平板 ========== */
+@media (min-width: 768px) {
+    #door-area {
+        height: 42vh;
+        min-height: 320px;
+    }
+    
+    .door-container {
+        width: 140px;
+        height: 210px;
+    }
+    
+    .door-frame {
+        border-radius: 70px 70px 0 0;
+    }
+    
+    .door-glow {
+        border-radius: 64px 64px 0 0;
+    }
+    
+    .door-aura {
+        border-radius: 85px 85px 0 0;
+    }
+    
+    .door-target-silhouette {
+        font-size: 62px;
+    }
+    
+    .level-name {
+        font-size: 22px;
+        letter-spacing: 6px;
+    }
+    
+    #synthesis-area {
+        top: 40vh;
+    }
+    
+    .game-item {
+        width: 95px;
+        height: 95px;
+    }
+    
+    .game-item .icon {
+        font-size: 40px;
+    }
+    
+    .game-item .name {
+        font-size: 11px;
+    }
+    
+    #inventory-area {
+        height: 18vh;
+        gap: 20px;
+        padding: 18px 28px;
+    }
+    
+    .success-modal {
+        max-width: 420px;
+        padding: 40px 32px;
+    }
+}
+
+/* ========== 横屏提示 ========== */
 @media (orientation: landscape) and (max-height: 500px) {
     body::before {
         content: '请旋转设备至竖屏模式';
@@ -122,13 +236,13 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--bg-color);
+        background: var(--dawn-pink);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
-        color: var(--text-color);
+        font-size: 16px;
+        color: var(--old-wood);
+        letter-spacing: 2px;
         z-index: 9999;
     }
 }
-

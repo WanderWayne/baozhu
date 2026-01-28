@@ -17,8 +17,8 @@ class Game {
         
         if (!this.levelData) {
             alert('关卡不存在');
-            if (window.navigateTo) window.navigateTo('index.html');
-            else window.location.href = 'index.html';
+            if (window.navigateTo) window.navigateTo('levels.html');
+            else window.location.href = 'levels.html';
             return;
         }
 
@@ -62,6 +62,10 @@ class Game {
         this.revealTimers = new Map();
         this.idleTimer = null;
         this.idleTimeout = 15000;
+        
+        // 应用默认主题和生成奶雾粒子
+        document.body.classList.add('theme-dairy');
+        this.createMilkFogParticles();
         
         // 隐藏教学动画
         this.hideTutorialImmediately();
@@ -200,6 +204,11 @@ class Game {
 
     // 开始游戏（初始化UI和交互）
     startGame() {
+        // 应用章节主题色
+        this.applyChapterTheme();
+        // 生成随机奶雾粒子
+        this.createMilkFogParticles();
+        
         this.initUI();
         this.initDragSystem();
         this.startIdleTimer();
@@ -208,6 +217,54 @@ class Game {
         // 播放游戏关卡BGM
         if (window.AudioManager) {
             window.AudioManager.playBGM('bgm-game');
+        }
+    }
+    
+    // 应用章节主题色
+    applyChapterTheme() {
+        const worldId = this.levelData?.worldId || 1;
+        const themeMap = {
+            1: 'theme-dairy',
+            2: 'theme-floral',
+            3: 'theme-fruit',
+            4: 'theme-grain',
+            5: 'theme-temperature',
+            6: 'theme-ultimate'
+        };
+        const themeClass = themeMap[worldId] || 'theme-dairy';
+        document.body.classList.add(themeClass);
+    }
+    
+    // 生成随机奶雾粒子 (2-5个)
+    createMilkFogParticles() {
+        const container = document.getElementById('milk-fog-container');
+        if (!container) return;
+        
+        // 随机2-5个粒子
+        const count = 2 + Math.floor(Math.random() * 4);
+        
+        for (let i = 0; i < count; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'milk-fog-particle';
+            
+            // 随机大小 50-120px
+            const size = 50 + Math.random() * 70;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // 随机位置（边缘区域，不遮挡中心）
+            const side = Math.random() > 0.5; // true=左侧, false=右侧
+            const x = side ? (2 + Math.random() * 15) : (83 + Math.random() * 15);
+            const y = 15 + Math.random() * 70;
+            particle.style.left = x + '%';
+            particle.style.top = y + '%';
+            
+            // 随机动画时长和延迟
+            const duration = 8 + Math.random() * 6; // 8-14秒
+            const delay = Math.random() * -duration;
+            particle.style.animation = `milkFogFloat ${duration}s ease-in-out ${delay}s infinite`;
+            
+            container.appendChild(particle);
         }
     }
     
@@ -275,14 +332,16 @@ class Game {
         // 更新身份铭牌
         this.updateIdentityPlaque();
 
-        // 绑定返回按钮
+        // 绑定返回按钮 - 返回章节选择
         document.getElementById('back-btn').addEventListener('click', () => {
             if (window.AudioManager) {
                 window.AudioManager.playClickBack();
                 window.AudioManager.stopBGM();
             }
-            if (window.navigateTo) window.navigateTo('index.html');
-            else window.location.href = 'index.html';
+            const worldId = this.levelData.worldId || 1;
+            const url = `levels.html?world=${worldId}`;
+            if (window.navigateTo) window.navigateTo(url);
+            else window.location.href = url;
         });
 
         // 显示关卡描述（增加显示时长）

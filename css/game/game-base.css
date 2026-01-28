@@ -1,20 +1,78 @@
-/* 游戏界面样式 - 基础样式 */
+/* ========================================
+   游戏界面样式 - 基础样式
+   宝珠酿造风格 V3
+   主题：弄堂 · 慢酿 · 专注
+======================================== */
+
 :root {
-    --bg-color: #F9F7F2; /* 更温暖的米色 */
-    --brand-color: #D4A574;
-    --brand-color-light: #E8D5C4;
-    --text-color: #5A4A42; /* 深棕色文字，比纯灰更柔和 */
-    --text-light: #9C8C74;
+    /* ===== 晨曦系 ===== */
+    --dawn-pink: #F5E6E0;
+    --sunrise-orange: #E8A87C;
+    --dawn-gold: #F0D9A0;
     
-    /* 物品类型颜色 - 柔和的莫兰迪色系 */
-    --color-base: #F5F5F5;
-    --color-floral: #FFF0F5; /* 浅粉 */
-    --color-fruit: #F0FFF4; /* 浅绿/果色 */
-    --color-grain: #FFF8E1; /* 浅黄 */
-    --color-special: #E3F2FD; /* 浅蓝 */
-    --color-mid: #F3E5F5; /* 浅紫 */
-    --color-final: #FFF3E0; /* 橙黄 */
-    --color-ultimate: #FFFDE7; /* 金亮 */
+    /* ===== 酿造系 ===== */
+    --rice-wine-gold: #E8C873;
+    --caramel-brown: #A67C52;
+    --old-wood: #6B5344;
+    --milk-foam: #FFFDF7;
+    --yeast-beige: #F5F0E6;
+    
+    /* ===== 生机系 ===== */
+    --moss-green: #7BA37B;
+    
+    /* ===== 章节主题色（默认） ===== */
+    --chapter-accent: var(--rice-wine-gold);
+    --chapter-glow: rgba(232, 200, 115, 0.15);
+    --chapter-bg: var(--dawn-pink);
+    
+    /* ===== 语义化 ===== */
+    --bg-color: var(--chapter-bg);
+    --brand-color: var(--rice-wine-gold);
+    --brand-color-light: var(--dawn-gold);
+    --text-color: var(--old-wood);
+    --text-light: var(--caramel-brown);
+    
+    /* ===== 物品类型颜色 ===== */
+    --color-base: var(--milk-foam);
+    --color-floral: #FFF0F5;
+    --color-fruit: #F0FFF4;
+    --color-grain: #FFF8E1;
+    --color-special: #E3F2FD;
+    --color-mid: #F3E5F5;
+    --color-final: #FFF3E0;
+    --color-ultimate: #FFFDE7;
+}
+
+/* ===== 章节主题类 ===== */
+.theme-dairy { 
+    --chapter-accent: #E8C873;
+    --chapter-glow: rgba(232, 200, 115, 0.2);
+    --chapter-bg: #FDF8E8;
+}
+.theme-floral { 
+    --chapter-accent: #D4A0A8;
+    --chapter-glow: rgba(212, 160, 168, 0.2);
+    --chapter-bg: #FDF0F2;
+}
+.theme-fruit { 
+    --chapter-accent: #7BA37B;
+    --chapter-glow: rgba(123, 163, 123, 0.2);
+    --chapter-bg: #F0F5EC;
+}
+.theme-grain { 
+    --chapter-accent: #D4A03A;
+    --chapter-glow: rgba(212, 160, 58, 0.2);
+    --chapter-bg: #F8F2E4;
+}
+.theme-temperature { 
+    --chapter-accent: #89B4C8;
+    --chapter-glow: rgba(137, 180, 200, 0.2);
+    --chapter-bg: #EDF4F7;
+}
+.theme-ultimate {
+    --chapter-accent: #E8A87C;
+    --chapter-glow: rgba(232, 168, 124, 0.2);
+    --chapter-bg: #FDF4EC;
 }
 
 * {
@@ -28,13 +86,10 @@ body {
     background: var(--bg-color);
     overflow: hidden;
     touch-action: manipulation;
-    /* 更柔和的全局纹理 - 奶雾感 */
-    background-image: radial-gradient(rgba(212, 165, 116, 0.06) 1.5px, transparent 1.5px);
-    background-size: 35px 35px;
-    background-color: var(--bg-color);
+    min-height: 100vh;
 }
 
-/* ========== 奶雾粒子背景层 ========== */
+/* ========== 温暖氛围背景层 ========== */
 .milk-fog-container {
     position: fixed;
     top: 0;
@@ -42,34 +97,55 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1;
+    z-index: 0;
     overflow: hidden;
+    background: 
+        /* 顶部门区域的柔和光晕 - 使用章节色 */
+        radial-gradient(ellipse 70% 35% at 50% 15%, var(--chapter-glow) 0%, transparent 60%),
+        /* 边缘淡淡的章节色 */
+        radial-gradient(ellipse 40% 50% at 5% 50%, var(--chapter-glow) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 50% at 95% 50%, var(--chapter-glow) 0%, transparent 50%),
+        var(--chapter-bg);
 }
 
+/* 边缘柔雾 - 增加层次但不遮挡中心 */
+.milk-fog-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(90deg, var(--chapter-glow) 0%, transparent 10%, transparent 90%, var(--chapter-glow) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 80%, var(--chapter-glow) 100%);
+    pointer-events: none;
+}
+
+/* 漂浮的奶雾粒子 - 由JS动态生成 */
 .milk-fog-particle {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 252, 245, 0.4) 0%, transparent 70%);
-    animation: milkFogFloat 6s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(255, 253, 247, 0.5) 0%, transparent 70%);
+    pointer-events: none;
 }
-
-.milk-fog-particle:nth-child(1) { width: 80px; height: 80px; left: 10%; top: 20%; animation-delay: 0s; }
-.milk-fog-particle:nth-child(2) { width: 120px; height: 120px; left: 70%; top: 15%; animation-delay: -1.5s; }
-.milk-fog-particle:nth-child(3) { width: 60px; height: 60px; left: 30%; top: 50%; animation-delay: -3s; }
-.milk-fog-particle:nth-child(4) { width: 100px; height: 100px; left: 80%; top: 60%; animation-delay: -4.5s; }
-.milk-fog-particle:nth-child(5) { width: 70px; height: 70px; left: 15%; top: 75%; animation-delay: -2s; }
-.milk-fog-particle:nth-child(6) { width: 90px; height: 90px; left: 55%; top: 35%; animation-delay: -5s; }
-.milk-fog-particle:nth-child(7) { width: 50px; height: 50px; left: 45%; top: 80%; animation-delay: -1s; }
-.milk-fog-particle:nth-child(8) { width: 110px; height: 110px; left: 85%; top: 40%; animation-delay: -3.5s; }
 
 @keyframes milkFogFloat {
     0%, 100% {
-        transform: translateY(0) scale(1);
-        opacity: 0.04;
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.06;
+    }
+    25% {
+        transform: translateY(-6px) translateX(4px) scale(1.03);
+        opacity: 0.1;
     }
     50% {
-        transform: translateY(-8px) scale(1.05);
-        opacity: 0.06;
+        transform: translateY(-10px) translateX(0) scale(1.06);
+        opacity: 0.12;
+    }
+    75% {
+        transform: translateY(-5px) translateX(-4px) scale(1.02);
+        opacity: 0.08;
     }
 }
 
@@ -80,13 +156,13 @@ body {
     z-index: 100;
     background: radial-gradient(circle, 
         rgba(255, 255, 255, 1) 0%, 
-        rgba(255, 220, 180, 0.9) 30%,
-        rgba(212, 165, 116, 0.5) 60%, 
+        rgba(240, 217, 160, 0.9) 30%,
+        rgba(232, 200, 115, 0.5) 60%, 
         transparent 80%);
     border-radius: 50%;
     box-shadow: 
         0 0 6px 2px rgba(255, 255, 255, 0.8),
-        0 0 12px 4px rgba(255, 220, 180, 0.5);
+        0 0 12px 4px rgba(240, 217, 160, 0.5);
     animation: sugarSparkle 2.5s ease-out forwards;
 }
 
@@ -98,7 +174,7 @@ body {
     transform: translate(-50%, -50%);
     font-size: 8px;
     color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 0 4px rgba(255, 220, 180, 0.8);
+    text-shadow: 0 0 4px rgba(240, 217, 160, 0.8);
 }
 
 @keyframes sugarSparkle {
@@ -127,4 +203,3 @@ body {
         transform: scale(0.2);
     }
 }
-
