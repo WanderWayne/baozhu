@@ -128,6 +128,13 @@ function updateTheme(theme) {
     if (theme) {
         document.body.classList.add(`theme-${theme}`);
     }
+    
+    // 更新关卡选择器的渐变遮罩颜色
+    updateCarouselGradients();
+}
+
+function updateCarouselGradients() {
+    // CSS 变量会自动应用，这里可以做额外处理
 }
 
 function updateWorldHeader(world) {
@@ -198,6 +205,9 @@ function createLevelDoor(level, index) {
     const isUnlocked = window.LevelManager.isLevelUnlocked(level.id);
     const isCompleted = window.LevelManager.isLevelCompleted(level.id);
     
+    // 检查是否是最新解锁的关卡（已解锁但未完成的第一个）
+    const isLatestUnlocked = isUnlocked && !isCompleted && isLatestUnlockedLevel(level.id);
+    
     door.className = `level-door ${isUnlocked ? 'unlocked' : 'locked'} ${isCompleted ? 'completed' : ''}`;
     door.dataset.index = index;
     door.dataset.levelId = level.id;
@@ -206,6 +216,9 @@ function createLevelDoor(level, index) {
     const targetText = isUnlocked 
         ? `目标 · ${level.target}` 
         : '尚未解锁';
+    
+    // 进入按钮，最新解锁的加光波特效
+    const btnClass = isLatestUnlocked ? 'door-enter-btn pulse-effect' : 'door-enter-btn';
     
     door.innerHTML = `
         ${isCompleted ? '<div class="completed-badge">✓</div>' : ''}
@@ -216,7 +229,7 @@ function createLevelDoor(level, index) {
             <div class="door-name">${isUnlocked ? level.name : '· · ·'}</div>
             <div class="door-target">${targetText}</div>
         </div>
-        ${isUnlocked ? '<button class="door-enter-btn">进 入</button>' : ''}
+        ${isUnlocked ? `<button class="${btnClass}">进 入</button>` : ''}
     `;
     
     // 点击关卡卡片选中
@@ -235,6 +248,24 @@ function createLevelDoor(level, index) {
     });
     
     return door;
+}
+
+// 判断是否是最新解锁的关卡
+function isLatestUnlockedLevel(levelId) {
+    // 获取当前世界的所有关卡
+    const levels = currentLevels;
+    
+    // 找到第一个已解锁但未完成的关卡
+    for (const level of levels) {
+        const isUnlocked = window.LevelManager.isLevelUnlocked(level.id);
+        const isCompleted = window.LevelManager.isLevelCompleted(level.id);
+        
+        if (isUnlocked && !isCompleted) {
+            return level.id === levelId;
+        }
+    }
+    
+    return false;
 }
 
 function handleCarouselScroll() {

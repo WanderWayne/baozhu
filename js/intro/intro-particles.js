@@ -242,22 +242,30 @@ IntroSystem.prototype.drawParticles = function() {
         }
     });
     
+    // 获取颜色过渡进度（0-1，在上升阶段渐变）
+    const colorProgress = this.colorTransitionProgress || 0;
+    
     // 再画粒子
     this.particles.forEach(p => {
         // 光波震动偏移
         const offsetX = Math.cos(p.pulseAngle) * p.pulseOffset * p.pulseDecay;
         const offsetY = Math.sin(p.pulseAngle) * p.pulseOffset * p.pulseDecay;
         
-        // 绘制拖尾（仅在上升时）
+        // 绘制拖尾（仅在上升时）- 颜色随进度渐变
         if (this.state === 'riseUp' && !p.gathering) {
             const speed = p.risingSpeed || 4;
             const trailLength = speed * 4 + (this.riseSpeed || 6) * 1.5;
             const renderY = p.y + riseY;
             
+            // 拖尾颜色：白色 → 米酒金
+            const trailR = Math.round(255 + (232 - 255) * colorProgress);
+            const trailG = Math.round(255 + (200 - 255) * colorProgress);
+            const trailB = Math.round(255 + (115 - 255) * colorProgress);
+            
             const gradient = ctx.createLinearGradient(p.x, renderY, p.x, renderY + trailLength);
-            gradient.addColorStop(0, `rgba(255, 255, 255, ${(p.visualAlpha || p.alpha) * 0.8})`);
-            gradient.addColorStop(0.4, `rgba(200, 230, 255, ${(p.visualAlpha || p.alpha) * 0.4})`);
-            gradient.addColorStop(1, 'rgba(150, 200, 255, 0)');
+            gradient.addColorStop(0, `rgba(${trailR}, ${trailG}, ${trailB}, ${(p.visualAlpha || p.alpha) * 0.8})`);
+            gradient.addColorStop(0.4, `rgba(${trailR}, ${trailG}, ${trailB}, ${(p.visualAlpha || p.alpha) * 0.4})`);
+            gradient.addColorStop(1, 'rgba(245, 230, 224, 0)');
             
             ctx.beginPath();
             ctx.moveTo(p.x, renderY);
@@ -281,12 +289,36 @@ IntroSystem.prototype.drawParticles = function() {
         ctx.beginPath();
         ctx.arc(p.x + offsetX, renderY + offsetY, radius, 0, Math.PI * 2);
         
-        // 决定粒子颜色：聚合/上升中的粒子变白，否则按原始颜色
-        if (p.gathering || p.settled || this.state === 'riseUp' || this.state === 'gatherToText' || this.state === 'showStartButton') {
-            // 聚合成文字时全部变白
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        // 颜色系统 - 渐进式变化
+        if (this.state === 'gatherToText' || this.state === 'showStartButton' || this.state === 'storyTransition') {
+            // 聚合成文字时使用老木褐色
+            if (p.isTextDot) {
+                ctx.fillStyle = `rgba(107, 83, 68, ${alpha})`;
+            } else {
+                ctx.fillStyle = `rgba(232, 200, 115, ${alpha * 0.5})`;
+            }
+        } else if (this.state === 'riseUp') {
+            // 上升阶段：渐进式颜色变化
+            // 白色/荧光蓝 → 老木褐/米酒金
+            let startR, startG, startB, endR, endG, endB;
+            
+            if (p.isCyan) {
+                // 荧光蓝 (176,245,255) → 米酒金 (232,200,115)
+                startR = 176; startG = 245; startB = 255;
+                endR = 232; endG = 200; endB = 115;
+            } else {
+                // 白色 (255,255,255) → 老木褐 (107,83,68)
+                startR = 255; startG = 255; startB = 255;
+                endR = 107; endG = 83; endB = 68;
+            }
+            
+            const r = Math.round(startR + (endR - startR) * colorProgress);
+            const g = Math.round(startG + (endG - startG) * colorProgress);
+            const b = Math.round(startB + (endB - startB) * colorProgress);
+            
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
         } else if (p.isCyan) {
-            // 荧光蓝粒子
+            // 开场荧光蓝粒子
             ctx.fillStyle = `rgba(176, 245, 255, ${alpha})`;
         } else {
             // 白色粒子

@@ -15,9 +15,9 @@
     transition: background-color 5s ease-out;
 }
 
-/* 粒子上升时背景颜色渐变到宝珠米黄色 */
+/* 粒子上升时背景颜色渐变到破晓粉（V2风格，衔接主界面初始状态） */
 #intro-screen.warm-transition {
-    background-color: #FAF8F5;
+    background-color: #F5E6E0;
 }
 
 /* 白色闪屏遮罩 */
@@ -60,7 +60,18 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* ========== 环境氛围 Canvas ========== */
+#intro-screen .ambience-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
     pointer-events: none;
 }
 
@@ -502,24 +513,24 @@
     opacity: 1;
 }
 
-/* ========== 开始按钮 ========== */
+/* ========== 开始按钮（V2风格：老木褐 + 米酒金） ========== */
 #intro-start-btn {
     position: absolute;
     top: 55%; /* 中央偏下一点 */
     left: 50%;
     transform: translateX(-50%);
-    padding: 8px 4px;
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.85);
+    padding: 10px 4px;
+    font-size: 15px;
+    color: #6B5344; /* 老木褐 */
     background: transparent;
     border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    border-top: 1px solid #A67C52; /* 焦糖棕 */
     cursor: pointer;
     z-index: 35;
     opacity: 0;
     pointer-events: none; /* 隐藏时不可点击 */
-    transition: opacity 0.8s ease, color 0.3s ease, border-color 0.3s ease;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    transition: opacity 0.8s ease, color 0.3s ease, border-color 0.3s ease, text-shadow 0.3s ease;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
     letter-spacing: 4px;
 }
 
@@ -529,8 +540,9 @@
 }
 
 #intro-start-btn:hover {
-    color: rgba(255, 255, 255, 1);
-    border-bottom-color: rgba(255, 255, 255, 0.8);
+    color: #E8C873; /* 米酒金 */
+    border-top-color: #E8C873;
+    text-shadow: 0 0 15px rgba(232, 200, 115, 0.4);
 }
 
 #intro-start-btn:active {

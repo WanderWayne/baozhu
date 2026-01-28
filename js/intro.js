@@ -25,10 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (introScreen) introScreen.style.display = 'none';
         if (mainScreen) {
             mainScreen.style.display = 'flex';
-            // 初始化主界面粒子系统
-            if (window.MainParticleSystem) {
-                window.mainParticles = new window.MainParticleSystem();
+            
+            // 初始化成长系统 CSS 变量
+            if (window.GrowthSystem) {
+                window.GrowthSystem.applyCSSVariables();
             }
+            
+            // 初始化主界面粒子系统
+            if (window.MainParticleSystem && !window.mainParticleSystem) {
+                window.mainParticleSystem = new window.MainParticleSystem();
+            }
+            
+            // 初始化主界面环境层（氛围系统）
+            if (window.initMainScreenAmbience) {
+                window.initMainScreenAmbience();
+            }
+            
             // 播放主界面BGM
             if (window.AudioManager) {
                 window.AudioManager.playBGM('bgm-menu');

@@ -97,17 +97,8 @@ class IntroSystem {
         screen.addEventListener('pointerup', this.onPointerUp.bind(this));
         screen.addEventListener('pointercancel', this.onPointerUp.bind(this));
         
-        // 开始游戏按钮
-        if (this.startBtnEl) {
-            this.startBtnEl.addEventListener('click', () => {
-                // 播放点击音效并淡出开场BGM
-                if (window.AudioManager) {
-                    window.AudioManager.playClickEnter();
-                    window.AudioManager.fadeOutBGM(2000);
-                }
-                this.setState('storyTransition');
-            });
-        }
+        // 开场的开始按钮不再使用（改用主界面的按钮）
+        // 保留元素但不绑定事件
     }
     
     // ==================== 状态机 ====================
@@ -153,6 +144,9 @@ class IntroSystem {
                 break;
             case 'blueWash':
                 this.initBlueWash();
+                break;
+            case 'storyNarration':
+                this.initStoryNarration();
                 break;
             case 'riseUp':
                 this.initRiseUp();

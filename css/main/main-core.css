@@ -1,4 +1,30 @@
-/* 主界面样式 V3 - 黑色背景 + 粒子拼字风格 */
+/* ========================================
+   主界面样式 V4 - 成长型发酵世界
+   基于 docs/baozhu-style-guide.md
+   主题：弄堂 · 慢酿 · 成长
+======================================== */
+
+:root {
+    /* V2 风格指南色彩 */
+    --dawn-pink: #F5E6E0;
+    --sunrise-orange: #E8A87C;
+    --dusk-purple: #B8A5C7;
+    --dawn-gold: #F0D9A0;
+    
+    --rice-wine-gold: #E8C873;
+    --caramel-brown: #A67C52;
+    --old-wood: #6B5344;
+    --milk-foam: #FFFDF7;
+    --yeast-beige: #F5F0E6;
+    
+    --moss-green: #7BA37B;
+    
+    /* 成长系统动态变量（会被 JS 覆盖） */
+    --growth-bg: #F5E6E0;
+    --growth-text: #6B5344;
+    --growth-glow: rgba(232, 200, 115, 0.05);
+    --growth-glow-strong: rgba(232, 200, 115, 0.08);
+}
 
 * {
     box-sizing: border-box;
@@ -8,8 +34,8 @@
 
 body {
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: #000;
-    color: #fff;
+    background: var(--growth-bg, var(--dawn-pink));
+    color: var(--old-wood);
     min-height: 100vh;
     overflow-x: hidden;
 }
@@ -21,7 +47,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #000;
+    background: var(--growth-bg, var(--dawn-pink));
     z-index: 100;
     display: flex;
     align-items: center;
@@ -36,7 +62,18 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* ========== 环境氛围 Canvas ========== */
+.ambience-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
     pointer-events: none;
 }
 
@@ -47,10 +84,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 18px;
     width: 90%;
     max-width: 320px;
-    margin-top: 35vh; /* 把菜单往下推，给粒子文字留空间 */
+    margin-top: 32vh; /* 从38vh改为32vh，按钮整体往上 */
     animation: fadeInUp 1s ease-out;
 }
 
@@ -69,28 +106,42 @@ body {
 .main-btn {
     width: 100%;
     padding: 14px 24px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 400;
     letter-spacing: 4px;
     cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s ease;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
+    transition: all 0.4s ease;
     border-radius: 0;
 }
 
-/* 主按钮 - 开始游戏 */
+/* 主按钮 - 开始游戏（米酒金风格） */
 .main-btn.primary {
     background: transparent;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--old-wood);
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
-    padding: 10px 4px;
+    border-top: 1px solid var(--caramel-brown);
+    padding: 12px 4px;
+    position: relative;
+}
+
+/* 按钮上方的金色光晕（成长暗示） */
+.main-btn.primary::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 20px;
+    background: radial-gradient(ellipse at center bottom, var(--growth-glow) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 .main-btn.primary:hover {
-    color: #fff;
-    border-top-color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    color: var(--rice-wine-gold);
+    border-top-color: var(--rice-wine-gold);
+    text-shadow: 0 0 20px var(--growth-glow-strong);
 }
 
 .main-btn.primary:active {
@@ -100,16 +151,17 @@ body {
 /* 次要按钮 - 设置 */
 .main-btn.secondary {
     background: transparent;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--caramel-brown);
     border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(166, 124, 82, 0.3);
     padding: 8px 4px;
-    font-size: 14px;
+    font-size: 13px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .main-btn.secondary:hover {
-    color: rgba(255, 255, 255, 0.9);
-    border-bottom-color: rgba(255, 255, 255, 0.6);
+    color: var(--old-wood);
+    border-bottom-color: var(--caramel-brown);
 }
 
 /* ========== 进度条样式 ========== */
@@ -120,8 +172,8 @@ body {
     width: 100%;
     padding: 12px 0;
     cursor: pointer;
-    transition: opacity 0.2s;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease;
+    border-bottom: 1px solid rgba(166, 124, 82, 0.1);
 }
 
 .main-progress-row:hover {
@@ -133,32 +185,32 @@ body {
 }
 
 .main-progress-row .progress-label {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    color: var(--caramel-brown);
     min-width: 60px;
     letter-spacing: 2px;
 }
 
 .main-progress-row .progress-bar {
     flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.15);
+    height: 3px;
+    background: rgba(166, 124, 82, 0.15);
     border-radius: 2px;
     overflow: hidden;
 }
 
 .main-progress-row .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, rgba(176, 245, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+    background: linear-gradient(90deg, var(--rice-wine-gold) 0%, var(--dawn-gold) 100%);
     border-radius: 2px;
     transition: width 0.5s ease;
     width: 0%;
 }
 
 .main-progress-row .progress-text {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--caramel-brown);
     min-width: 40px;
     text-align: right;
     letter-spacing: 1px;
@@ -176,22 +228,25 @@ body {
 .main-link-btn {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 12px;
+    color: var(--caramel-brown);
+    font-size: 11px;
     letter-spacing: 2px;
     cursor: pointer;
     font-family: inherit;
     padding: 4px 8px;
     transition: color 0.3s ease;
+    opacity: 0.6;
 }
 
 .main-link-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
+    opacity: 1;
+    color: var(--old-wood);
 }
 
 .main-footer-divider {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--caramel-brown);
     font-size: 12px;
+    opacity: 0.4;
 }
 
 /* ========== 弹出面板通用样式 ========== */
@@ -201,7 +256,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(107, 83, 68, 0.4);
     backdrop-filter: blur(8px);
     z-index: 500;
     display: flex;
@@ -221,15 +276,30 @@ body {
     width: 90%;
     max-width: 450px;
     max-height: 85vh;
-    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--milk-foam);
+    border: 1px solid rgba(166, 124, 82, 0.1);
     border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 
+        0 20px 60px rgba(107, 83, 68, 0.15),
+        0 4px 16px rgba(107, 83, 68, 0.08);
     overflow-y: auto;
     transform: translateY(20px) scale(0.95);
     transition: transform 0.3s ease;
     position: relative;
+}
+
+/* 面板顶部温暖光效 */
+.panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(245, 230, 224, 0.5) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
+    pointer-events: none;
 }
 
 .panel-overlay.visible .panel {
@@ -243,29 +313,33 @@ body {
     width: 32px;
     height: 32px;
     border: none;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(166, 124, 82, 0.08);
     border-radius: 50%;
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--caramel-brown);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    z-index: 1;
 }
 
 .panel-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
+    background: rgba(166, 124, 82, 0.15);
+    color: var(--old-wood);
 }
 
 .panel-title {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--old-wood);
     text-align: center;
     margin-bottom: 20px;
     letter-spacing: 4px;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
+    position: relative;
+    z-index: 1;
 }
 
 /* ========== 设置面板 ========== */
@@ -273,6 +347,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 .settings-row {
@@ -283,17 +359,17 @@ body {
 }
 
 .settings-label {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    color: var(--caramel-brown);
     min-width: 70px;
 }
 
 .volume-slider {
     flex: 1;
-    height: 4px;
+    height: 3px;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(166, 124, 82, 0.15);
     border-radius: 2px;
     outline: none;
 }
@@ -303,10 +379,10 @@ body {
     appearance: none;
     width: 16px;
     height: 16px;
-    background: rgba(176, 245, 255, 0.9);
+    background: var(--rice-wine-gold);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(176, 245, 255, 0.4);
+    box-shadow: 0 2px 8px rgba(232, 200, 115, 0.4);
     transition: transform 0.2s ease;
 }
 
@@ -317,22 +393,23 @@ body {
 .volume-slider::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    background: rgba(176, 245, 255, 0.9);
+    background: var(--rice-wine-gold);
     border-radius: 50%;
     cursor: pointer;
     border: none;
 }
 
 .volume-value {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    color: var(--caramel-brown);
     min-width: 40px;
     text-align: right;
 }
 
 .settings-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(90deg, transparent, var(--caramel-brown), transparent);
+    opacity: 0.15;
     margin: 8px 0;
 }
 
@@ -342,28 +419,14 @@ body {
 }
 
 .settings-info p {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    color: var(--caramel-brown);
     margin: 4px 0;
 }
 
 .settings-info .info-sub {
     font-size: 11px;
     opacity: 0.7;
-}
-
-/* ========== 关卡选择面板 ========== */
-.level-select-panel {
-    max-height: 90vh;
-}
-
-.level-select-panel .world-map {
-    margin-bottom: 16px;
-}
-
-.level-select-panel .level-doors {
-    max-height: 50vh;
-    overflow-y: auto;
 }
 
 /* ========== 动画 ========== */
@@ -386,5 +449,17 @@ body {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* 呼吸动画 */
+@keyframes living-breath {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.02);
     }
 }

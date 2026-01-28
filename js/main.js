@@ -1,6 +1,9 @@
-// 主界面逻辑（V4 - 黑色粒子风格）
+// 主界面逻辑（V5 - 成长型发酵世界）
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 初始化成长系统
+    initGrowthSystem();
+    
     // 更新进度面板
     updateProgressPanel();
 
@@ -10,26 +13,60 @@ document.addEventListener('DOMContentLoaded', () => {
     // 绑定面板事件
     bindPanelEvents();
     
-    // 检查是否需要播放主界面BGM（如果不是从开场动画过来的话）
-    // 开场动画会在 finishIntro 时切换到主界面，那时会播放BGM
     const mainScreen = document.getElementById('main-screen');
     if (mainScreen && mainScreen.style.display !== 'none') {
-        // 主界面已显示，播放BGM
+        // 主界面已显示，初始化粒子系统
+        if (!window.mainParticleSystem) {
+            window.mainParticleSystem = new MainParticleSystem();
+        }
+        
+        // 初始化环境层（使用全局函数，更可靠）
+        if (window.initMainScreenAmbience) {
+            window.initMainScreenAmbience();
+        }
+        
+        // 播放BGM
         if (window.AudioManager) {
             window.AudioManager.playBGM('bgm-menu');
         }
     }
 });
 
+// ==================== 成长系统初始化 ====================
+
+function initGrowthSystem() {
+    // 应用成长系统 CSS 变量
+    if (window.GrowthSystem) {
+        window.GrowthSystem.applyCSSVariables();
+        
+        // 输出当前成长状态（调试用）
+        const stage = window.GrowthSystem.getCurrentStage();
+        console.log(`[成长系统] 当前阶段: ${stage.name}, 进度: ${stage.progress}%`);
+    }
+}
+
 // ==================== 主菜单按钮绑定 ====================
 
 function bindMenuButtons() {
-    // 开始游戏按钮 - 跳转到章节选择页面
+    // 开始游戏按钮
     const continueBtn = document.getElementById('continue-btn');
     if (continueBtn) {
         continueBtn.addEventListener('click', () => {
             if (window.AudioManager) window.AudioManager.playClickEnter();
-            window.navigateTo('levels.html');
+            
+            // 检查是否是首次进入（从开场动画过来，进度条等被隐藏）
+            const codexRow = document.getElementById('codex-row');
+            const isFirstTime = codexRow && codexRow.style.display === 'none';
+            
+            // 如果是从开场过来，introSystem 实例还在 window 上
+            // 但如果直接刷新主界面，introSystem 可能不在
+            if (isFirstTime && window.introSystem) {
+                // 首次进入：播放播种动画后跳转
+                window.introSystem.showSeedAndGoToLevels();
+            } else {
+                // 老玩家：直接跳转
+                window.navigateTo('levels.html');
+            }
         });
     }
 
@@ -190,4 +227,3 @@ function updateProgressPanel() {
     fragmentFill.style.width = fragmentPercent + '%';
     fragmentText.textContent = `${fragments.length}/${totalFragments}`;
 }
-

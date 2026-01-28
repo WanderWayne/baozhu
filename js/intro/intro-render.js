@@ -5,17 +5,45 @@ IntroSystem.prototype.animate = function(time = 0) {
     const dt = time - this.lastTime;
     this.lastTime = time;
     
-    // 清空画布
-    // 在上升和后续阶段，使用透明清除让CSS背景渐变显示出来
-    if (this.risePhase === 'rising' || this.risePhase === 'stopped' || this.state === 'gatherToText' || this.state === 'showStartButton' || this.state === 'storyTransition') {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    } else {
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // ==================== 背景渲染 (DOM控制) ====================
+    
+    const introScreen = document.getElementById('intro-screen');
+    
+    // 在上升阶段，渐进式背景变色（黑色 → 破晓粉）
+    // 我们直接修改 DOM 背景色，而不是在 Canvas 上画，这样才能透出下层的环境 Canvas
+    if (introScreen) {
+        if (this.state === 'riseUp' && this.risePhase === 'rising') {
+            // 计算颜色过渡进度
+            const elapsed = performance.now() - this.riseStartTime;
+            const colorProgress = Math.min(elapsed / this.riseDuration, 1);
+            this.colorTransitionProgress = colorProgress;
+            
+            // 黑色 (0,0,0) → 破晓粉 (245,230,224)
+            const r = Math.round(0 + 245 * colorProgress);
+            const g = Math.round(0 + 230 * colorProgress);
+            const b = Math.round(0 + 224 * colorProgress);
+            
+            introScreen.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        } else if (this.risePhase === 'stopped' || this.state === 'gatherToText' || this.state === 'showStartButton' || this.state === 'storyTransition') {
+            // 上升完成后保持破晓粉
+            introScreen.style.backgroundColor = '#F5E6E0';
+        } else {
+            // 其他状态使用黑色背景
+            introScreen.style.backgroundColor = '#000';
+        }
     }
     
-    // 荧光蓝覆层（献上后的效果）- 更亮更温柔
-    if (this.state === 'blueWash' || this.state === 'riseUp') {
+    // ==================== 主 Canvas 清理 ====================
+    
+    // 始终清除主 Canvas，保持透明，让底层的背景色和环境层透出来
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // ==================== 荧光蓝覆层 ====================
+    
+    // 荧光蓝覆层（献上后的效果）
+    // 这个仍然画在 Canvas 上，因为它需要在粒子下面但在背景上面？
+    // 不，这层半透明覆盖应该不影响环境层。
+    if (this.state === 'blueWash' || this.state === 'storyNarration') {
         const maxAlpha = this.blueWashMaxAlpha || 0.25;
         
         if (this.blueWashPhase === 'fadeIn') {
@@ -23,7 +51,7 @@ IntroSystem.prototype.animate = function(time = 0) {
         } else if (this.blueWashPhase === 'hold') {
             // 保持
         } else if (this.blueWashPhase === 'fadeOut') {
-            this.cyanOverlayAlpha = Math.max(this.cyanOverlayAlpha - 0.006, 0);
+            this.cyanOverlayAlpha = Math.max(this.cyanOverlayAlpha - 0.004, 0);
         }
         
         if (this.cyanOverlayAlpha > 0) {
@@ -32,7 +60,8 @@ IntroSystem.prototype.animate = function(time = 0) {
         }
     }
     
-    // 上升动画 - 镜头与粒子同步，带加速和减速
+    // ==================== 上升动画逻辑 ====================
+    
     if (this.risePhase === 'rising') {
         const elapsed = performance.now() - this.riseStartTime;
         const totalDuration = this.riseDuration;
@@ -45,7 +74,7 @@ IntroSystem.prototype.animate = function(time = 0) {
         let maxCameraSpeed = 15; // 最大镜头速度
         
         if (elapsed < accelTime) {
-            // 加速阶段：使用缓动函数平滑加速
+            // 加速阶段
             const accelProgress = elapsed / accelTime;
             const eased = this.easeOutCubic(accelProgress);
             this.targetRiseSpeed = maxCameraSpeed * eased;
@@ -53,7 +82,7 @@ IntroSystem.prototype.animate = function(time = 0) {
             // 匀速阶段
             this.targetRiseSpeed = maxCameraSpeed;
         } else if (elapsed < totalDuration) {
-            // 减速阶段：使用缓动函数平滑减速
+            // 减速阶段
             const decelProgress = (elapsed - steadyEnd) / decelTime;
             const eased = this.easeInCubic(1 - decelProgress);
             this.targetRiseSpeed = maxCameraSpeed * eased;
@@ -69,8 +98,6 @@ IntroSystem.prototype.animate = function(time = 0) {
         if (this.riseOffset > this.riseTargetOffset) {
             this.riseOffset = this.riseTargetOffset;
         }
-    } else if (this.risePhase === 'stopped') {
-        // 停止后保持位置
     }
     
     // 更新和绘制粒子
@@ -161,21 +188,4 @@ IntroSystem.prototype.hideNarrative = function() {
     }
 };
 
-IntroSystem.prototype.finishIntro = function() {
-    // 标记已播放
-    sessionStorage.setItem('hasPlayedIntro_v5', 'true');
-    
-    // 淡出开场
-    const screen = document.getElementById('intro-screen');
-    if (screen) {
-        screen.classList.add('fade-out');
-        
-        setTimeout(() => {
-            screen.style.display = 'none';
-            // 直接跳转到章节选择页面（开始游戏 = 继续探索）
-            if (window.navigateTo) window.navigateTo('levels.html');
-            else window.location.href = 'levels.html';
-        }, 1000);
-    }
-};
-
+// finishIntro 不再使用（改为直接在开场界面显示按钮，点击后跳转章节选择）
