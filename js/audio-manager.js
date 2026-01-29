@@ -12,6 +12,10 @@ class AudioManager {
         this.bgmVolume = 0.8;
         this.sfxVolume = 0.8;
         
+        // 用户交互状态（用于解锁音频播放）
+        this.audioUnlocked = false;
+        this.pendingBGM = null; // 等待播放的BGM
+        
         // 加载保存的音量设置
         this.loadVolumeSettings();
         
@@ -54,8 +58,37 @@ class AudioManager {
         // 预加载音频
         this.preloadAudio();
         
+        // 设置用户交互解锁
+        this.setupUserInteractionUnlock();
+        
         // 页面可见性变化处理
         this.setupVisibilityHandler();
+    }
+    
+    // 设置用户交互解锁音频
+    setupUserInteractionUnlock() {
+        const unlockAudio = () => {
+            if (this.audioUnlocked) return;
+            
+            this.audioUnlocked = true;
+            console.log('Audio unlocked by user interaction');
+            
+            // 如果有等待播放的BGM，现在播放它
+            if (this.pendingBGM) {
+                this.playBGM(this.pendingBGM);
+                this.pendingBGM = null;
+            }
+            
+            // 移除监听器
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('keydown', unlockAudio);
+        };
+        
+        // 监听用户交互事件
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+        document.addEventListener('keydown', unlockAudio);
     }
     
     // 加载保存的音量设置
@@ -129,6 +162,8 @@ class AudioManager {
         this.currentBGM.currentTime = 0;
         this.currentBGM.play().catch(e => {
             console.log('BGM autoplay blocked, waiting for user interaction');
+            // 保存待播放的BGM，等用户交互后播放
+            this.pendingBGM = name;
         });
     }
     
