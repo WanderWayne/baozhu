@@ -4,44 +4,58 @@
 
 // 合成配方数据库（基于新方案）
 const RECIPES = [
-    // ========== 基础合成（世界1必需） ==========
-    // 冰酥酪路径A（标准路径）
+    // ========== 第一章核心配方：酪之初启 ==========
+    
+    // 第1关：第一缕甜
     { ingredients: ["牛奶", "冰糖碎"], result: "甜牛奶", time: 0, msg: "甜蜜的开始" },
+    
+    // 第2关：凝固之术
+    { ingredients: ["牛奶", "酿造"], result: "奶酪", time: 5, msg: "100度低温烤制中..." },
+    
+    // 第3关：双酪之约
+    // 雪酪 = 甜牛奶 + 酿造（甜液体凝固 = 轻盈版酪）
+    { ingredients: ["甜牛奶", "酿造"], result: "雪酪", time: 5, msg: "甜蜜凝固，轻盈雪酪诞生..." },
+    { ingredients: ["酿造", "甜牛奶"], result: "雪酪", time: 5, msg: "甜蜜凝固，轻盈雪酪诞生..." },
+    { ingredients: ["奶酪", "雪酪"], result: "双酪", time: 0, msg: "双酪合璧，厚与轻，一体两面" },
+    
+    // 第4关：香气之约 - 桂花酒酿
+    { ingredients: ["桂花", "酒酿原浆"], result: "桂花酒酿", time: 3, msg: "桂花香气融入酒酿..." },
+    { ingredients: ["酒酿原浆", "桂花"], result: "桂花酒酿", time: 3, msg: "桂花香气融入酒酿..." },
+    
+    // 第5关：酪饮之道 - 酒酿玫瑰酪
+    { ingredients: ["玫瑰", "酒酿原浆"], result: "玫瑰酒酿", time: 3, msg: "玫瑰香气融入酒酿..." },
+    { ingredients: ["酒酿原浆", "玫瑰"], result: "玫瑰酒酿", time: 3, msg: "玫瑰香气融入酒酿..." },
+    { ingredients: ["双酪", "玫瑰酒酿"], result: "酒酿玫瑰酪", time: 0, msg: "玫瑰与酪的舞蹈！", isTarget: true },
+    
+    // 第6关 Boss：冰酒酿桂花酪
+    { ingredients: ["双酪", "桂花酒酿"], result: "酒酿桂花酪", time: 0, msg: "桂花与酪的醇香！" },
+    { ingredients: ["酒酿桂花酪", "冰块"], result: "冰酒酿桂花酪", time: 0, msg: "经典之作！", isTarget: true },
+    
+    // ========== 辅助配方（兼容旧版/备用路径） ==========
     { ingredients: ["牛奶", "冰块"], result: "冰牛奶", time: 0, msg: "清凉一下" },
     { ingredients: ["甜牛奶", "酒酿原浆"], result: "酿香奶底", time: 0, msg: "酒酿的香气开始弥漫" },
     { ingredients: ["酿香奶底", "冰块"], result: "冰酥基底", time: 0, msg: "基底已成" },
     { ingredients: ["冰酥基底", "酒酿原浆"], result: "冰酥酪", time: 0, msg: "冰酥酪完成！", isTarget: true },
-    // 冰酥酪路径B（快捷路径）
     { ingredients: ["冰牛奶", "酒酿原浆"], result: "冰酿奶", time: 0, msg: "冰与酒酿的相遇" },
     { ingredients: ["冰酿奶", "冰糖碎"], result: "冰酥酪", time: 0, msg: "另一种方式完成冰酥酪！", isTarget: true },
     
-    // 雪域酸奶路径A（标准路径）
+    // 雪域酸奶路径
     { ingredients: ["牛奶", "菌种"], result: "发酵奶", time: 3, msg: "发酵中，请稍候..." },
     { ingredients: ["发酵奶", "冰糖碎"], result: "原味酸奶", time: 0, msg: "原味的美好" },
     { ingredients: ["原味酸奶", "冰糖碎"], result: "雪域酸奶", time: 2, msg: "四步两次发酵...", isTarget: true },
-    // 雪域酸奶路径B（冷冻路径）
     { ingredients: ["原味酸奶", "冰块"], result: "冰镇酸奶", time: 0, msg: "冰镇的清爽" },
     { ingredients: ["冰镇酸奶", "冰糖碎"], result: "雪域酸奶", time: 0, msg: "冰镇版雪域酸奶！", isTarget: true },
     
-    // 基础酪系列
-    { ingredients: ["牛奶", "酿造"], result: "奶酪", time: 5, msg: "100度低温烤制中..." },
-    { ingredients: ["奶酪", "冰糖碎"], result: "雪酪", time: 0, msg: "雪酪，轻盈版的奶酪" },
-    { ingredients: ["奶酪", "雪酪"], result: "双酪底", time: 0, msg: "双酪合璧" },
-    // 双酪底路径B
+    // 双酪底（兼容旧版，映射到双酪）
     { ingredients: ["奶酪", "奶酪"], result: "浓酪底", time: 0, msg: "双倍浓郁" },
-    { ingredients: ["浓酪底", "冰糖碎"], result: "双酪底", time: 0, msg: "另一种双酪！" },
+    { ingredients: ["浓酪底", "冰糖碎"], result: "双酪", time: 0, msg: "另一种双酪！" },
     
-    // 酒酿系列
-    { ingredients: ["酒酿原浆", "桂花"], result: "桂花酒酿", time: 3, msg: "桂花香气融入酒酿..." },
-    { ingredients: ["酒酿原浆", "桂花原浆"], result: "桂花酒酿", time: 3, msg: "桂花原浆融入酒酿..." },
-    { ingredients: ["双酪底", "桂花酒酿"], result: "桂花酪底", time: 0, msg: "桂花与酪相遇" },
-    { ingredients: ["桂花酪底", "冰块"], result: "酒酿桂花酪", time: 0, msg: "经典之作！", isTarget: true },
-    // 酒酿桂花酪路径B（直接路径）
+    // 冰酒酿桂花酪备用路径
+    { ingredients: ["桂花原浆", "酒酿原浆"], result: "桂花酒酿", time: 3, msg: "桂花原浆融入酒酿..." },
     { ingredients: ["奶酪", "桂花酒酿"], result: "桂香奶酪", time: 0, msg: "桂花香气包裹奶酪" },
-    { ingredients: ["桂香奶酪", "雪酪"], result: "酒酿桂花酪", time: 0, msg: "创新路径完成！", isTarget: true },
-    // 酒酿桂花酪路径C（花底优先）
+    { ingredients: ["桂香奶酪", "雪酪"], result: "酒酿桂花酪", time: 0, msg: "创新路径！" },
     { ingredients: ["雪酪", "桂花"], result: "桂花雪酪", time: 0, msg: "桂花飘落雪酪" },
-    { ingredients: ["桂花雪酪", "酒酿原浆"], result: "酒酿桂花酪", time: 2, msg: "酒酿慢慢渗入...", isTarget: true },
+    { ingredients: ["桂花雪酪", "酒酿原浆"], result: "酒酿桂花酪", time: 2, msg: "酒酿慢慢渗入..." },
     
     // ========== 花之山脉（世界2） ==========
     { ingredients: ["桂花酪底", "芋头圆子"], result: "酒酿桂花酪（自然发酵甜）", time: 0, msg: "自然发酵的甜！", isTarget: true },
@@ -103,9 +117,10 @@ const ITEMS = {
     "冷冻": { icon: "❄️", type: "tool", desc: "冷冻工具" },
     
     // 花类原料
-    "桂花": { icon: "🌼", type: "floral", desc: "桂林金桂" },
+    "桂花": { icon: "🌼", type: "floral", desc: "桂林金桂，秋天最温柔的香气" },
     "桂花原浆": { icon: "🌼", type: "floral", desc: "桂花原浆" },
-    "玫瑰花": { icon: "🌹", type: "floral", desc: "平阴玫瑰" },
+    "玫瑰": { icon: "🌹", type: "floral", desc: "平阴玫瑰，千年花都的馈赠" },
+    "玫瑰花": { icon: "🌹", type: "floral", desc: "平阴玫瑰（旧版兼容）" },
     "玫瑰原浆": { icon: "🌹", type: "floral", desc: "玫瑰原浆" },
     "茉莉花茶": { icon: "🍵", type: "floral", desc: "茉莉花茶" },
     "茉莉花液": { icon: "🍵", type: "floral", desc: "茉莉花液" },
@@ -151,14 +166,16 @@ const ITEMS = {
     "发酵奶": { icon: "🥛", type: "mid", desc: "发酵中的奶" },
     "原味酸奶": { icon: "🥛", type: "mid", desc: "原味酸奶" },
     "冰镇酸奶": { icon: "🥛", type: "mid", desc: "冰镇的清爽" },
-    "奶酪": { icon: "🧀", type: "mid", desc: "中式奶酪" },
-    "雪酪": { icon: "🍨", type: "mid", desc: "轻盈雪酪" },
+    "奶酪": { icon: "🧀", type: "mid", desc: "中式奶酪，100度低温烤制" },
+    "雪酪": { icon: "🍨", type: "mid", desc: "轻盈雪酪，甜牛奶凝固而成" },
     "浓酪底": { icon: "🧀", type: "mid", desc: "双倍浓郁" },
-    "双酪底": { icon: "🥣", type: "mid", desc: "双酪合璧" },
-    "桂花酒酿": { icon: "🌼", type: "mid", desc: "桂花酒酿" },
+    "双酪": { icon: "🥣", type: "mid", desc: "双酪合璧，厚与轻，一体两面" },
+    "双酪底": { icon: "🥣", type: "mid", desc: "双酪合璧（旧版兼容）" },
+    "桂花酒酿": { icon: "🌼", type: "mid", desc: "桂花香气融入酒酿" },
+    "玫瑰酒酿": { icon: "🌹", type: "mid", desc: "玫瑰香气融入酒酿" },
     "桂香奶酪": { icon: "🌼", type: "mid", desc: "桂花香气包裹奶酪" },
     "桂花雪酪": { icon: "🌼", type: "mid", desc: "桂花飘落雪酪" },
-    "桂花酪底": { icon: "🥣", type: "mid", desc: "桂花酪底" },
+    "桂花酪底": { icon: "🥣", type: "mid", desc: "桂花酪底（旧版兼容）" },
     "玫瑰酪底": { icon: "🌹", type: "mid", desc: "玫瑰酪底" },
     "双酪玫瑰": { icon: "🌹", type: "mid", desc: "双酪玫瑰" },
     "茉莉酸奶": { icon: "🍵", type: "mid", desc: "茉莉酸奶" },
@@ -186,7 +203,9 @@ const ITEMS = {
     // 最终产品
     "冰酥酪": { icon: "🍨", type: "final", desc: "宝珠的第一碗" },
     "雪域酸奶": { icon: "🥛", type: "final", desc: "四步两次发酵" },
-    "酒酿桂花酪": { icon: "🌼", type: "final", desc: "宝珠经典之作" },
+    "酒酿桂花酪": { icon: "🌼", type: "mid", desc: "双酪与桂花酒酿的醇香融合" },
+    "冰酒酿桂花酪": { icon: "🧊", type: "final", desc: "宝珠经典之作，桂花香与酒酿的完美融合，冰凉清爽" },
+    "酒酿玫瑰酪": { icon: "🌹", type: "final", desc: "玫瑰与酪的舞蹈，芬芳满溢" },
     "酒酿桂花酪（自然发酵甜）": { icon: "🌼", type: "final", desc: "自然发酵的甜" },
     "酒酿玫瑰酪": { icon: "🌹", type: "final", desc: "玫瑰与酪的舞蹈" },
     "岩间茉莉酸奶昔": { icon: "🍵", type: "final", desc: "清新脱俗" },
@@ -489,6 +508,143 @@ ITEMS["蓝莓冰酥"] = { icon: "🫐", type: "hidden", desc: "意外的美味�
 ITEMS["火龙酸奶"] = { icon: "🐉", type: "hidden", desc: "色彩的碰撞", hidden: true };
 ITEMS["茉桂双香"] = { icon: "🌸", type: "hidden", desc: "两种香气的融合", hidden: true };
 
+// ========================================
+// 物品属性系统 - 帮助玩家推理合成关系
+// ========================================
+// 玩家长按物品时显示属性标签，通过属性匹配推理合成
+const ITEM_ATTRIBUTES = {
+    // ========== 基础原料 ==========
+    "牛奶": {
+        tags: ["液体", "基底", "可凝固", "可发酵"],
+        color: "white",
+        hint: "新鲜牛奶，一切的起点"
+    },
+    "冰糖碎": {
+        tags: ["粉末", "甜味", "可溶解"],
+        color: "yellow",
+        hint: "天然冰糖，增添甜蜜"
+    },
+    "酿造": {
+        tags: ["工艺", "可使液体凝固", "需要时间"],
+        color: "brown",
+        hint: "酿造工艺，让液体变成酪"
+    },
+    "酒酿原浆": {
+        tags: ["酒类", "香醇", "可载香", "液体"],
+        color: "amber",
+        hint: "40天自酿的原浆，可以承载花香"
+    },
+    "菌种": {
+        tags: ["催化剂", "需要液体", "需要时间"],
+        color: "green",
+        hint: "发酵菌种，需要液体和时间"
+    },
+    "冰块": {
+        tags: ["固体", "冷感", "可冰镇"],
+        color: "blue",
+        hint: "清凉冰块，给饮品降温"
+    },
+    
+    // ========== 花类原料 ==========
+    "桂花": {
+        tags: ["花香", "干燥", "可融入酒类"],
+        color: "gold",
+        hint: "桂林金桂，香气需要酒酿来唤醒"
+    },
+    "玫瑰": {
+        tags: ["花香", "干燥", "可融入酒类"],
+        color: "pink",
+        hint: "平阴玫瑰，香气需要酒酿来唤醒"
+    },
+    
+    // ========== 中间产物 ==========
+    "甜牛奶": {
+        tags: ["液体", "甜", "可凝固", "可发酵"],
+        color: "white",
+        hint: "甜蜜的牛奶，加酿造可变成轻盈的雪酪"
+    },
+    "奶酪": {
+        tags: ["凝固态", "醇厚", "可变轻盈", "可融合风味"],
+        color: "cream",
+        hint: "中式奶酪，加甜味可变轻盈"
+    },
+    "雪酪": {
+        tags: ["凝固态", "轻盈", "甜", "可融合风味"],
+        color: "white",
+        hint: "轻盈雪酪，甜牛奶凝固而成"
+    },
+    "双酪": {
+        tags: ["复合酪底", "醇厚与轻盈兼具", "可融合风味", "需要香酿点睛"],
+        color: "cream",
+        hint: "双酪合璧，需要酒酿来点睛"
+    },
+    "桂花酒酿": {
+        tags: ["酒香", "花香", "可提升风味", "可点睛酪底"],
+        color: "gold",
+        hint: "桂花香气融入酒酿，可以点睛双酪"
+    },
+    "玫瑰酒酿": {
+        tags: ["酒香", "花香", "可提升风味", "可点睛酪底"],
+        color: "pink",
+        hint: "玫瑰香气融入酒酿，可以点睛双酪"
+    },
+    // ========== 最终产品 ==========
+    "酒酿桂花酪": {
+        tags: ["酪饮", "桂花香", "酒酿味", "可冰镇"],
+        color: "gold",
+        hint: "酒酿桂花酪，加冰块即成经典"
+    },
+    "冰酒酿桂花酪": {
+        tags: ["经典成品", "桂花香", "酒酿味", "冰凉"],
+        color: "gold",
+        hint: "宝珠经典之作"
+    },
+    "酒酿玫瑰酪": {
+        tags: ["经典成品", "玫瑰香", "酒酿味"],
+        color: "pink",
+        hint: "玫瑰与酪的舞蹈"
+    }
+};
+
+// 属性匹配规则 - 用于推理系统
+const ATTRIBUTE_RULES = [
+    {
+        rule: "甜化",
+        match: ["液体", "甜味"],
+        description: "液体 + 甜味 → 甜液体"
+    },
+    {
+        rule: "凝固",
+        match: ["可凝固", "工艺"],
+        description: "液体 + 酿造工艺 → 凝固成酪"
+    },
+    {
+        rule: "轻盈凝固",
+        match: ["甜", "可凝固", "工艺"],
+        description: "甜液体 + 酿造 → 轻盈版酪（雪酪）"
+    },
+    {
+        rule: "双酪合璧",
+        match: ["凝固态", "凝固态"],
+        description: "奶酪 + 雪酪 → 双酪（厚与轻合一）"
+    },
+    {
+        rule: "香酿",
+        match: ["花香", "可载香"],
+        description: "花香物 + 酒酿原浆 → 花香酒酿"
+    },
+    {
+        rule: "酪饮",
+        match: ["复合酪底", "可点睛酪底"],
+        description: "双酪 + 花香酒酿 → 酪饮品"
+    },
+    {
+        rule: "冰镇",
+        match: ["可冰镇", "冷感"],
+        description: "酪饮 + 冰块 → 冰凉版本"
+    }
+];
+
 // 导出
 window.RECIPES = RECIPES;
 window.ITEMS = ITEMS;
@@ -497,4 +653,6 @@ window.TIPS = TIPS;
 window.HINT_SYSTEM = HINT_SYSTEM;
 window.ACHIEVEMENTS = ACHIEVEMENTS;
 window.FRAGMENTS = FRAGMENTS;
+window.ITEM_ATTRIBUTES = ITEM_ATTRIBUTES;
+window.ATTRIBUTE_RULES = ATTRIBUTE_RULES;
 

@@ -3,29 +3,19 @@
 // ========================================
 
 // 章节配置 - Monument Valley 风格的多目标关卡
+// 第一章以"冰酒酿桂花酪"为最终Boss，共5关
 const CHAPTERS = {
     1: {
         id: 1,
-        name: "乳之觉醒",
-        objectives: [101, 102, 2],  // 唤醒之手 -> 时间的答案 -> 酸奶阶梯
+        name: "酪之初启",
+        description: "从牛奶到酪，建立酿造的基础语言",
+        objectives: [101, 102, 103, 104, 105],  // 5关递进结构
         transitionTexts: [
-            "第一道门已开启...",
-            "第二道门正在等待..."
+            "甜蜜，是最朴素的开始...",
+            "液体凝固成酪，奶酿之道初现...",
+            "双酪合璧，厚与轻，一体两面...",
+            "双酪为底，酒酿为魂，酪饮之道开启...",
         ]
-    },
-    2: {
-        id: 2,
-        name: "酪之试炼",
-        objectives: [1, 104],  // 冰酥门廊 -> 双酪启程
-        transitionTexts: [
-            "更深的门在召唤..."
-        ]
-    },
-    3: {
-        id: 3,
-        name: "奶酪试炼",
-        objectives: [3],  // 奶酪试炼 - 独立
-        transitionTexts: []
     }
 };
 
@@ -34,13 +24,13 @@ const WORLDS = [
     {
         id: 1,
         name: "奶酪谷",
-        subtitle: "乳制基础",
-        description: "从牛奶到酪的基础认知，建立酿造语言。",
+        subtitle: "酪之初启",
+        description: "从牛奶到酪的基础认知，建立酿造语言。以冰酒酿桂花酪为目标。",
         theme: "dairy",
         color: "#FFF5E6",
         icon: "🥛",
         unlocked: true,
-        levels: [101, 102, 2, 1, 104, 3]  // 唤醒之手 -> 时间的答案 -> 酸奶阶梯 -> 冰酥门廊 -> 双酪启程 -> 奶酪试炼
+        levels: [101, 102, 103, 104, 105]  // 第一缕甜 -> 凝固之术 -> 双酪之约 -> 酪饮之道 -> Boss:冰酒酿桂花酪
     },
     {
         id: 2,
@@ -99,152 +89,175 @@ const WORLDS = [
     }
 ];
 
-// 关卡配置（基于新方案）
+// 关卡配置（第一章：酪之初启 - 5关，以冰酒酿桂花酪为Boss）
 const LEVELS = [
-    // ========== 基础教学关（世界1前置） ==========
+    // ========== 第一章：酪之初启（6关） ==========
+    
+    // 第1关：第一缕甜 - 强制因果演示
     {
         id: 101,
         worldId: 1,
         chapterId: 1,
         objectiveIndex: 0,
-        name: "唤醒之手",
+        name: "第一缕甜",
         target: "甜牛奶",
-        targetId: "tutorial_1",
+        targetId: "sweet_milk",
         description: "合成，然后献上。",
         storyIntro: "一切开始于最简单的组合。",
         icon: "🥛",
         duration: "15-30秒",
-        initialItems: ["牛奶", "冰糖碎"],
+        initialItems: ["牛奶", "冰糖碎"],  // 仅2个，零自由度
         doorTriggers: {
             stage1: [],
             stage2: [],
             stage3: ["甜牛奶"]
         },
-        completionText: "你唤醒了第一缕甜。",
+        completionText: "甜蜜，是最朴素的开始。",
         cultureNote: "牛奶与冰糖，最朴素的甜蜜开始。",
         realProductNote: "现实中：这是宝珠许多饮品的基础。",
         isTutorial: true,
-        tutorialFocus: "approach_and_offer"  // 教学重点：靠近+献上
+        tutorialFocus: "approach_and_offer",
+        // 教学的规律
+        teachingRule: "液体 + 甜味 → 甜液体"
     },
+    
+    // 第2关：凝固之术 - 引入工艺概念
     {
         id: 102,
         worldId: 1,
         chapterId: 1,
         objectiveIndex: 1,
-        name: "时间的答案",
-        target: "发酵奶",
-        targetId: "tutorial_2",
-        description: "有时候，等待就是答案。",
-        storyIntro: "发酵需要时间，耐心是酿造的一部分。",
-        icon: "🦠",
+        name: "凝固之术",
+        target: "奶酪",
+        targetId: "cheese",
+        description: "酿造工艺，让液体凝固成酪。",
+        storyIntro: "牛奶遇见酿造，会发生什么？",
+        icon: "🧀",
         duration: "30-45秒",
-        initialItems: ["牛奶", "菌种"],
+        initialItems: ["牛奶", "酿造"],  // 仅2个，零自由度
         doorTriggers: {
             stage1: [],
             stage2: [],
-            stage3: ["发酵奶"]
+            stage3: ["奶酪"]
         },
-        completionText: "时间给了牛奶新的生命。",
-        cultureNote: "四步两次发酵，是宝珠酸奶的灵魂工艺。",
-        realProductNote: "宝珠的发酵工艺传承自古老的中式酿造。",
+        completionText: "奶酿成酪，百度慢烤。",
+        cultureNote: "以牛奶和40天自酿的原浆，经由100度低温烤制而成。",
+        realProductNote: "宝珠奶酪：牛奶+稀奶油+冰糖粉+酒酿原浆B，95-100°C烤制20-25分钟。",
         isTutorial: true,
-        tutorialFocus: "pause_wait"  // 教学重点：静置等待
+        tutorialFocus: "craft_transform",
+        teachingRule: "液体 + 酿造工艺 → 凝固成酪"
     },
-    // ========== 世界1：奶酪谷 ==========
+    
+    // 第3关：双酪之约 - 多步合成，运用规律
     {
-        id: 1,
-        worldId: 1,
-        chapterId: 2,
-        objectiveIndex: 0,
-        name: "冰酥门廊",
-        target: "冰酥酪",
-        targetId: "bingsulao",
-        description: "把味道拼回去。先从最简单的一碗开始。",
-        storyIntro: "时间在酒缸里走错了路，老配方散落成字句与原料。",
-        icon: "🍨",
-        duration: "30-60秒",
-        initialItems: ["牛奶", "酒酿原浆", "冰糖碎", "冰块"],
-        // 门状态触发条件
-        doorTriggers: {
-            stage1: ["甜牛奶"],           // 门微光
-            stage2: ["冰酥基底"],         // 门震动
-            stage3: ["冰酥酪"]            // 门打开
-        },
-        completionText: "你找回了宝珠的第一碗冰酥酪。",
-        cultureNote: "牛奶、米酒和冰糖碎，最简单的组合，需要最长的耐心。",
-        realProductNote: "现实中的冰酥酪：牛奶、米酒、冰糖碎，零添加的小甜甜。"
-    },
-    {
-        id: 2,
+        id: 103,
         worldId: 1,
         chapterId: 1,
         objectiveIndex: 2,
-        name: "酸奶阶梯",
-        target: "雪域酸奶",
-        targetId: "xueyusuannai",
-        description: "发酵，是时间给予的礼物。",
-        storyIntro: "有了奶底，还需要另一种魔法——发酵。",
-        icon: "🥛",
-        duration: "30-60秒",
-        initialItems: ["牛奶", "菌种", "冰糖碎"],
+        name: "双酪之约",
+        target: "双酪",
+        targetId: "dual_cheese",
+        description: "厚与轻，是一体两面。",
+        storyIntro: "奶酪与雪酪，两种质地，一个基底。",
+        icon: "🍨",
+        duration: "1-2分钟",
+        initialItems: ["牛奶", "酿造", "冰糖碎"],  // 3个，低自由度
         doorTriggers: {
-            stage1: ["发酵奶"],
-            stage2: ["原味酸奶"],
-            stage3: ["雪域酸奶"]
+            stage1: ["甜牛奶", "奶酪"],  // 门微光（做出任一中间产物）
+            stage2: ["雪酪"],            // 门震动
+            stage3: ["双酪"]             // 门打开
         },
-        completionText: "四步两次发酵，浓郁绵醇。",
-        cultureNote: "酸奶饮以宝珠雪域酸奶为基础原料，传承经典手工酸奶制作方法。",
-        realProductNote: "雪域酸奶：牛奶、菌种、冰糖碎，四步两次发酵。"
+        completionText: "双酪合璧，厚与轻，一体两面。",
+        cultureNote: "奶酪醇厚，雪酪轻盈，合而为一是宝珠饮品的核心基底。",
+        realProductNote: "双酪：奶酪与雪酪的完美融合。",
+        levelHints: [
+            "双酪，是两种酪的组合...",
+            "雪酪尝起来更轻盈、更甜...",
+            "奶酪：牛奶 + 酿造",
+            "雪酪：甜牛奶 + 酿造（甜的液体凝固成轻盈的酪）"
+        ],
+        // 合成路径：
+        // 牛奶 + 冰糖碎 → 甜牛奶
+        // 牛奶 + 酿造 → 奶酪
+        // 甜牛奶 + 酿造 → 雪酪
+        // 奶酪 + 雪酪 → 双酪
+        teachingRule: "甜液体 + 酿造 → 轻盈版酪；奶酪 + 雪酪 → 双酪"
     },
+    
+    // 第4关：酪饮之道 - 教双酪+酒酿=酪饮（花+酒酿在这里首次出现）
     {
         id: 104,
         worldId: 1,
-        chapterId: 2,
-        objectiveIndex: 1,
-        name: "双酪启程",
-        target: "双酪底",
-        targetId: "shuanglao",
-        description: "两种酪底的相遇，开启新的可能。",
-        storyIntro: "奶酪与雪酪，两种质地，一个基底。",
-        icon: "🧀",
+        chapterId: 1,
+        objectiveIndex: 3,
+        name: "酪饮之道",
+        target: "酒酿玫瑰酪",
+        targetId: "rose_cheese_drink",
+        description: "双酪为底，酒酿为魂。",
+        storyIntro: "玫瑰与酒酿相遇，双酪承载芬芳。",
+        icon: "🌹",
         duration: "1-2分钟",
-        initialItems: ["牛奶", "酿造", "冰糖碎", "酒酿原浆", "冰块"],
+        initialItems: ["双酪", "玫瑰", "酒酿原浆"],  // 3个，无干扰
         doorTriggers: {
-            stage1: ["奶酪"],
-            stage2: ["雪酪"],
-            stage3: ["双酪底"]
+            stage1: ["玫瑰酒酿"],        // 门微光
+            stage2: [],
+            stage3: ["酒酿玫瑰酪"]       // 门打开
         },
-        completionText: "双酪底，是许多经典的起点。",
-        cultureNote: "奶酪与雪酪的融合，是宝珠饮品的核心基底。",
-        realProductNote: "双酪底：奶酪与雪酪的完美融合。",
+        completionText: "玫瑰与酒酿相遇，双酪承载芬芳。酪饮之道，始于此刻。",
+        cultureNote: "平阴玫瑰，千年花都的馈赠。",
+        realProductNote: "酒酿玫瑰酪：奶酪、雪酪、玫瑰原浆、燕麦爆爆珠、冰块、平阴玫瑰花干。",
         levelHints: [
-            "所谓的双酪，是奶酪和雪酪。",
-            "雪酪尝起来很甜啊！",
-            "奶酪需要牛奶和酿造...",
-            "雪酪需要甜牛奶和冰块..."
-        ]
+            "玫瑰是一种花香...",
+            "花香可以融入酒酿...",
+            "酪饮需要双酪做底...",
+            "双酪 + 花香酒酿 = 酪饮品"
+        ],
+        // 合成路径：
+        // 玫瑰 + 酒酿原浆 → 玫瑰酒酿
+        // 双酪 + 玫瑰酒酿 → 酒酿玫瑰酪
+        teachingRule: "花香 + 酒酿原浆 → 花香酒酿；双酪 + 花香酒酿 → 酪饮品"
     },
+    
+    // 第5关 Boss：冰酒酿桂花酪 - 综合运用所有规律
     {
-        id: 3,
+        id: 105,
         worldId: 1,
-        chapterId: 3,
-        objectiveIndex: 0,
-        name: "奶酪试炼",
-        target: "酒酿桂花酪",
-        targetId: "guihualo",
+        chapterId: 1,
+        objectiveIndex: 4,
+        name: "冰酒酿桂花酪",
+        target: "冰酒酿桂花酪",
+        targetId: "ice_osmanthus_cheese_drink",
         description: "第一次触碰经典的味道。",
         storyIntro: "当奶与酿相遇，经典的轮廓开始显现。",
-        icon: "🌼",
-        duration: "1-2分钟",
-        initialItems: ["牛奶", "酒酿原浆", "冰糖碎", "冰块", "桂花", "酿造"],
+        icon: "🧊",
+        duration: "2-3分钟",
+        initialItems: ["牛奶", "酿造", "冰糖碎", "酒酿原浆", "桂花", "冰块"],  // 6个，Boss关
         doorTriggers: {
-            stage1: ["奶酪"],
-            stage2: ["雪酪", "桂花酒酿"],
-            stage3: ["酒酿桂花酪"]
+            stage1: ["双酪"],              // 门微光
+            stage2: ["酒酿桂花酪"],        // 门震动
+            stage3: ["冰酒酿桂花酪"]       // 门打开
         },
-        completionText: "酒酿桂花酪，宝珠的经典之作。",
-        cultureNote: "酒酿的甘洌、奶酪的醇厚、桂花的清香，三者合一。",
-        realProductNote: "酒酿桂花酪：奶酪、雪酪、鲜活酒酿米、冰块、桂花原浆、桂林金桂桂花。"
+        completionText: "冰酒酿桂花酪，宝珠的经典之作。",
+        cultureNote: "酒酿的甘洌、奶酪的醇厚、桂花的清香，三者合一，冰凉入口。",
+        realProductNote: "酒酿桂花酪：奶酪、雪酪、鲜活酒酿米、冰块、桂花原浆、桂林金桂桂花。",
+        isBoss: true,
+        levelHints: [
+            "运用你学到的所有规律...",
+            "先做双酪底...",
+            "桂花需要酒酿来唤醒...",
+            "双酪 + 桂花酒酿 = 酒酿桂花酪",
+            "最后加上冰块..."
+        ],
+        // Boss关需要运用的规律
+        requiredRules: [
+            "牛奶 + 冰糖碎 → 甜牛奶",
+            "牛奶 + 酿造 → 奶酪",
+            "甜牛奶 + 酿造 → 雪酪",
+            "奶酪 + 雪酪 → 双酪",
+            "桂花 + 酒酿原浆 → 桂花酒酿",
+            "双酪 + 桂花酒酿 → 酒酿桂花酪",
+            "酒酿桂花酪 + 冰块 → 冰酒酿桂花酪"
+        ]
     },
 
     // ========== 世界2：花之山脉 ==========

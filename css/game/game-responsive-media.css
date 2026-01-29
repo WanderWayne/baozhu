@@ -57,15 +57,18 @@
     }
     
     #inventory-area {
-        height: 16vh;
-        min-height: 100px;
-        padding: 10px 16px;
-        gap: 14px;
+        padding: 10px 8px;
+        gap: 6px;
     }
     
-    .game-item {
-        width: 70px;
-        height: 70px;
+    #inventory-area.rows-1 { max-height: 100px; }
+    #inventory-area.rows-2 { max-height: 190px; }
+    #inventory-area.rows-3-plus { height: 220px; max-height: 220px; }
+    
+    .game-item.in-inventory {
+        width: calc((100% - 18px) / 4);
+        min-width: 60px;
+        max-width: 75px;
     }
     
     .game-item .icon {
@@ -118,13 +121,18 @@
     }
     
     #inventory-area {
-        height: 17vh;
-        min-height: 115px;
+        padding: 10px 8px;
+        gap: 6px;
     }
     
-    .game-item {
-        width: 78px;
-        height: 78px;
+    #inventory-area.rows-1 { max-height: 110px; }
+    #inventory-area.rows-2 { max-height: 200px; }
+    #inventory-area.rows-3-plus { height: 235px; max-height: 235px; }
+    
+    .game-item.in-inventory {
+        width: calc((100% - 18px) / 4);
+        min-width: 65px;
+        max-width: 80px;
     }
     
     .game-item .icon {
@@ -202,11 +210,6 @@
         top: 40vh;
     }
     
-    .game-item {
-        width: 95px;
-        height: 95px;
-    }
-    
     .game-item .icon {
         font-size: 40px;
     }
@@ -216,9 +219,18 @@
     }
     
     #inventory-area {
-        height: 18vh;
-        gap: 20px;
-        padding: 18px 28px;
+        gap: 10px;
+        padding: 14px 12px;
+    }
+    
+    #inventory-area.rows-1 { max-height: 130px; }
+    #inventory-area.rows-2 { max-height: 240px; }
+    #inventory-area.rows-3-plus { height: 280px; max-height: 280px; }
+    
+    .game-item.in-inventory {
+        width: calc((100% - 30px) / 4);
+        min-width: 75px;
+        max-width: 95px;
     }
     
     .success-modal {

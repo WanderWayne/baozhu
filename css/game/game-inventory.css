@@ -9,18 +9,37 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 18vh;
-    min-height: 130px;
+    max-height: 45vh; /* 最多显示约2.5行 */
     background: linear-gradient(180deg, rgba(255, 253, 247, 0.96) 0%, rgba(250, 245, 240, 0.98) 100%);
     backdrop-filter: blur(12px);
     box-shadow: 0 -4px 24px rgba(107, 83, 68, 0.04);
-    padding: 14px 20px;
+    padding: 12px 10px;
     display: flex;
-    align-items: center;
-    overflow-x: auto;
-    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 8px;
     z-index: 20;
     border-top: 1px solid rgba(166, 124, 82, 0.08);
+    transition: height 0.4s ease-out;
+}
+
+/* 物品栏高度状态 */
+#inventory-area.rows-1 {
+    height: auto;
+    max-height: 120px;
+}
+
+#inventory-area.rows-2 {
+    height: auto;
+    max-height: 220px;
+}
+
+#inventory-area.rows-3-plus {
+    height: 260px; /* 显示2行+第3行头部 */
+    max-height: 260px;
 }
 
 /* 顶部装饰线 - 增加层次感 */
@@ -41,7 +60,7 @@
 }
 
 #inventory-area::-webkit-scrollbar {
-    height: 4px;
+    width: 4px;
 }
 
 #inventory-area::-webkit-scrollbar-track {
@@ -56,37 +75,12 @@
 .game-item.in-inventory {
     position: relative;
     flex-shrink: 0;
-    animation: itemBreath 7s ease-in-out infinite;
-}
-
-/* 物品呼吸动画 - 等待被使用的感觉 */
-@keyframes itemBreath {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 6px 16px rgba(139, 115, 85, 0.15);
-    }
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 8px 20px rgba(139, 115, 85, 0.18);
-    }
-}
-
-/* 错开呼吸节奏 - 每个物品有不同的延迟 */
-.game-item.in-inventory:nth-child(1) { animation-delay: 0s; }
-.game-item.in-inventory:nth-child(2) { animation-delay: -1s; }
-.game-item.in-inventory:nth-child(3) { animation-delay: -2s; }
-.game-item.in-inventory:nth-child(4) { animation-delay: -3s; }
-.game-item.in-inventory:nth-child(5) { animation-delay: -4s; }
-.game-item.in-inventory:nth-child(6) { animation-delay: -5s; }
-.game-item.in-inventory:nth-child(7) { animation-delay: -6s; }
-.game-item.in-inventory:nth-child(8) { animation-delay: -0.5s; }
-.game-item.in-inventory:nth-child(9) { animation-delay: -1.5s; }
-.game-item.in-inventory:nth-child(10) { animation-delay: -2.5s; }
-
-/* 拖动时停止呼吸 */
-.game-item.dragging,
-.game-item:active {
-    animation: none !important;
+    /* 一行4个：(100% - 3个间隙8px*3) / 4 */
+    width: calc((100% - 24px) / 4);
+    max-width: 90px;
+    min-width: 70px;
+    height: auto;
+    aspect-ratio: 1;
 }
 
 /* ========== 物品栏金光效果 ========== */
@@ -204,7 +198,7 @@
 
 /* ========== 物品爆开动画（增强气泡）========== */
 .game-item.bubble-pop {
-    animation: bubblePop 1.6s ease-out forwards;
+    animation: bubblePop 1.6s ease-out forwards !important;
 }
 
 @keyframes bubblePop {

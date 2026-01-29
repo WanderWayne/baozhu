@@ -450,6 +450,30 @@ class Game {
             el.classList.add('in-inventory');
             inventory.appendChild(el);
         });
+        
+        // 更新物品栏布局
+        this.updateInventoryLayout();
+    }
+    
+    // 根据物品数量更新物品栏高度
+    updateInventoryLayout() {
+        const inventory = document.getElementById('inventory-area');
+        const itemCount = inventory.querySelectorAll('.game-item').length;
+        const itemsPerRow = 4;
+        const rows = Math.ceil(itemCount / itemsPerRow);
+        
+        // 移除所有行数类
+        inventory.classList.remove('rows-1', 'rows-2', 'rows-3-plus');
+        
+        // 根据行数添加对应类
+        if (rows <= 1) {
+            inventory.classList.add('rows-1');
+        } else if (rows === 2) {
+            inventory.classList.add('rows-2');
+        } else {
+            // 3行及以上，固定高度让玩家滑动
+            inventory.classList.add('rows-3-plus');
+        }
     }
 
     initDragSystem() {
@@ -485,10 +509,13 @@ class Game {
             newItem.classList.add('new-item'); // 复用弹出动画
             inventory.appendChild(newItem);
             
-            // 滚动到最新的物品
+            // 更新物品栏布局
+            this.updateInventoryLayout();
+            
+            // 滚动到最新的物品（垂直滚动）
             setTimeout(() => {
                 inventory.scrollTo({
-                    left: inventory.scrollWidth,
+                    top: inventory.scrollHeight,
                     behavior: 'smooth'
                 });
             }, 100);

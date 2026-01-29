@@ -462,61 +462,75 @@ Game.prototype.performItemTransition = function() {
     
     const newItemNames = nextLevelData.initialItems || [];
     
-    // 确定新旧物品数量的最大值
-    const maxItems = Math.max(currentItems.length, newItemNames.length);
+    // ========== 第一阶段：所有老物品按顺序消失 ==========
+    const disappearInterval = 300; // 每个物品消失间隔
+    const disappearAnimationDuration = 1600; // 消失动画时长
     
-    // 依次让老物品爆开变成新物品
-    let delay = 0;
-    for (let i = 0; i < maxItems; i++) {
+    currentItems.forEach((oldItem, index) => {
         setTimeout(() => {
-            const oldItem = currentItems[i];
-            const newItemName = newItemNames[i];
+            // 禁用交互
+            oldItem.style.pointerEvents = 'none';
+            // 移除金光
+            oldItem.classList.remove('golden-outline');
+            // 清除可能的内联动画样式
+            oldItem.style.animation = '';
             
-            if (oldItem) {
-                // 创建更多泡沫粒子效果
-                this.createFoamParticles(oldItem, 14); // 更多气泡
-                // 移除金光，添加爆开动画
-                oldItem.classList.remove('golden-outline');
+            // 等待一帧后再添加爆开动画，确保金光动画完全移除
+            requestAnimationFrame(() => {
+                // 创建泡沫粒子效果（减少粒子数量提升性能）
+                this.createFoamParticles(oldItem, 8);
+                // 添加爆开动画
                 oldItem.classList.add('bubble-pop');
-                
-                // 爆开完成后，原位置出现新物品（等待爆开动画完成）
-                setTimeout(() => {
-                    oldItem.remove();
-                    
-                    if (newItemName) {
-                        const newItem = this.createItemElement(newItemName);
-                        newItem.classList.add('in-inventory');
-                        newItem.classList.add('item-pop-in');
-                        // 插入到原位置
-                        if (inventoryArea.children[i]) {
-                            inventoryArea.insertBefore(newItem, inventoryArea.children[i]);
-                        } else {
-                            inventoryArea.appendChild(newItem);
-                        }
-                        
-                        // 动画结束后移除动画类
-                        setTimeout(() => {
-                            newItem.classList.remove('item-pop-in');
-                        }, 1900);
-                    }
-                }, 1280); // 等待爆开动画大部分完成
-            } else if (newItemName) {
-                // 没有老物品，直接弹入新物品
-                const newItem = this.createItemElement(newItemName);
-                newItem.classList.add('in-inventory');
-                newItem.classList.add('item-pop-in');
-                inventoryArea.appendChild(newItem);
-                
-                setTimeout(() => {
-                    newItem.classList.remove('item-pop-in');
-                }, 1900);
-            }
-        }, delay);
-        delay += 640; // 每个物品间隔640ms
-    }
+            });
+            
+            // 动画结束后隐藏元素（用 visibility 保持占位，避免布局重排）
+            setTimeout(() => {
+                oldItem.style.visibility = 'hidden';
+            }, disappearAnimationDuration - 50);
+        }, index * disappearInterval);
+    });
     
-    // 所有物品变换完成后
-    const totalTransitionTime = delay + 2200; // 等待最后一个新物品弹入完成
+    // 计算所有老物品消失完成的时间
+    const allDisappearTime = currentItems.length * disappearInterval + disappearAnimationDuration;
+    
+    // 所有消失动画完成后，一次性清空物品栏
+    setTimeout(() => {
+        currentItems.forEach(item => item.remove());
+    }, allDisappearTime);
+    
+    // ========== 第二阶段：新物品按顺序出现 ==========
+    const appearInterval = 300; // 每个物品出现间隔
+    const appearAnimationDuration = 1900; // 出现动画时长
+    const appearStartDelay = 200; // 消失完成后稍等一下再开始出现
+    
+    newItemNames.forEach((newItemName, index) => {
+        setTimeout(() => {
+            const newItem = this.createItemElement(newItemName);
+            // 先设置初始状态（隐藏），避免闪烁
+            newItem.style.opacity = '0';
+            newItem.style.transform = 'scale(0)';
+            newItem.classList.add('in-inventory');
+            inventoryArea.appendChild(newItem);
+            
+            // 下一帧再添加动画类，确保初始状态生效
+            requestAnimationFrame(() => {
+                newItem.style.opacity = '';
+                newItem.style.transform = '';
+                newItem.classList.add('item-pop-in');
+                // 添加奶雾 pop 效果
+                this.createFoamParticles(newItem, 8);
+            });
+            
+            // 动画结束后移除动画类
+            setTimeout(() => {
+                newItem.classList.remove('item-pop-in');
+            }, appearAnimationDuration);
+        }, allDisappearTime + appearStartDelay + index * appearInterval);
+    });
+    
+    // 计算所有物品变换完成的总时间
+    const totalTransitionTime = allDisappearTime + appearStartDelay + 
+        newItemNames.length * appearInterval + appearAnimationDuration;
     
     setTimeout(() => {
         // 完成当前目标，切换到下一个目标
@@ -540,6 +554,9 @@ Game.prototype.performItemTransition = function() {
         // 物品栏金光消失
         inventoryArea.classList.remove('golden-glow');
         inventoryArea.classList.add('golden-fade');
+        
+        // 更新物品栏布局
+        this.updateInventoryLayout();
         
         // 更新门的目标图标
         const targetItem = window.ITEMS[this.levelData.target];

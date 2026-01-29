@@ -32,11 +32,15 @@ class DragSystem {
     // 触觉反馈（如果支持）
     vibrate(duration = 10) {
         // 只有在用户已交互且设备支持时才调用
-        if (this.hapticFeedback && this.userHasInteracted && navigator.vibrate) {
+        if (this.hapticFeedback && this.userHasInteracted && typeof navigator.vibrate === 'function') {
+            // 使用 try-catch 包裹，避免任何错误
             try {
-                navigator.vibrate(duration);
+                // 检查页面是否有焦点
+                if (document.hasFocus()) {
+                    navigator.vibrate(duration);
+                }
             } catch (e) {
-                // 忽略错误
+                // 静默忽略错误
             }
         }
     }
