@@ -3,10 +3,10 @@
    宝珠酿造风格 V3
 ======================================== */
 
-/* ========== 合成工作台区域 ========== */
+/* ========== 合成工作台区域（覆盖物品栏以外的整个屏幕） ========== */
 #synthesis-area {
     position: absolute;
-    top: 35vh; /* 调整位置给门留更多空间 */
+    top: 0;
     bottom: 18vh;
     left: 0;
     right: 0;
@@ -14,6 +14,71 @@
     background: transparent;
     overflow: hidden;
     touch-action: none;
+    z-index: 2;
+}
+
+/* ========== 门的对话气泡 ========== */
+.door-bubble {
+    position: absolute;
+    z-index: 50;
+    pointer-events: none;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(58, 42, 12, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255, 220, 100, 0.6);
+    box-shadow:
+        0 0 12px rgba(255, 220, 100, 0.2),
+        0 0 28px rgba(255, 220, 100, 0.1),
+        0 0 48px rgba(201, 164, 60, 0.06);
+    color: #FFE278;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.65;
+    letter-spacing: 0.8px;
+    text-shadow:
+        0 0 10px rgba(255, 226, 120, 0.55),
+        0 0 24px rgba(255, 220, 100, 0.3),
+        0 0 48px rgba(201, 164, 60, 0.15);
+    animation: doorBubbleIn 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+.door-bubble::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    margin-top: -7px;
+}
+
+.door-bubble.tail-right::after {
+    right: -9px;
+    border-left: 9px solid rgba(58, 42, 12, 0.6);
+    filter: drop-shadow(2px 0 4px rgba(255, 220, 100, 0.15));
+}
+
+.door-bubble.tail-left::after {
+    left: -9px;
+    border-right: 9px solid rgba(58, 42, 12, 0.6);
+    filter: drop-shadow(-2px 0 4px rgba(255, 220, 100, 0.15));
+}
+
+.door-bubble.fade-out {
+    animation: doorBubbleFadeOut 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes doorBubbleIn {
+    0%   { opacity: 0; transform: scale(0.9) translateY(6px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes doorBubbleFadeOut {
+    0%   { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.92) translateY(-8px); }
 }
 
 /* 工作台装饰 - 中心柔和聚焦 */
@@ -72,11 +137,38 @@
     user-select: none;
     cursor: grab;
     position: absolute;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, border-color 0.25s;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, border-color 0.25s, left 0.35s ease-out, top 0.35s ease-out;
     border: 2px solid rgba(166, 124, 82, 0.1);
-    z-index: 5;
+    z-index: 10;
     touch-action: none;
     overflow: hidden;
+}
+
+/* 有长按效果的物品 — 荧光蓝边框 + 呼吸光晕 */
+.game-item.has-effect {
+    border: 2.5px solid rgba(0, 200, 255, 0.55);
+    box-shadow: 0 0 10px rgba(0, 200, 255, 0.15), 0 4px 12px rgba(107, 83, 68, 0.1);
+    animation: effectBorderBreath 2.5s ease-in-out infinite;
+}
+
+@keyframes effectBorderBreath {
+    0%, 100% { border-color: rgba(0, 200, 255, 0.45); box-shadow: 0 0 8px rgba(0, 200, 255, 0.1), 0 4px 12px rgba(107, 83, 68, 0.1); }
+    50%      { border-color: rgba(0, 200, 255, 0.7);  box-shadow: 0 0 14px rgba(0, 200, 255, 0.25), 0 4px 12px rgba(107, 83, 68, 0.1); }
+}
+
+/* 长按完成 — 金色边缘爆发 */
+.game-item.lp-gold-burst {
+    border-color: rgba(232, 200, 115, 0.95) !important;
+    box-shadow:
+        0 0 12px 3px rgba(232, 200, 115, 0.6),
+        0 0 28px 6px rgba(232, 200, 115, 0.3),
+        inset 0 0 8px rgba(232, 200, 115, 0.15) !important;
+    animation: lpGoldFlash 0.8s ease-out !important;
+}
+
+@keyframes lpGoldFlash {
+    0%   { border-color: rgba(255, 230, 150, 1); box-shadow: 0 0 20px 6px rgba(255, 220, 100, 0.8), 0 0 40px 10px rgba(232, 200, 115, 0.4); }
+    100% { border-color: rgba(232, 200, 115, 0.95); box-shadow: 0 0 12px 3px rgba(232, 200, 115, 0.6), 0 0 28px 6px rgba(232, 200, 115, 0.3); }
 }
 
 /* 类型样式 - 更柔和的宝珠色调 */
@@ -115,28 +207,58 @@
     box-shadow: 0 0 20px rgba(232, 200, 115, 0.3);
 }
 
-/* 目标物品荧光效果 - 保持荧光蓝风格 */
+/* 目标物品金色发光效果 */
 .game-item.target-item {
-    border: 3px solid rgba(0, 200, 220, 0.8) !important;
+    border: 3px solid rgba(232, 200, 115, 0.9) !important;
     box-shadow: 
-        0 0 12px rgba(0, 200, 220, 0.5),
-        0 0 24px rgba(0, 200, 220, 0.25),
-        inset 0 0 8px rgba(0, 200, 220, 0.15);
-    animation: targetGlow 2.5s ease-in-out infinite;
+        0 0 12px rgba(232, 200, 115, 0.5),
+        0 0 24px rgba(232, 200, 115, 0.25),
+        inset 0 0 8px rgba(232, 200, 115, 0.15);
+    animation: targetGlowAndGrow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-@keyframes targetGlow {
-    0%, 100% { 
+@keyframes targetGlowAndGrow {
+    0% { 
+        transform: scale(1);
         box-shadow: 
-            0 0 12px rgba(0, 200, 220, 0.5),
-            0 0 24px rgba(0, 200, 220, 0.25),
-            inset 0 0 8px rgba(0, 200, 220, 0.15);
+            0 0 12px rgba(232, 200, 115, 0.5),
+            0 0 24px rgba(232, 200, 115, 0.25),
+            inset 0 0 8px rgba(232, 200, 115, 0.15);
+    }
+    60% { 
+        transform: scale(1.35);
+        box-shadow: 
+            0 0 25px rgba(232, 200, 115, 0.8),
+            0 0 50px rgba(232, 200, 115, 0.5),
+            inset 0 0 15px rgba(232, 200, 115, 0.3);
+    }
+    100% { 
+        transform: scale(1.25);
+        box-shadow: 
+            0 0 20px rgba(232, 200, 115, 0.7),
+            0 0 40px rgba(232, 200, 115, 0.4),
+            inset 0 0 12px rgba(232, 200, 115, 0.25);
+    }
+}
+
+.game-item.target-item.target-breathe {
+    animation: targetGlowBreathe 2.5s ease-in-out infinite;
+}
+
+@keyframes targetGlowBreathe {
+    0%, 100% { 
+        transform: scale(1.25);
+        box-shadow: 
+            0 0 20px rgba(232, 200, 115, 0.6),
+            0 0 40px rgba(232, 200, 115, 0.35),
+            inset 0 0 12px rgba(232, 200, 115, 0.2);
     }
     50% { 
+        transform: scale(1.3);
         box-shadow: 
-            0 0 20px rgba(0, 200, 220, 0.7),
-            0 0 40px rgba(0, 200, 220, 0.4),
-            inset 0 0 12px rgba(0, 200, 220, 0.25);
+            0 0 28px rgba(232, 200, 115, 0.8),
+            0 0 55px rgba(232, 200, 115, 0.5),
+            inset 0 0 15px rgba(232, 200, 115, 0.3);
     }
 }
 
@@ -364,6 +486,18 @@
     }
 }
 
+/* 飞向门时的金色光晕 */
+.game-item.offering-flight {
+    filter: brightness(1.15);
+    border-radius: 50%;
+}
+
+/* 飞行轨迹粒子淡出 */
+@keyframes trailFade {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.2); opacity: 0; }
+}
+
 /* 提取出的物品动画 */
 .game-item.extracted-item {
     animation: extractPop 0.5s ease-out;
@@ -381,6 +515,17 @@
         transform: scale(1) rotate(0deg); 
         opacity: 1;
     }
+}
+
+/* 章节过渡中延续到下一关的物品：轻微金光闪烁 */
+.game-item.carry-over-flash {
+    animation: carryOverFlash 0.8s ease-out forwards;
+}
+
+@keyframes carryOverFlash {
+    0%   { box-shadow: 0 4px 12px rgba(107, 83, 68, 0.1); border-color: rgba(166, 124, 82, 0.1); }
+    35%  { box-shadow: 0 0 22px rgba(232, 200, 115, 0.7), 0 0 0 3px rgba(232, 200, 115, 0.4); border-color: rgba(232, 200, 115, 0.8); }
+    100% { box-shadow: 0 4px 12px rgba(107, 83, 68, 0.1); border-color: rgba(166, 124, 82, 0.1); }
 }
 
 /* ========== 章节过渡动画 - 星星效果 ========== */
@@ -465,5 +610,581 @@
     transform: translate(-50%, 0);
     border-radius: 50%;
     filter: blur(2px);
+}
+
+/* ========== 交易站（矩形点击式）========== */
+.trade-station {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    cursor: pointer;
+    animation: tradeStationIn 0.5s cubic-bezier(0, 0, 0.2, 1.2) forwards;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.trade-station.special-area-center {
+    right: auto;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+}
+
+.special-area-continue {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 28px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: rgba(160, 140, 110, 0.7);
+    border: 1px solid rgba(160, 140, 110, 0.25);
+    border-radius: 20px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.5s ease, color 0.2s, border-color 0.2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.special-area-continue.visible {
+    opacity: 1;
+}
+
+.special-area-continue:active {
+    color: rgba(232, 200, 115, 0.9);
+    border-color: rgba(232, 200, 115, 0.4);
+}
+
+@keyframes tradeStationIn {
+    0% { transform: translateY(-50%) scale(0); opacity: 0; }
+    100% { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+/* 交易台主体 — 横向矩形 */
+.ts-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 253, 247, 0.92);
+    border: 1.5px solid rgba(166, 124, 82, 0.25);
+    border-radius: 14px;
+    box-shadow: 0 3px 14px rgba(107, 83, 68, 0.1);
+    transition: transform 0.15s ease;
+}
+
+.trade-station:active .ts-body {
+    transform: scale(0.96);
+}
+
+/* 圆形槽位 */
+.ts-slot {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    gap: 1px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.ts-slot-name {
+    font-size: 8px;
+    color: var(--old-wood, #6B5344);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    margin-top: -2px;
+    pointer-events: none;
+}
+
+/* 左：输入槽（虚线，空） */
+.ts-slot-input {
+    border: 2px dashed rgba(166, 124, 82, 0.3);
+    background: rgba(232, 200, 115, 0.04);
+}
+
+.ts-slot-input .ts-ghost-icon {
+    opacity: 0.18;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.ts-slot-input .ts-gem-cost {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--old-wood, #6B5344);
+    white-space: nowrap;
+}
+
+.ts-gem-icon {
+    font-size: 13px;
+}
+
+/* 右：输出槽（实线） */
+.ts-slot-output {
+    border: 2px solid rgba(166, 124, 82, 0.2);
+    background: rgba(232, 200, 115, 0.06);
+}
+
+/* 中间箭头 + 标签 */
+.ts-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.ts-arrow {
+    font-size: 20px;
+    color: var(--caramel-brown, #A67C52);
+    opacity: 0.55;
+    line-height: 1;
+}
+
+.ts-label {
+    font-size: 10px;
+    color: var(--caramel-brown, #A67C52);
+    letter-spacing: 3px;
+    font-weight: 500;
+}
+
+/* 拖拽命中区域 */
+.trade-station-hitbox {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    z-index: 3;
+    transition: box-shadow 0.3s, background 0.3s;
+}
+
+.trade-station-hitbox.trade-hover {
+    box-shadow: 0 0 18px rgba(232, 200, 115, 0.5), inset 0 0 8px rgba(232, 200, 115, 0.15);
+    background: rgba(232, 200, 115, 0.08);
+}
+
+.trade-station-hitbox.trade-wrong {
+    animation: shake 0.4s ease-in-out;
+}
+
+/* 进货中遮罩 */
+.trade-restock-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 253, 247, 0.92);
+    border: 1px solid rgba(166, 124, 82, 0.2);
+    border-radius: 14px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    pointer-events: none;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    animation: restockFadeIn 0.3s ease-out;
+}
+
+.trade-restock-overlay.active {
+    display: flex;
+}
+
+@keyframes restockFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.trade-restock-title {
+    font-size: 11px;
+    color: var(--caramel-brown, #A67C52);
+    letter-spacing: 2px;
+}
+
+.trade-restock-countdown {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--old-wood, #6B5344);
+    line-height: 1.1;
+}
+
+.trade-restock-unit {
+    font-size: 12px;
+    color: var(--caramel-brown, #A67C52);
+    letter-spacing: 1px;
+}
+
+/* 断货状态 */
+.trade-station.trade-sold-out {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(0.4);
+}
+
+/* ========== 交易确认弹窗 ========== */
+.trade-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: tradeDialogIn 0.25s ease-out;
+}
+
+@keyframes tradeDialogIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.trade-confirm-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(107, 83, 68, 0.18);
+    backdrop-filter: blur(2px);
+}
+
+.trade-confirm-box {
+    position: relative;
+    background: var(--milk-foam, #FFFDF7);
+    border: 1.5px solid rgba(166, 124, 82, 0.25);
+    border-radius: 18px;
+    padding: 22px 28px 18px;
+    box-shadow: 0 8px 32px rgba(107, 83, 68, 0.12);
+    text-align: center;
+    max-width: 300px;
+    animation: tradeBoxPop 0.3s cubic-bezier(0, 0, 0.2, 1.2);
+}
+
+@keyframes tradeBoxPop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.trade-confirm-text {
+    font-size: 15px;
+    color: var(--old-wood, #6B5344);
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.trade-confirm-input-name {
+    font-weight: 700;
+    color: var(--rice-wine-gold, #E8C873);
+    font-size: 16px;
+}
+
+.trade-confirm-output-name {
+    font-weight: 700;
+    color: var(--old-wood, #6B5344);
+    font-size: 16px;
+}
+
+.trade-confirm-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.trade-confirm-cancel,
+.trade-confirm-ok {
+    padding: 8px 24px;
+    border-radius: 22px;
+    border: 1.5px solid rgba(166, 124, 82, 0.2);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.trade-confirm-cancel {
+    background: transparent;
+    color: var(--caramel-brown, #A67C52);
+}
+
+.trade-confirm-cancel:active {
+    transform: scale(0.95);
+}
+
+.trade-confirm-ok {
+    background: linear-gradient(135deg, #E8C873 0%, #D4B060 100%);
+    color: var(--old-wood, #6B5344);
+    border-color: #D4B060;
+    font-weight: 600;
+}
+
+.trade-confirm-ok:active {
+    transform: scale(0.95);
+}
+
+.trade-confirm-ok.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.trade-confirm-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #c0795a;
+    letter-spacing: 1px;
+}
+
+/* ========== 配方书按钮（门区域右上角） ========== */
+.recipe-book-btn {
+    position: absolute;
+    top: 22px;
+    right: 16px;
+    padding: 6px 14px;
+    background: var(--milk-foam, #FFFDF7);
+    border: 1px solid rgba(166, 124, 82, 0.2);
+    border-radius: 16px;
+    font-size: 13px;
+    color: var(--old-wood, #6B5344);
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(107, 83, 68, 0.08);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.recipe-book-btn:active {
+    transform: scale(0.94);
+}
+
+.recipe-book-btn.golden-pulse {
+    border-color: rgba(232, 200, 115, 0.6);
+    box-shadow:
+        0 0 8px rgba(232, 200, 115, 0.3),
+        0 0 20px rgba(232, 200, 115, 0.15);
+    animation: recipeBookPulse 2s ease-in-out infinite;
+}
+
+@keyframes recipeBookPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 8px rgba(232, 200, 115, 0.3),
+            0 0 20px rgba(232, 200, 115, 0.15);
+    }
+    50% {
+        box-shadow:
+            0 0 14px 4px rgba(232, 200, 115, 0.55),
+            0 0 30px 8px rgba(232, 200, 115, 0.25);
+    }
+}
+
+/* ========== 配方书弹窗 ========== */
+.recipe-book-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 12, 10, 0.6);
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.recipe-book-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.recipe-book-page {
+    width: 88%;
+    max-width: 360px;
+    max-height: 80vh;
+    background: #FDF8EE;
+    border-radius: 4px;
+    padding: 28px 24px 20px;
+    box-shadow:
+        4px 4px 0 rgba(166, 124, 82, 0.15),
+        8px 8px 0 rgba(166, 124, 82, 0.08),
+        0 16px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0, 0, 0.2, 1.2);
+    border-left: 3px solid rgba(166, 124, 82, 0.2);
+}
+
+.recipe-book-overlay.visible .recipe-book-page {
+    transform: scale(1);
+}
+
+.recipe-book-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.recipe-book-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: #6B5344;
+    letter-spacing: 6px;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", serif;
+}
+
+.recipe-book-close {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid rgba(166, 124, 82, 0.15);
+    border-radius: 50%;
+    color: #A67C52;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.recipe-book-close:active {
+    transform: scale(0.9);
+}
+
+/* 搜索框 */
+.recipe-book-search {
+    margin-bottom: 10px;
+}
+
+.recipe-search-input {
+    width: 100%;
+    padding: 8px 14px;
+    border: 1px solid rgba(166, 124, 82, 0.15);
+    border-radius: 10px;
+    background: rgba(255, 253, 247, 0.8);
+    font-size: 13px;
+    color: #6B5344;
+    outline: none;
+    letter-spacing: 1px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    transition: border-color 0.2s;
+}
+
+.recipe-search-input::placeholder {
+    color: #C4B5A3;
+}
+
+.recipe-search-input:focus {
+    border-color: rgba(232, 200, 115, 0.5);
+}
+
+/* 标签页切换 */
+.recipe-book-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(166, 124, 82, 0.12);
+}
+
+.recipe-tab {
+    flex: 1;
+    padding: 8px 0;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 13px;
+    color: #B8A590;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
+}
+
+.recipe-tab.active {
+    color: #6B5344;
+    border-bottom-color: #A67C52;
+}
+
+.recipe-book-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(166, 124, 82, 0.25), transparent);
+    margin-bottom: 12px;
+}
+
+/* 空状态 */
+.recipe-empty {
+    text-align: center;
+    padding: 32px 0;
+    font-size: 13px;
+    color: #C4B5A3;
+    letter-spacing: 2px;
+    font-style: italic;
+}
+
+.recipe-book-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.recipe-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 253, 247, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(166, 124, 82, 0.06);
+}
+
+.recipe-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.recipe-detail {
+    min-width: 0;
+}
+
+.recipe-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B5344;
+    letter-spacing: 2px;
+    margin-bottom: 3px;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
+}
+
+.recipe-formula {
+    font-size: 13px;
+    color: #A67C52;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.recipe-note {
+    font-size: 11px;
+    color: #B8A590;
+    font-style: italic;
+    letter-spacing: 0.5px;
+}
+
+.recipe-book-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #C4B5A3;
+    letter-spacing: 3px;
+    font-style: italic;
 }
 

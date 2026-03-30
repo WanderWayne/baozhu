@@ -9,7 +9,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 38vh; /* 增加高度，让门成为焦点 */
+    height: 38vh;
     min-height: 260px;
     display: flex;
     flex-direction: column;
@@ -19,6 +19,11 @@
     padding: 20px;
     padding-top: 55px;
     padding-bottom: 15px;
+    pointer-events: none;
+}
+
+#door-area > * {
+    pointer-events: auto;
 }
 
 /* 门区域底部淡化边界 - 与合成区自然过渡 */
@@ -65,61 +70,75 @@
     transform: scale(0.92);
 }
 
-/* ========== 身份铭牌 ========== */
-.identity-plaque {
+/* ========== 可领取任务金色提示点 ========== */
+.claimable-dot {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffd96b 30%, #e8c873 100%);
+    box-shadow: 0 0 6px 2px rgba(232, 200, 115, 0.6);
+    animation: claimableDotBreathe 1.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes claimableDotBreathe {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0.6;
+        box-shadow: 0 0 4px 1px rgba(232, 200, 115, 0.4);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+        box-shadow: 0 0 8px 3px rgba(232, 200, 115, 0.8);
+    }
+}
+
+/* ========== 身份铭牌 ========== */
+/* ========== 门行容器 ========== */
+.door-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.door-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 双门完成勾 */
+.door-wrapper.door-done .door-container::after {
+    content: '✓';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--moss-green, #7BA37B);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: var(--milk-foam);
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(166, 124, 82, 0.12);
-    box-shadow: 0 2px 8px rgba(107, 83, 68, 0.05);
+    justify-content: center;
     z-index: 20;
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(123, 163, 123, 0.4);
+    animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.identity-icon {
-    font-size: 14px;
+@keyframes badgePop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
 }
 
-.identity-title {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--caramel-brown);
-    letter-spacing: 1px;
-}
-
-/* 不同等级的身份铭牌样式 */
-.identity-plaque.level-apprentice {
-    border-color: rgba(166, 124, 82, 0.2);
-}
-
-.identity-plaque.level-brewer {
-    border-color: rgba(232, 200, 115, 0.4);
-    background: linear-gradient(135deg, var(--milk-foam) 0%, rgba(240, 217, 160, 0.3) 100%);
-}
-
-.identity-plaque.level-master {
-    border-color: rgba(232, 200, 115, 0.6);
-    background: linear-gradient(135deg, var(--milk-foam) 0%, rgba(232, 200, 115, 0.25) 100%);
-    box-shadow: 0 4px 12px rgba(232, 200, 115, 0.15);
-}
-
-.identity-plaque.level-legend {
-    border-color: var(--rice-wine-gold);
-    background: linear-gradient(135deg, #FFF8E1 0%, #FFD54F 100%);
-    box-shadow: 0 4px 16px rgba(232, 200, 115, 0.3);
-}
-
-.identity-plaque.level-legend .identity-title {
-    color: var(--old-wood);
-}
-
-/* ========== 门容器 ========== */
+/* ========== 门容器（开场拱门风格） ========== */
 .door-container {
     position: relative;
     width: 120px;
@@ -132,6 +151,11 @@
     transition: transform 0.5s ease;
 }
 
+/* 双门模式：保持正常大小，仅微调间距 */
+.door-row.dual-doors {
+    gap: 32px;
+}
+
 /* 门的外部光晕 */
 .door-aura {
     position: absolute;
@@ -140,7 +164,7 @@
     right: -15px;
     bottom: -15px;
     border-radius: 75px 75px 0 0;
-    background: radial-gradient(ellipse at center 40%, rgba(0, 200, 220, 0.08) 0%, transparent 60%);
+    background: radial-gradient(ellipse at center 40%, rgba(232, 200, 115, 0.06) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
     animation: auraBreath 4s ease-in-out infinite;
@@ -148,22 +172,22 @@
 
 @keyframes auraBreath {
     0%, 100% {
-        opacity: 0.6;
+        opacity: 0.5;
         transform: scale(1);
     }
     50% {
-        opacity: 1;
-        transform: scale(1.05);
+        opacity: 0.8;
+        transform: scale(1.03);
     }
 }
 
-/* 门框 - 拱门风格 */
+/* 门框 - 简洁拱门轮廓 */
 .door-frame {
     width: 100%;
     height: 100%;
     border-radius: 60px 60px 0 0;
     background: transparent;
-    border: 3px solid rgba(140, 140, 140, 0.5);
+    border: 3px solid rgba(150, 150, 150, 0.6);
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
@@ -171,7 +195,7 @@
     z-index: 2;
 }
 
-/* 门内部空间 */
+/* 门内部 - 纯黑深邃 */
 .door-glow {
     position: absolute;
     top: 6px;
@@ -179,105 +203,72 @@
     right: 6px;
     bottom: 0;
     border-radius: 54px 54px 0 0;
-    background: linear-gradient(180deg, #0a0a0a 0%, #050508 100%);
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s ease;
     overflow: hidden;
-    box-shadow: inset 0 0 40px rgba(0, 180, 200, 0.12);
-    animation: doorGlowBreath 6s ease-in-out infinite;
 }
 
-@keyframes doorGlowBreath {
-    0%, 100% {
-        box-shadow: inset 0 0 40px rgba(0, 180, 200, 0.1);
-    }
-    50% {
-        box-shadow: inset 0 0 60px rgba(0, 180, 200, 0.18);
-    }
-}
-
-/* 门内微光效果 */
+/* 金色呼吸光 */
 .door-glow::before {
     content: '';
     position: absolute;
-    top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(ellipse at center 30%, rgba(0, 200, 220, 0.12) 0%, transparent 60%);
-    opacity: 0.5;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center 40%,
+        rgba(232, 200, 115, 0.25) 0%,
+        rgba(200, 170, 80, 0.08) 50%,
+        transparent 80%
+    );
+    opacity: 0;
     pointer-events: none;
-    animation: doorGlowPulse 7s ease-in-out infinite;
+    animation: doorBreathGlow 2s ease-in-out infinite;
 }
 
-@keyframes doorGlowPulse {
+@keyframes doorBreathGlow {
     0%, 100% {
-        opacity: 0.4;
-        transform: scale(1);
+        opacity: 0.3;
+        transform: scale(0.95);
     }
     50% {
         opacity: 0.7;
-        transform: scale(1.08);
+        transform: scale(1.02);
     }
 }
 
-/* 液态流动感 */
-.door-glow::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: 
-        radial-gradient(ellipse at 30% 40%, rgba(200, 230, 255, 0.04) 0%, transparent 40%),
-        radial-gradient(ellipse at 70% 60%, rgba(180, 220, 240, 0.03) 0%, transparent 35%);
-    animation: liquidFlow 12s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes liquidFlow {
-    0%, 100% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    33% {
-        transform: translate(5%, 3%) rotate(2deg);
-    }
-    66% {
-        transform: translate(-3%, 5%) rotate(-1deg);
-    }
-}
-
-/* 门内雾气 */
+/* 门内雾气 - 底部微弱 */
 .door-fog {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 40%;
-    background: linear-gradient(to top, rgba(0, 180, 200, 0.08) 0%, transparent 100%);
+    height: 35%;
+    background: linear-gradient(to top, rgba(232, 200, 115, 0.06) 0%, transparent 100%);
     pointer-events: none;
     animation: fogWave 8s ease-in-out infinite;
 }
 
 @keyframes fogWave {
     0%, 100% {
-        opacity: 0.6;
+        opacity: 0.5;
         transform: translateY(0);
     }
     50% {
-        opacity: 0.9;
-        transform: translateY(-5px);
+        opacity: 0.8;
+        transform: translateY(-3px);
     }
 }
 
 /* 目标物品剪影 */
 .door-target-silhouette {
     font-size: 52px;
-    opacity: 0.25;
-    filter: blur(5px) grayscale(80%);
+    opacity: 0.4;
+    filter: blur(3px) grayscale(70%);
     transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 3;
     transform: scale(0.85);
@@ -288,15 +279,15 @@
 @keyframes targetBreath {
     0%, 100% { 
         transform: scale(0.85); 
-        filter: blur(5px) grayscale(80%);
+        filter: blur(3px) grayscale(70%);
     }
     50% { 
         transform: scale(0.92); 
-        filter: blur(4px) grayscale(70%);
+        filter: blur(2px) grayscale(60%);
     }
 }
 
-/* 献上提示 - 放在门的正下方，不会遮挡标题 */
+/* 献上提示 */
 .door-offer-hint {
     position: absolute;
     bottom: 8px;
@@ -323,11 +314,7 @@
 }
 
 .level-name {
-    font-size: 18px;
-    font-weight: 400;
-    color: var(--old-wood);
-    letter-spacing: 4px;
-    font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", serif;
+    display: none;
 }
 
 .level-target-display {
@@ -338,6 +325,7 @@
     background: var(--milk-foam);
     border-radius: 16px;
     border: 1px solid rgba(166, 124, 82, 0.1);
+    position: relative;
 }
 
 .target-label {
@@ -351,6 +339,43 @@
     color: var(--old-wood);
     font-weight: 500;
     letter-spacing: 1px;
+}
+
+/* ========== 进关目标高亮动画 ========== */
+.level-target-display.target-entry-pulse {
+    animation: targetEntryGlow 2s ease-out forwards;
+}
+
+@keyframes targetEntryGlow {
+    0% {
+        border-color: rgba(232, 200, 115, 0.9);
+        background: rgba(255, 248, 220, 0.85);
+        box-shadow:
+            0 0 0 0   rgba(232, 200, 115, 0.6),
+            0 0 0 0   rgba(232, 200, 115, 0.3),
+            0 0 18px  rgba(232, 200, 115, 0.5);
+    }
+    30% {
+        box-shadow:
+            0 0 0 10px rgba(232, 200, 115, 0.18),
+            0 0 0 22px rgba(232, 200, 115, 0.07),
+            0 0 26px  rgba(232, 200, 115, 0.35);
+        border-color: rgba(232, 200, 115, 0.7);
+        background: rgba(255, 248, 220, 0.6);
+    }
+    65% {
+        box-shadow:
+            0 0 0 18px rgba(232, 200, 115, 0.04),
+            0 0 0 34px rgba(232, 200, 115, 0),
+            0 0 14px  rgba(232, 200, 115, 0.15);
+        border-color: rgba(232, 200, 115, 0.35);
+        background: rgba(255, 248, 220, 0.25);
+    }
+    100% {
+        border-color: rgba(166, 124, 82, 0.1);
+        background: var(--milk-foam, #FFFDF7);
+        box-shadow: none;
+    }
 }
 
 /* 门状态指示 - 隐藏或移到不遮挡的位置 */

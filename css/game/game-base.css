@@ -122,6 +122,39 @@ body {
     pointer-events: none;
 }
 
+/* ========== 背景装饰层 ========== */
+.bg-decor {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.bg-decor svg {
+    position: absolute;
+    pointer-events: none;
+}
+
+.bg-dust {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(200, 180, 140, 0.5);
+    pointer-events: none;
+}
+
+@keyframes dustDrift {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    15%  { opacity: 0.55; }
+    85%  { opacity: 0.4; }
+    100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+@keyframes windSway {
+    0%, 100% { transform: rotate(var(--base-rot)); }
+    50%      { transform: rotate(calc(var(--base-rot) + var(--sway))); }
+}
+
 /* 漂浮的奶雾粒子 - 由JS动态生成 */
 .milk-fog-particle {
     position: absolute;

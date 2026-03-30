@@ -1,0 +1,306 @@
+/* ========================================
+   Abyss Mode — Quiet Geometry Style
+   ======================================== */
+
+/* ===== Viewport & World ===== */
+
+.abyss-active #abyss-viewport {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    z-index: 1;
+    background: #f5f3ef;
+}
+
+.abyss-active #abyss-world {
+    position: absolute;
+    top: 0; left: 0;
+    will-change: transform;
+}
+
+.abyss-active #abyss-ui-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+.abyss-active #abyss-ui-layer > * {
+    pointer-events: auto;
+}
+
+/* Synthesis area fills the world */
+.abyss-active #synthesis-area {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+.abyss-active #synthesis-area .workbench-texture {
+    display: none;
+}
+
+/* Hide default UI */
+.abyss-active .identity-plaque,
+.abyss-active .level-info,
+.abyss-active #door-status,
+.abyss-active #door-container,
+.abyss-active #milk-fog-container,
+.abyss-active #tutorial-overlay {
+    display: none !important;
+}
+
+/* ===== Inventory — White Frosted Glass ===== */
+
+.abyss-active #inventory-area {
+    position: fixed;
+    bottom: 0; left: 0;
+    width: 100%;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 16px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 64px;
+}
+
+/* ===== Particles ===== */
+
+.abyss-particles {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.abyss-particle {
+    position: absolute;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* Dust motes */
+.abyss-dust {
+    border-radius: 50%;
+    animation: abyssDustDrift ease-in-out infinite;
+}
+
+@keyframes abyssDustDrift {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.2;
+    }
+    30% {
+        transform: translate(10px, -16px) scale(1.08);
+        opacity: 0.38;
+    }
+    60% {
+        transform: translate(-6px, -28px) scale(0.92);
+        opacity: 0.15;
+    }
+    85% {
+        transform: translate(8px, -10px) scale(1.04);
+        opacity: 0.3;
+    }
+}
+
+/* Fog wisps */
+.abyss-fog {
+    border-radius: 50%;
+    background: rgba(240, 238, 232, 0.06);
+    filter: blur(8px);
+    animation: abyssFogDrift ease-in-out infinite;
+}
+
+@keyframes abyssFogDrift {
+    0%, 100% {
+        transform: translateX(0) scaleX(1);
+        opacity: 0.06;
+    }
+    50% {
+        transform: translateX(30px) scaleX(1.15);
+        opacity: 0.1;
+    }
+}
+
+/* ===== Door ===== */
+
+.abyss-door {
+    position: absolute;
+    z-index: 10;
+    cursor: default;
+    transition: filter 0.6s ease;
+}
+.abyss-door svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Idle breathing */
+.abyss-door.closed {
+    animation: abyssDoorBreathe 4s ease-in-out infinite;
+}
+
+@keyframes abyssDoorBreathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.012); }
+}
+
+/* Ready state — gold pulse */
+.abyss-door.ready {
+    animation: abyssDoorGoldPulse 2.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(218,185,107,0.3));
+}
+
+@keyframes abyssDoorGoldPulse {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(218,185,107,0.25)); }
+    50% { filter: drop-shadow(0 0 22px rgba(218,185,107,0.5)); }
+}
+
+/* Open state */
+.abyss-door.open {
+    cursor: pointer;
+    animation: abyssDoorOpenPulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 16px rgba(218,185,107,0.35));
+}
+.abyss-door.open:active {
+    transform: scale(0.96);
+}
+
+@keyframes abyssDoorOpenPulse {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(218,185,107,0.3)); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 24px rgba(218,185,107,0.5)); transform: scale(1.015); }
+}
+
+/* ===== Chest ===== */
+
+.abyss-chest {
+    position: absolute;
+    z-index: 10;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    animation: abyssChestIdle 3.5s ease-in-out infinite;
+}
+.abyss-chest svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.abyss-chest:active {
+    transform: scale(0.94);
+}
+.abyss-chest.opened {
+    cursor: default;
+    animation: none;
+}
+
+@keyframes abyssChestIdle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+/* ===== Hint UI ===== */
+
+.abyss-hint {
+    position: fixed;
+    top: 52px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 195, 188, 0.2);
+    border-radius: 3px;
+    font-size: 13px;
+    color: #6b6560;
+    letter-spacing: 1px;
+    z-index: 200;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    white-space: nowrap;
+}
+.abyss-hint.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.abyss-hint.fade-out {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+}
+
+/* ===== Reward Labels ===== */
+
+.abyss-reward-label {
+    position: absolute;
+    color: #8b7355;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: abyssRewardFloat 2s ease-out forwards;
+    z-index: 20;
+}
+
+@keyframes abyssRewardFloat {
+    0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+    15% { opacity: 0.8; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-36px); }
+}
+
+/* ===== Golden Glow ===== */
+
+.abyss-golden-glow {
+    filter: drop-shadow(0 0 8px rgba(218,185,107,0.5)) !important;
+    animation: abyssGoldPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes abyssGoldPulse {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(218,185,107,0.4)); }
+    50% { filter: drop-shadow(0 0 16px rgba(218,185,107,0.7)); }
+}
+
+/* ===== Flying Item ===== */
+
+.abyss-flying-item {
+    position: absolute;
+    z-index: 50;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 10px rgba(218,185,107,0.5));
+}
+.abyss-flying-item .name {
+    display: none;
+}
+
+/* ===== Transition Overlay ===== */
+
+.abyss-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: #08080f;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    pointer-events: none;
+}
+.abyss-transition-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}

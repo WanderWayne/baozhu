@@ -12,20 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 绑定面板事件
     bindPanelEvents();
+
+    // 检测可领取任务，更新金色提示点
+    updateClaimableDots();
     
     const mainScreen = document.getElementById('main-screen');
     if (mainScreen && mainScreen.style.display !== 'none') {
-        // 主界面已显示，初始化粒子系统
-        if (!window.mainParticleSystem) {
+        // 主界面已显示（跳过开场的情况），初始化粒子系统
+        if (!window.mainParticleSystem && window.MainParticleSystem) {
             window.mainParticleSystem = new MainParticleSystem();
         }
         
-        // 初始化环境层（使用全局函数，更可靠）
         if (window.initMainScreenAmbience) {
             window.initMainScreenAmbience();
         }
         
-        // 播放BGM
         if (window.AudioManager) {
             window.AudioManager.playBGM('bgm-menu');
         }
@@ -54,19 +55,7 @@ function bindMenuButtons() {
         continueBtn.addEventListener('click', () => {
             if (window.AudioManager) window.AudioManager.playClickEnter();
             
-            // 检查是否是首次进入（从开场动画过来，进度条等被隐藏）
-            const codexRow = document.getElementById('codex-row');
-            const isFirstTime = codexRow && codexRow.style.display === 'none';
-            
-            // 如果是从开场过来，introSystem 实例还在 window 上
-            // 但如果直接刷新主界面，introSystem 可能不在
-            if (isFirstTime && window.introSystem) {
-                // 首次进入：播放播种动画后跳转
-                window.introSystem.showSeedAndGoToLevels();
-            } else {
-                // 老玩家：直接跳转
-                window.navigateTo('levels.html');
-            }
+            window.navigateTo('levels.html');
         });
     }
 
@@ -88,12 +77,13 @@ function bindMenuButtons() {
         });
     }
 
-    // 自由世界按钮
-    const freeModeBtn = document.getElementById('free-mode-btn');
-    if (freeModeBtn) {
-        freeModeBtn.addEventListener('click', () => {
+    // 任务按钮
+    const tasksBtn = document.getElementById('free-mode-btn');
+    if (tasksBtn) {
+        tasksBtn.addEventListener('click', () => {
             if (window.AudioManager) window.AudioManager.playClickEnter();
-            window.navigateTo('game.html?mode=free');
+            renderTasks();
+            openPanel('tasks-overlay');
         });
     }
 
@@ -136,6 +126,14 @@ function bindPanelEvents() {
     if (settingsClose) {
         settingsClose.addEventListener('click', () => {
             closePanel('settings-overlay');
+        });
+    }
+
+    // 任务面板关闭按钮
+    const tasksClose = document.getElementById('tasks-close');
+    if (tasksClose) {
+        tasksClose.addEventListener('click', () => {
+            closePanel('tasks-overlay');
         });
     }
 
@@ -199,6 +197,177 @@ function closePanel(panelId) {
         panel.classList.remove('visible');
         document.body.style.overflow = '';
     }
+}
+
+// ==================== 可领取任务金色提示点 ====================
+
+function hasAnyClaimableTask() {
+    return window.LevelManager && window.LevelManager.hasAnyClaimableTask();
+}
+
+function _ensureDot(el) {
+    if (!el || el.querySelector('.claimable-dot')) return;
+    const dot = document.createElement('span');
+    dot.className = 'claimable-dot';
+    el.appendChild(dot);
+}
+
+function _removeDot(el) {
+    if (!el) return;
+    const dot = el.querySelector('.claimable-dot');
+    if (dot) dot.remove();
+}
+
+function updateClaimableDots() {
+    const show = hasAnyClaimableTask();
+    const tasksBtn = document.getElementById('free-mode-btn');
+    if (show) {
+        _ensureDot(tasksBtn);
+    } else {
+        _removeDot(tasksBtn);
+    }
+}
+
+// ==================== 任务系统 ====================
+
+const TASKS = [
+    {
+        id: 'first_synthesis',
+        name: '初次合成',
+        description: '完成第一次物品合成',
+        check: () => {
+            const items = window.LevelManager.currentProgress.discoveredItems || [];
+            return { current: Math.min(items.length, 1), total: 1 };
+        },
+        reward: '💎 30',
+        gems: 30
+    },
+    {
+        id: 'complete_first5',
+        name: '崭露头角',
+        description: '完成前五关',
+        check: () => {
+            const completed = window.LevelManager.currentProgress.completedLevels || [];
+            const first5 = [101, 102, 103, 104, 105];
+            const done = first5.filter(id => completed.includes(id)).length;
+            return { current: done, total: 5 };
+        },
+        reward: '💎 150',
+        gems: 150
+    },
+    {
+        id: 'complete_boss',
+        name: '经典之作',
+        description: '酿出冰酒酿桂花酪',
+        check: () => {
+            const completed = window.LevelManager.currentProgress.completedLevels || [];
+            const done = completed.includes(106) ? 1 : 0;
+            return { current: done, total: 1 };
+        },
+        reward: '💎 300',
+        gems: 300
+    },
+    {
+        id: 'complete_chapter1',
+        name: '酪之初启',
+        description: '完成奶酪谷全部 6 关',
+        check: () => {
+            const completed = window.LevelManager.currentProgress.completedLevels || [];
+            const chapter1 = [101, 102, 103, 104, 105, 106];
+            const done = chapter1.filter(id => completed.includes(id)).length;
+            return { current: done, total: 6 };
+        },
+        reward: '💎 200',
+        gems: 200
+    },
+    {
+        id: 'discover_10',
+        name: '见多识广',
+        description: '发现 10 种物品',
+        check: () => {
+            const items = window.LevelManager.currentProgress.discoveredItems || [];
+            return { current: Math.min(items.length, 10), total: 10 };
+        },
+        reward: '💎 100',
+        gems: 100
+    },
+    {
+        id: 'discover_20',
+        name: '酿造百科',
+        description: '发现 20 种物品',
+        check: () => {
+            const items = window.LevelManager.currentProgress.discoveredItems || [];
+            return { current: Math.min(items.length, 20), total: 20 };
+        },
+        reward: '💎 250',
+        gems: 250
+    }
+];
+
+function renderTasks() {
+    const list = document.getElementById('tasks-list');
+    if (!list) return;
+
+    // 已领取的任务奖励记录
+    const claimed = JSON.parse(localStorage.getItem('baozhu_claimed_tasks') || '[]');
+
+    list.innerHTML = '';
+
+    TASKS.forEach(task => {
+        const { current, total } = task.check();
+        const percent = Math.min((current / total) * 100, 100);
+        const done = current >= total;
+        const alreadyClaimed = claimed.includes(task.id);
+        const canClaim = done && !alreadyClaimed;
+
+        const row = document.createElement('div');
+        row.className = 'task-row' + (done ? ' task-done' : '') + (alreadyClaimed ? ' task-claimed' : '');
+
+        const rewardLabel = canClaim ? '领取' : (alreadyClaimed ? '已领取' : '奖励');
+
+        row.innerHTML =
+            '<div class="task-left">' +
+                '<div class="task-info">' +
+                    '<span class="task-name">' + task.name + '</span>' +
+                    '<span class="task-desc">' + task.description + '</span>' +
+                '</div>' +
+                '<div class="task-progress-bar">' +
+                    '<div class="task-progress-fill" style="width:' + percent + '%"></div>' +
+                '</div>' +
+                '<span class="task-progress-text">' + current + ' / ' + total + '</span>' +
+            '</div>' +
+            '<div class="task-reward' + (canClaim ? ' task-claimable' : '') + '" data-task-id="' + task.id + '">' +
+                (canClaim ? '<span class="claimable-dot"></span>' : '') +
+                '<span class="task-reward-label">' + rewardLabel + '</span>' +
+                '<span class="task-reward-value">' + task.reward + '</span>' +
+            '</div>';
+
+        list.appendChild(row);
+    });
+
+    // Bind claim buttons
+    list.querySelectorAll('.task-claimable').forEach(el => {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', () => {
+            const taskId = el.dataset.taskId;
+            const task = TASKS.find(t => t.id === taskId);
+            if (!task || !task.gems) return;
+
+            claimed.push(taskId);
+            localStorage.setItem('baozhu_claimed_tasks', JSON.stringify(claimed));
+            window.LevelManager.addGems(task.gems);
+
+            el.classList.remove('task-claimable');
+            el.querySelector('.task-reward-label').textContent = '已领取';
+            _removeDot(el);
+            el.style.cursor = '';
+
+            const row = el.closest('.task-row');
+            if (row) row.classList.add('task-claimed');
+
+            updateClaimableDots();
+        });
+    });
 }
 
 // ==================== 进度面板 ====================

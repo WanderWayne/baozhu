@@ -17,7 +17,7 @@ IntroSystem.prototype.addParticle = function(fromCenter = false) {
         y = this.centerY + Math.sin(angle) * dist;
     }
     
-    // 随机决定是否为荧光蓝粒子（约30%概率）
+    // 随机决定是否为金色粒子（约30%概率）
     const isCyan = Math.random() < 0.3;
     
     const p = {
@@ -41,8 +41,8 @@ IntroSystem.prototype.addParticle = function(fromCenter = false) {
         pulseOffset: 0, // 被光波震动的偏移
         pulseDecay: 0,
         pulseAngle: 0,
-        isCyan: isCyan, // 是否为荧光蓝粒子
-        originalColor: isCyan ? 'cyan' : 'white' // 原始颜色
+        isCyan: isCyan, // 是否为金色粒子
+        originalColor: isCyan ? 'gold' : 'white'
     };
     
     this.particles.push(p);
@@ -230,8 +230,8 @@ IntroSystem.prototype.drawParticles = function() {
     const riseY = (this.state === 'riseUp' || this.state === 'gatherToText' || this.state === 'showStartButton') 
         ? (this.riseOffset || 0) : 0;
     
-    // 先画连线（更细更透明）
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    // 先画连线（更细更透明，微金色）
+    ctx.strokeStyle = 'rgba(255, 230, 170, 0.15)';
     ctx.lineWidth = 0.5;
     this.particles.forEach(p => {
         if (p.linkedTo && !p.gathering && this.state !== 'riseUp') {
@@ -299,12 +299,12 @@ IntroSystem.prototype.drawParticles = function() {
             }
         } else if (this.state === 'riseUp') {
             // 上升阶段：渐进式颜色变化
-            // 白色/荧光蓝 → 老木褐/米酒金
+            // 白色/金色 → 老木褐/米酒金
             let startR, startG, startB, endR, endG, endB;
             
             if (p.isCyan) {
-                // 荧光蓝 (176,245,255) → 米酒金 (232,200,115)
-                startR = 176; startG = 245; startB = 255;
+                // 金色 (255,220,130) → 米酒金 (232,200,115)
+                startR = 255; startG = 220; startB = 130;
                 endR = 232; endG = 200; endB = 115;
             } else {
                 // 白色 (255,255,255) → 老木褐 (107,83,68)
@@ -318,8 +318,8 @@ IntroSystem.prototype.drawParticles = function() {
             
             ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
         } else if (p.isCyan) {
-            // 开场荧光蓝粒子
-            ctx.fillStyle = `rgba(176, 245, 255, ${alpha})`;
+            // 金色粒子
+            ctx.fillStyle = `rgba(255, 220, 130, ${alpha})`;
         } else {
             // 白色粒子
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;

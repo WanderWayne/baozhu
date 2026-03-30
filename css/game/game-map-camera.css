@@ -1,0 +1,229 @@
+/* ========================================
+   游戏界面样式 - 地图镜头
+======================================== */
+
+#game-map-viewport {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 1;
+    touch-action: none;
+    cursor: grab;
+    background: transparent;
+}
+
+#game-map-viewport.is-panning {
+    cursor: grabbing;
+}
+
+#game-map-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max(235vw, 1800px);
+    height: max(210vh, 1320px);
+    will-change: transform;
+    overflow: hidden;
+}
+
+.map-landscape-layer,
+.map-grid-layer,
+.map-boundary-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.map-landscape-layer {
+    z-index: 0;
+    background:
+        radial-gradient(ellipse 120% 70% at 50% 12%, rgba(255, 253, 247, 0.35) 0%, transparent 52%),
+        radial-gradient(circle at 15% 80%, rgba(232, 200, 115, 0.08) 0%, transparent 42%),
+        radial-gradient(circle at 82% 74%, rgba(166, 124, 82, 0.08) 0%, transparent 40%);
+}
+
+.map-grid-layer {
+    z-index: 1;
+    background-image:
+        linear-gradient(rgba(166, 124, 82, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(166, 124, 82, 0.05) 1px, transparent 1px);
+    background-size: 70px 70px;
+    opacity: 0.35;
+}
+
+.map-boundary-layer {
+    --boundary-width: 135px;
+    z-index: 2;
+    mix-blend-mode: normal;
+}
+
+/* 房间之间的可消失墙体（第一关双房间） */
+.map-boundary-wall {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 135px;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    background:
+        linear-gradient(to right, transparent 0%, rgba(170, 18, 43, 0.48) 25%, rgba(170, 18, 43, 0.52) 50%, rgba(170, 18, 43, 0.48) 75%, transparent 100%);
+    filter: blur(10px);
+    opacity: 0.9;
+    transition: opacity 0.6s ease;
+}
+
+.map-boundary-wall.unlocked {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.map-boundary-layer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right, rgba(170, 18, 43, 0.48), transparent var(--boundary-width)),
+        linear-gradient(to left, rgba(170, 18, 43, 0.48), transparent var(--boundary-width)),
+        linear-gradient(to bottom, rgba(170, 18, 43, 0.52), transparent var(--boundary-width)),
+        linear-gradient(to top, rgba(170, 18, 43, 0.52), transparent var(--boundary-width));
+    filter: blur(10px);
+    opacity: 0.9;
+}
+
+.map-boundary-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(130px 70px at 5% 50%, rgba(216, 56, 92, 0.32), transparent 75%),
+        radial-gradient(140px 80px at 95% 52%, rgba(216, 56, 92, 0.32), transparent 75%),
+        radial-gradient(90px 55px at 50% 4%, rgba(210, 42, 82, 0.4), transparent 72%),
+        radial-gradient(90px 55px at 50% 96%, rgba(210, 42, 82, 0.4), transparent 72%);
+    filter: blur(4px);
+    animation: toxicFumeDrift 8s ease-in-out infinite alternate;
+}
+
+.map-boundary-bubbles,
+.map-boundary-bubbles::before,
+.map-boundary-bubbles::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+}
+
+.map-boundary-bubbles {
+    background-image:
+        radial-gradient(circle, rgba(255, 155, 170, 0.46) 0 44%, transparent 47%),
+        radial-gradient(circle, rgba(245, 120, 145, 0.42) 0 44%, transparent 47%),
+        radial-gradient(circle, rgba(255, 170, 190, 0.4) 0 44%, transparent 47%);
+    background-size: 18px 18px, 13px 13px, 11px 11px;
+    background-position: 24px calc(100% - 30px), calc(100% - 26px) 36%, 50% calc(100% - 26px);
+    animation: toxicBubbleRiseA 4.2s linear infinite;
+    opacity: 0.75;
+}
+
+.map-boundary-bubbles::before {
+    background-image:
+        radial-gradient(circle, rgba(255, 178, 196, 0.38) 0 44%, transparent 47%),
+        radial-gradient(circle, rgba(244, 137, 159, 0.32) 0 44%, transparent 47%);
+    background-size: 10px 10px, 14px 14px;
+    background-position: 38% calc(100% - 18px), calc(100% - 40px) calc(100% - 32px);
+    animation: toxicBubbleRiseB 5.2s linear infinite;
+}
+
+.map-boundary-bubbles::after {
+    background-image:
+        radial-gradient(circle, rgba(255, 165, 182, 0.28) 0 44%, transparent 47%),
+        radial-gradient(circle, rgba(255, 190, 205, 0.25) 0 44%, transparent 47%);
+    background-size: 12px 12px, 9px 9px;
+    background-position: 18px 42%, 52% 14px;
+    animation: toxicBubbleRiseC 6.1s linear infinite;
+}
+
+@keyframes toxicFumeDrift {
+    0% {
+        transform: scale(1) translate3d(0, 0, 0);
+        opacity: 0.72;
+    }
+    50% {
+        transform: scale(1.03) translate3d(4px, -6px, 0);
+        opacity: 0.88;
+    }
+    100% {
+        transform: scale(1.01) translate3d(-5px, 5px, 0);
+        opacity: 0.74;
+    }
+}
+
+@keyframes toxicBubbleRiseA {
+    0% {
+        background-position: 24px calc(100% - 8px), calc(100% - 26px) 54%, 50% calc(100% - 8px);
+        opacity: 0;
+    }
+    18% {
+        opacity: 0.75;
+    }
+    100% {
+        background-position: 24px calc(100% - 120px), calc(100% - 26px) calc(54% - 90px), 50% calc(100% - 95px);
+        opacity: 0;
+    }
+}
+
+@keyframes toxicBubbleRiseB {
+    0% {
+        background-position: 38% calc(100% - 6px), calc(100% - 40px) calc(100% - 6px);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.55;
+    }
+    100% {
+        background-position: 38% calc(100% - 98px), calc(100% - 40px) calc(100% - 112px);
+        opacity: 0;
+    }
+}
+
+@keyframes toxicBubbleRiseC {
+    0% {
+        background-position: 18px 58%, 52% 14px;
+        opacity: 0;
+    }
+    22% {
+        opacity: 0.42;
+    }
+    100% {
+        background-position: 18px calc(58% - 120px), 52% -70px;
+        opacity: 0;
+    }
+}
+
+#game-map-world #door-area {
+    width: min(86vw, 460px);
+    left: 50%;
+    top: 68px;
+    transform: translateX(-50%);
+}
+
+#game-map-world #synthesis-area {
+    width: min(92vw, 820px);
+    height: min(62vh, 560px);
+    left: 50%;
+    top: 360px;
+    bottom: auto;
+    transform: translateX(-50%);
+}
+
+@media (max-width: 640px) {
+    #game-map-world {
+        width: max(260vw, 1280px);
+        height: max(235vh, 1300px);
+    }
+
+    #game-map-world #synthesis-area {
+        top: 348px;
+        height: min(58vh, 500px);
+    }
+}

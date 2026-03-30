@@ -38,7 +38,7 @@
     .intro-item {
         width: 70px;
         height: 70px;
-        border-radius: 12px;
+        border-radius: 50%;
     }
     
     .intro-item .item-icon {

@@ -338,22 +338,9 @@ Game.prototype.checkWorldCompletion = function() {
     }
 };
 
-// Toast 消息
+// Toast 消息（暂时禁用所有提示）
 Game.prototype.showToast = function(msg, duration = 4000) {
-    // 移除现有 toast
-    const existingToast = document.querySelector('.toast-msg');
-    if (existingToast) existingToast.remove();
-
-    const toast = document.createElement('div');
-    toast.className = 'toast-msg';
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
-        setTimeout(() => toast.remove(), 300);
-    }, duration);
+    return;
 };
 
 // 发现新物品提示（增强版）
@@ -459,5 +446,164 @@ Game.prototype.resetIdleTimer = function() {
 Game.prototype.showIdleHint = function() {
     this.showToast(window.TIPS.idle5s, 4000);
     this.resetIdleTimer();
+};
+
+// ==================== 配方书系统 ====================
+
+Game.prototype.showRecipeBookButton = function() {
+    if (document.getElementById('recipe-book-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'recipe-book-btn';
+    btn.className = 'recipe-book-btn golden-pulse';
+    btn.textContent = '📖 配方书';
+    btn.addEventListener('click', () => {
+        btn.classList.remove('golden-pulse');
+        if (window.AudioManager) window.AudioManager.playSFX('craft-normal');
+        this.openRecipeBook();
+    });
+    document.getElementById('door-area').appendChild(btn);
+
+    btn.style.transform = 'scale(0)';
+    btn.style.opacity = '0';
+    btn.offsetHeight;
+    btn.style.transition = 'transform 0.4s cubic-bezier(0, 0, 0.2, 1.2), opacity 0.3s ease';
+    btn.style.transform = 'scale(1)';
+    btn.style.opacity = '1';
+};
+
+// 记载页配方（由配方书物品提供的固定配方）
+Game.prototype._recordedRecipes = [
+    { name: '奶酪', icon: '🧀', formula: '牛奶 + 酿造', note: '100°C 低温烤制' },
+    { name: '甜牛奶', icon: '🥛', formula: '牛奶 + 冰糖碎', note: '甜蜜的开始' },
+    { name: '雪酪', icon: '🍨', formula: '甜牛奶 + 酿造', note: '甜液体凝固，轻盈版酪' },
+    { name: '双酪', icon: '🍨', formula: '奶酪 + 雪酪', note: '厚与轻，一体两面',
+      lockedFormula: '失去了配方', lockedNote: '重要的原料。只记得方法跟它的名字一样。' },
+    { name: '玫瑰酒酿', icon: '🌹', formula: '玫瑰 + 酒酿原浆', note: '花香融入酒酿' },
+    { name: '酒酿玫瑰酪', icon: '🌹', formula: '双酪 + 玫瑰酒酿', note: '双酪为底，玫瑰酒酿为魂' },
+    { name: '桂花酒酿', icon: '🌼', formula: '桂花 + 酒酿原浆', note: '秋天最温柔的香气' },
+];
+
+Game.prototype.openRecipeBook = function() {
+    if (document.getElementById('recipe-book-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'recipe-book-overlay';
+    overlay.className = 'recipe-book-overlay';
+
+    overlay.innerHTML = `
+        <div class="recipe-book-page">
+            <div class="recipe-book-header">
+                <span class="recipe-book-title">酿 造 手 札</span>
+                <button class="recipe-book-close" id="recipe-book-close">✕</button>
+            </div>
+            <div class="recipe-book-search">
+                <input type="text" class="recipe-search-input" id="recipe-search" placeholder="搜索配方...">
+            </div>
+            <div class="recipe-book-tabs">
+                <button class="recipe-tab active" data-tab="recorded">记载</button>
+                <button class="recipe-tab" data-tab="discovered">发现</button>
+            </div>
+            <div class="recipe-book-divider"></div>
+            <div class="recipe-book-content" id="recipe-book-list"></div>
+            <div class="recipe-book-footer">— 记载于宝珠酿造坊 —</div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // State
+    let currentTab = 'recorded';
+    const listEl = overlay.querySelector('#recipe-book-list');
+    const searchInput = overlay.querySelector('#recipe-search');
+    const self = this;
+
+    function renderList() {
+        const query = searchInput.value.trim().toLowerCase();
+        let entries = [];
+
+        if (currentTab === 'recorded') {
+            const discovered = new Set(window.LevelManager.currentProgress.discoveredItems || []);
+            entries = self._recordedRecipes.map(r => {
+                if (r.lockedFormula && !discovered.has(r.name)) {
+                    return { icon: r.icon, name: r.name, formula: r.lockedFormula, note: r.lockedNote || '' };
+                }
+                return { icon: r.icon, name: r.name, formula: r.formula, note: r.note };
+            });
+        } else {
+            const recordedNames = new Set(self._recordedRecipes.map(r => r.name));
+            const discovered = window.LevelManager.currentProgress.discoveredItems || [];
+            discovered.forEach(itemName => {
+                const itemData = window.ITEMS[itemName];
+                if (!itemData) return;
+                if (itemData.type === 'base' || itemData.type === 'tool' || itemData.type === 'process') return;
+                if (itemData.isRecipeBook) return;
+                if (recordedNames.has(itemName)) return;
+
+                const recipe = window.RECIPES.find(r => r.result === itemName);
+                const formula = recipe ? recipe.ingredients.join(' + ') : '未知来源';
+                entries.push({
+                    icon: itemData.icon || '?',
+                    name: itemName,
+                    formula: formula,
+                    note: itemData.desc || ''
+                });
+            });
+        }
+
+        if (query) {
+            entries = entries.filter(e =>
+                e.name.toLowerCase().includes(query) ||
+                e.formula.toLowerCase().includes(query)
+            );
+        }
+
+        if (entries.length === 0) {
+            listEl.innerHTML = '<div class="recipe-empty">' +
+                (query ? '没有找到匹配的配方' : (currentTab === 'discovered' ? '还没有发现任何配方' : '暂无记载')) +
+                '</div>';
+            return;
+        }
+
+        listEl.innerHTML = entries.map(r => `
+            <div class="recipe-entry">
+                <span class="recipe-icon">${r.icon}</span>
+                <div class="recipe-detail">
+                    <div class="recipe-name">${r.name}</div>
+                    <div class="recipe-formula">${r.formula}</div>
+                    <div class="recipe-note">${r.note}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Tab switching
+    overlay.querySelectorAll('.recipe-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            overlay.querySelectorAll('.recipe-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentTab = tab.dataset.tab;
+            renderList();
+        });
+    });
+
+    // Search
+    searchInput.addEventListener('input', renderList);
+
+    // Initial render
+    renderList();
+
+    overlay.offsetHeight;
+    overlay.classList.add('visible');
+
+    // Close
+    const closeBook = () => {
+        overlay.classList.remove('visible');
+        setTimeout(() => overlay.remove(), 300);
+    };
+    overlay.querySelector('#recipe-book-close').addEventListener('click', closeBook);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeBook();
+    });
 };
 

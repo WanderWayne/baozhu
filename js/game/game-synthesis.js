@@ -30,6 +30,11 @@ Game.prototype.handleSynthesis = function(item1, item2) {
                 try { if (navigator.vibrate) navigator.vibrate(50); } catch(e) {}
                 
                 this.showToast(result.message);
+
+                // 两个物品互相挤开
+                this._pushItemsApart(item1, item2);
+
+                this.checkTriggerDialogs('onFailedSynthesis');
             } else if (result.type === 'instant') {
                 this.performSynthesis(item1, item2, result);
             } else if (result.type === 'timer') {
@@ -37,6 +42,33 @@ Game.prototype.handleSynthesis = function(item1, item2) {
             }
         }
     );
+};
+
+// 合成失败时：两个物品互相挤开
+Game.prototype._pushItemsApart = function(item1, item2) {
+    const synthArea = document.getElementById('synthesis-area');
+    if (!synthArea) return;
+    const parentRect = synthArea.getBoundingClientRect();
+    const rect1 = item1.getBoundingClientRect();
+    const rect2 = item2.getBoundingClientRect();
+    const cx1 = rect1.left + rect1.width / 2;
+    const cy1 = rect1.top + rect1.height / 2;
+    const cx2 = rect2.left + rect2.width / 2;
+    const cy2 = rect2.top + rect2.height / 2;
+    let dx = cx1 - cx2;
+    let dy = cy1 - cy2;
+    const dist = Math.hypot(dx, dy) || 1;
+    dx /= dist;
+    dy /= dist;
+    const pushDist = 55;
+    const newCx1 = cx1 + dx * pushDist;
+    const newCy1 = cy1 + dy * pushDist;
+    const newCx2 = cx2 - dx * pushDist;
+    const newCy2 = cy2 - dy * pushDist;
+    item1.style.left = (newCx1 - parentRect.left - rect1.width / 2) + 'px';
+    item1.style.top = (newCy1 - parentRect.top - rect1.height / 2) + 'px';
+    item2.style.left = (newCx2 - parentRect.left - rect2.width / 2) + 'px';
+    item2.style.top = (newCy2 - parentRect.top - rect2.height / 2) + 'px';
 };
 
 // 即时合成
@@ -81,8 +113,12 @@ Game.prototype.performSynthesis = function(item1, item2, resultData) {
     // 添加合成成功特效
     newItem.classList.add('synthesis-anim');
     
-    // 如果是目标物品，添加金边效果
-    if (!this.isFreeMode && resultData.result === this.levelData.target) {
+    // 如果是目标物品，添加金边效果（支持双门）
+    const isTarget = !this.isFreeMode && (
+        resultData.result === this.levelData.target ||
+        (this.isDualDoor && this.doorStates.some(d => !d.done && d.target === resultData.result))
+    );
+    if (isTarget) {
         newItem.classList.add('target-item');
     }
     
@@ -95,6 +131,8 @@ Game.prototype.performSynthesis = function(item1, item2, resultData) {
     }
     
     document.getElementById('synthesis-area').appendChild(newItem);
+
+    this.checkTriggerDialogs('onSynthesize', resultData.result);
 
     // 粒子特效
     this.showSynthesisParticles(centerX, centerY);
@@ -123,8 +161,8 @@ Game.prototype.performSynthesis = function(item1, item2, resultData) {
     // 检查门状态
     this.checkDoorProgress(resultData.result);
 
-    // 检查是否完成关卡
-    this.checkLevelCompletion(resultData.result);
+    // 检查是否完成关卡（传入合成区元素，而非去物品栏找）
+    this.checkLevelCompletion(resultData.result, newItem);
 };
 
 // 应用神秘效果（静置揭晓）
@@ -244,15 +282,30 @@ Game.prototype.startTimerSynthesis = function(item1, item2, resultData) {
     }, resultData.duration * 1000 + 300);
 };
 
-// 检查门进度
+// 检查门进度（支持双门）
 Game.prototype.checkDoorProgress = function(newItemName) {
-    if (!this.levelData.doorTriggers) return;
+    if (this.isDualDoor) {
+        this.doorStates.forEach(ds => {
+            if (ds.done) return;
+            const triggers = ds.doorTriggers;
+            if (!triggers) return;
+            for (const [stage, items] of Object.entries(triggers)) {
+                if (items.includes(newItemName) && !ds.discoveredTriggers.has(newItemName)) {
+                    ds.discoveredTriggers.add(newItemName);
+                    const stageNum = parseInt(stage.replace('stage', ''));
+                    if (stageNum > ds.stage) {
+                        this.updateDoorStageFor(ds, stageNum);
+                    }
+                }
+            }
+        });
+        return;
+    }
 
-    // 检查是否触发新阶段
+    if (!this.levelData.doorTriggers) return;
     for (const [stage, triggers] of Object.entries(this.levelData.doorTriggers)) {
         if (triggers.includes(newItemName) && !this.discoveredTriggers.has(newItemName)) {
             this.discoveredTriggers.add(newItemName);
-            
             const stageNum = parseInt(stage.replace('stage', ''));
             if (stageNum > this.doorStage) {
                 this.updateDoorStage(stageNum);
@@ -261,54 +314,194 @@ Game.prototype.checkDoorProgress = function(newItemName) {
     }
 };
 
-// 更新门状态
+// 更新指定门的状态（双门用）
+Game.prototype.updateDoorStageFor = function(ds, stage) {
+    ds.stage = stage;
+    if (ds.container) {
+        ds.container.className = `door-container stage-${stage}`;
+    }
+};
+
+// 更新门状态（单门用）
 Game.prototype.updateDoorStage = function(stage) {
     this.doorStage = stage;
     
     const doorContainer = document.getElementById('door-container');
     const doorStatus = document.getElementById('door-status');
     
-    // 更新门样式
-    doorContainer.className = `door-container stage-${stage}`;
-    
-    // 显示状态提示
-    let statusText = '';
-    switch (stage) {
-        case 1:
-            statusText = window.TIPS.doorStage1;
-            break;
-        case 2:
-            statusText = window.TIPS.doorStage2;
-            break;
-        case 3:
-            statusText = window.TIPS.doorStage3;
-            break;
+    if (doorContainer) {
+        doorContainer.className = `door-container stage-${stage}`;
     }
     
-    if (statusText) {
-        doorStatus.textContent = statusText;
-        doorStatus.classList.add('visible');
-        setTimeout(() => {
-            doorStatus.classList.remove('visible');
-        }, 3000);
+    // 提示暂时禁用
+};
+
+// 检查关卡完成 - 目标物品合成后自动飞向门（支持双门）
+Game.prototype.checkLevelCompletion = function(newItemName, synthAreaEl) {
+    if (this.isDualDoor) {
+        // 双门模式：看哪扇门需要这个物品
+        const ds = this.doorStates.find(d => !d.done && d.target === newItemName);
+        if (!ds) return;
+
+        this.updateDoorStageFor(ds, 3);
+        const targetEl = synthAreaEl || document.querySelector('#synthesis-area .game-item.target-item');
+        if (!targetEl) return;
+
+        const invCopy = document.querySelector('#inventory-area .game-item[data-name="' + newItemName + '"]');
+        if (invCopy) invCopy.style.display = 'none';
+
+        setTimeout(() => { targetEl.classList.add('target-breathe'); }, 1200);
+        setTimeout(() => { this.autoOfferToDoor(targetEl, ds); }, 2200);
+        return;
+    }
+
+    // 单门模式
+    if (newItemName === this.levelData.target) {
+        this.targetReady = true;
+        this.updateDoorStage(3);
+
+        const targetEl = synthAreaEl || document.querySelector('#synthesis-area .game-item.target-item');
+        if (targetEl) {
+            const invCopy = document.querySelector('#inventory-area .game-item[data-name="' + newItemName + '"]');
+            if (invCopy) invCopy.style.display = 'none';
+
+            setTimeout(() => { targetEl.classList.add('target-breathe'); }, 1200);
+            setTimeout(() => { this.autoOfferToDoor(targetEl); }, 2200);
+        }
     }
 };
 
-// 检查关卡完成 - 改为只解锁门stage-3，不立即结算
-Game.prototype.checkLevelCompletion = function(newItemName) {
-    if (newItemName === this.levelData.target) {
-        // 标记目标已就绪
-        this.targetReady = true;
-        
-        // 更新门到最终状态（等待献上）
-        this.updateDoorStage(3);
-        
-        // 添加等待献上状态
-        const doorContainer = document.getElementById('door-container');
-        doorContainer.classList.add('awaiting-offer');
-        
-        // 显示献上提示
-        this.showDoorStatus('把它放到门前');
+// 目标物品自动飞向门（支持双门：doorState 指定目标门）
+Game.prototype.autoOfferToDoor = function(itemEl, doorState) {
+    if (this.isTransitioning) return;
+    if (!this.isDualDoor) this.targetReady = false;
+
+    const doorContainer = doorState ? doorState.container : document.getElementById('door-container');
+    const doorRect = doorContainer.getBoundingClientRect();
+    const itemName = itemEl.dataset.name;
+
+    // 读取物品当前屏幕位置（包含 scale 变换后的视觉位置）
+    const visualRect = itemEl.getBoundingClientRect();
+    // 视觉中心
+    const cx = visualRect.left + visualRect.width / 2;
+    const cy = visualRect.top + visualRect.height / 2;
+    // 物品原始尺寸（去掉 scale）
+    const baseW = 85;
+    const baseH = 85;
+
+    // 创建一个干净的飞行克隆体，避免原元素的动画/transition干扰
+    const flyer = itemEl.cloneNode(true);
+    flyer.className = 'game-item target-item offering-flight';
+    flyer.style.cssText = `
+        position: fixed;
+        left: ${cx - baseW / 2}px;
+        top: ${cy - baseH / 2}px;
+        width: ${baseW}px;
+        height: ${baseH}px;
+        transform: scale(1.25);
+        z-index: 2000;
+        pointer-events: none;
+        opacity: 1;
+        animation: none;
+        border: 3px solid rgba(232, 200, 115, 0.9);
+        box-shadow: 0 0 25px rgba(232, 200, 115, 0.7), 0 0 50px rgba(232, 200, 115, 0.4);
+        filter: brightness(1.15);
+    `;
+    document.body.appendChild(flyer);
+
+    // 删掉合成区原元素
+    itemEl.remove();
+
+    // 保存门位置供珠宝飞行动画使用
+    this._lastDoorRect = { left: doorRect.left, top: doorRect.top, width: doorRect.width, height: doorRect.height };
+    console.log('[Gems] _lastDoorRect saved:', this._lastDoorRect);
+
+    // 飞行目标：门中心
+    const doorCX = doorRect.left + doorRect.width / 2;
+    const doorCY = doorRect.top + doorRect.height / 2;
+    const targetLeft = doorCX - baseW / 2;
+    const targetTop = doorCY - baseH / 2;
+
+    // 金色轨迹粒子
+    this._spawnFlightTrail(document.body, cx, cy, doorCX, doorCY, 1500);
+
+    // 强制浏览器渲染初始帧，然后再设置目标值触发过渡
+    flyer.offsetHeight;
+
+    flyer.style.transition = 'left 1.5s cubic-bezier(0.4, 0, 0.15, 1), top 1.5s cubic-bezier(0.4, 0, 0.15, 1), transform 1.5s cubic-bezier(0.4, 0, 0.15, 1), opacity 0.4s ease-in 1.1s';
+    flyer.style.left = targetLeft + 'px';
+    flyer.style.top = targetTop + 'px';
+    flyer.style.transform = 'scale(0.3)';
+    flyer.style.opacity = '0';
+
+    setTimeout(() => {
+        const invCopy = document.querySelector('#inventory-area .game-item[data-name="' + itemName + '"]');
+        if (invCopy) invCopy.remove();
+
+        flyer.remove();
+
+        // 物品栏少了一个物品，需要更新布局和珠宝位置
+        this.updateInventoryLayout();
+
+        if (doorState) {
+            // 双门模式：标记这扇门完成
+            this.completeDoor(doorState, itemEl);
+        } else {
+            this.performOffering(itemEl);
+        }
+    }, 1600);
+};
+
+Game.prototype._spawnFlightTrail = function(container, sx, sy, ex, ey, duration) {
+    const isBody = container === document.body;
+    const pos = isBody ? 'fixed' : 'absolute';
+    const count = 12;
+    const interval = duration / count;
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const t = i / count;
+            const x = sx + (ex - sx) * t + (Math.random() - 0.5) * 20;
+            const y = sy + (ey - sy) * t + (Math.random() - 0.5) * 20;
+            const dot = document.createElement('div');
+            dot.style.cssText = `
+                position:${pos}; left:${x}px; top:${y}px;
+                width:8px; height:8px; border-radius:50%; pointer-events:none; z-index:1999;
+                background: radial-gradient(circle, rgba(255,220,100,0.9) 0%, rgba(232,200,115,0.4) 60%, transparent 100%);
+                box-shadow: 0 0 8px rgba(232,200,115,0.6);
+                animation: trailFade 0.8s ease-out forwards;
+            `;
+            container.appendChild(dot);
+            setTimeout(() => dot.remove(), 850);
+        }, i * interval);
+    }
+};
+
+// 双门模式：完成一扇门
+Game.prototype.completeDoor = function(doorState, itemEl) {
+    doorState.done = true;
+
+    // 播放吸收音效
+    if (window.AudioManager) {
+        window.AudioManager.playSFX('door-absorb');
+    }
+
+    // 视觉：门闪光 + 勾标记
+    if (doorState.container) {
+        doorState.container.classList.add('offering');
+        setTimeout(() => doorState.container.classList.remove('offering'), 600);
+    }
+    if (doorState.wrapper) {
+        doorState.wrapper.classList.add('door-done');
+    }
+
+    // 检查是否所有门都完成
+    const allDone = this.doorStates.every(d => d.done);
+    if (allDone) {
+        // 所有门完成 → 过关
+        setTimeout(() => {
+            this.showSuccessModal();
+            window.LevelManager.completeLevel(this.levelId);
+        }, 600);
     }
 };
 
@@ -344,23 +537,25 @@ Game.prototype.performOffering = function(itemEl) {
     // 触觉反馈
     try { if (navigator.vibrate) navigator.vibrate([50, 50, 100]); } catch(e) {}
     
-    // 检查是否有下一个目标（章节过渡）
-    if (this.hasNextObjective()) {
-        // 章节内过渡 - 星星动画
-        this.performChapterTransition(itemEl);
+    const proceed = () => {
+        if (this.hasNextObjective()) {
+            this.performChapterTransition(itemEl);
+        } else {
+            itemEl.classList.add('offering-item');
+            doorContainer.classList.add('offering');
+            setTimeout(() => {
+                itemEl.remove();
+                doorContainer.classList.remove('offering');
+                this.showSuccessModal();
+                window.LevelManager.completeLevel(this.levelId);
+            }, 600);
+        }
+    };
+
+    if (this.levelData.completionDialogs && this.levelData.completionDialogs.length > 0) {
+        this.playCompletionDialogs().then(proceed);
     } else {
-        // 最后一个目标或独立关卡 - 正常完成
-        itemEl.classList.add('offering-item');
-        doorContainer.classList.add('offering');
-        
-        setTimeout(() => {
-            itemEl.remove();
-            doorContainer.classList.remove('offering');
-            
-            // 正式完成关卡
-            this.showSuccessModal();
-            window.LevelManager.completeLevel(this.levelId);
-        }, 600);
+        proceed();
     }
 };
 
@@ -434,19 +629,84 @@ Game.prototype.performGoldenGlowTransition = function() {
     const inventoryArea = document.getElementById('inventory-area');
     const doorContainer = document.getElementById('door-container');
     const currentItems = Array.from(inventoryArea.querySelectorAll('.game-item'));
-    
-    // 物品栏发出金光
-    inventoryArea.classList.add('golden-glow');
-    
-    // 物品发出金光轮廓
-    currentItems.forEach(item => {
-        item.classList.add('golden-outline');
+
+    // ========== 先缩小消失：目标显示、交易台、合成区物品 ==========
+    const targetDisplay = document.querySelector('.level-target-display');
+    if (targetDisplay) {
+        targetDisplay.style.transition = 'transform 0.4s ease-in, opacity 0.4s ease-in';
+        targetDisplay.style.transform = 'scale(0)';
+        targetDisplay.style.opacity = '0';
+    }
+
+    if (this.tradeStations && this.tradeStations.length > 0) {
+        this.tradeStations.forEach(ts => {
+            if (ts.el) {
+                ts.el.style.transition = 'transform 0.4s ease-in, opacity 0.4s ease-in';
+                ts.el.style.opacity = '0';
+                ts.el.style.transform = (ts.el.style.transform || '') + ' scale(0)';
+            }
+        });
+    }
+
+    const synthItems = Array.from(
+        document.getElementById('synthesis-area')?.querySelectorAll('.game-item') || []
+    );
+    synthItems.forEach((item, i) => {
+        setTimeout(() => {
+            item.style.transition = 'transform 0.35s ease-in, opacity 0.35s ease-in';
+            item.style.transform = 'scale(0)';
+            item.style.opacity = '0';
+        }, i * 60);
     });
-    
-    // 金光闪烁后开始物品变换（0.6s后）
+
+    // 等缩小动画完成后：先发珠宝 → 再显示关卡介绍 → 再做金光 + 物品变换
     setTimeout(() => {
-        this.performItemTransition();
-    }, 600);
+        synthItems.forEach(item => item.remove());
+        if (this.tradeStations) {
+            this.tradeStations.forEach(ts => { if (ts.el) ts.el.remove(); });
+            this.tradeStations = [];
+            this.tradeStation = null;
+        }
+
+        // 在关卡介绍之前完成珠宝奖励
+        const gemAwarded = !this.levelData.isSpecialArea
+            ? window.LevelManager.completeLevel(this.levelId)
+            : false;
+        if (gemAwarded) {
+            this.updateGemDisplay();
+        }
+
+        const gemDelay = gemAwarded ? 1600 : 0;
+
+        setTimeout(() => {
+            const proceedToNext = () => {
+                const nextLevelId = this.getNextObjectiveLevelId();
+                const nextLevelData = nextLevelId ? window.LevelManager.getLevelData(nextLevelId) : null;
+
+                const savedLevelData = this.levelData;
+                if (nextLevelData) this.levelData = nextLevelData;
+
+                this.showLevelIntro().then(() => {
+                    this.levelData = savedLevelData;
+
+                    inventoryArea.classList.add('golden-glow');
+                    currentItems.forEach(item => {
+                        item.classList.add('golden-outline');
+                    });
+
+                    setTimeout(() => {
+                        this.performItemTransition();
+                    }, 600);
+                });
+            };
+
+            if (this.levelId === 105) {
+                this.showSettlementScreen().then(proceedToNext);
+            } else {
+                proceedToNext();
+            }
+        }, gemDelay);
+    }, 500);
 };
 
 // 执行物品栏物品变换动画
@@ -460,84 +720,81 @@ Game.prototype.performItemTransition = function() {
     const nextLevelData = window.LevelManager.getLevelData(nextLevelId);
     if (!nextLevelData) return;
     
-    const newItemNames = nextLevelData.initialItems || [];
-    
-    // ========== 第一阶段：所有老物品按顺序消失 ==========
-    const disappearInterval = 300; // 每个物品消失间隔
-    const disappearAnimationDuration = 1600; // 消失动画时长
-    
+    const isNextRecipePhase = !!nextLevelData.recipeBookPhase;
+    const newItemNames = isNextRecipePhase ? [] : (nextLevelData.initialItems || []);
+
+    // ========== 第一阶段：所有旧物品 bubble-pop 消失 ==========
+    const disappearInterval = 300;
+    const disappearAnimationDuration = 1600;
+
     currentItems.forEach((oldItem, index) => {
         setTimeout(() => {
-            // 禁用交互
             oldItem.style.pointerEvents = 'none';
-            // 移除金光
             oldItem.classList.remove('golden-outline');
-            // 清除可能的内联动画样式
             oldItem.style.animation = '';
-            
-            // 等待一帧后再添加爆开动画，确保金光动画完全移除
             requestAnimationFrame(() => {
-                // 创建泡沫粒子效果（减少粒子数量提升性能）
                 this.createFoamParticles(oldItem, 8);
-                // 添加爆开动画
                 oldItem.classList.add('bubble-pop');
             });
-            
-            // 动画结束后隐藏元素（用 visibility 保持占位，避免布局重排）
             setTimeout(() => {
                 oldItem.style.visibility = 'hidden';
             }, disappearAnimationDuration - 50);
         }, index * disappearInterval);
     });
-    
-    // 计算所有老物品消失完成的时间
-    const allDisappearTime = currentItems.length * disappearInterval + disappearAnimationDuration;
-    
-    // 所有消失动画完成后，一次性清空物品栏
+
+    const allDisappearTime = currentItems.length > 0
+        ? currentItems.length * disappearInterval + disappearAnimationDuration
+        : 0;
+
     setTimeout(() => {
         currentItems.forEach(item => item.remove());
     }, allDisappearTime);
-    
-    // ========== 第二阶段：新物品按顺序出现 ==========
-    const appearInterval = 300; // 每个物品出现间隔
-    const appearAnimationDuration = 1900; // 出现动画时长
-    const appearStartDelay = 200; // 消失完成后稍等一下再开始出现
-    
+
+    // ========== 第二阶段：所有新物品依次出现 ==========
+    const appearInterval = 300;
+    const appearAnimationDuration = 1900;
+    const appearStartDelay = allDisappearTime > 0 ? 200 : 150;
+
     newItemNames.forEach((newItemName, index) => {
         setTimeout(() => {
             const newItem = this.createItemElement(newItemName);
-            // 先设置初始状态（隐藏），避免闪烁
             newItem.style.opacity = '0';
             newItem.style.transform = 'scale(0)';
             newItem.classList.add('in-inventory');
             inventoryArea.appendChild(newItem);
-            
-            // 下一帧再添加动画类，确保初始状态生效
             requestAnimationFrame(() => {
                 newItem.style.opacity = '';
                 newItem.style.transform = '';
                 newItem.classList.add('item-pop-in');
-                // 添加奶雾 pop 效果
                 this.createFoamParticles(newItem, 8);
             });
-            
-            // 动画结束后移除动画类
             setTimeout(() => {
                 newItem.classList.remove('item-pop-in');
             }, appearAnimationDuration);
         }, allDisappearTime + appearStartDelay + index * appearInterval);
     });
-    
-    // 计算所有物品变换完成的总时间
-    const totalTransitionTime = allDisappearTime + appearStartDelay + 
-        newItemNames.length * appearInterval + appearAnimationDuration;
+
+    // 计算总过渡时间
+    const totalTransitionTime = allDisappearTime + appearStartDelay +
+        (newItemNames.length > 0
+            ? newItemNames.length * appearInterval + appearAnimationDuration
+            : 500);
     
     setTimeout(() => {
-        // 完成当前目标，切换到下一个目标
-        window.LevelManager.completeLevel(this.levelId);
+        // 完成当前目标，切换到下一个目标（特殊区域不奖励珠宝）
+        if (this.levelData.isSpecialArea) {
+            const p = window.LevelManager.currentProgress;
+            if (!p.completedLevels.includes(this.levelId)) {
+                p.completedLevels.push(this.levelId);
+                window.LevelManager.saveProgress();
+            }
+        } else {
+            window.LevelManager.completeLevel(this.levelId);
+        }
         this.levelId = nextLevelId;
         this.levelData = nextLevelData;
         this.objectiveIndex = nextLevelData.objectiveIndex || 0;
+        this._recipeBookPhaseActive = !!nextLevelData.recipeBookPhase;
         
         // 重置游戏状态
         this.doorStage = 0;
@@ -545,7 +802,6 @@ Game.prototype.performItemTransition = function() {
         this.synthesizedItems = new Set();
         this.targetReady = false;
         
-        // 清理提示计时器
         if (this.levelHintInterval) {
             clearInterval(this.levelHintInterval);
             this.levelHintInterval = null;
@@ -555,58 +811,173 @@ Game.prototype.performItemTransition = function() {
         inventoryArea.classList.remove('golden-glow');
         inventoryArea.classList.add('golden-fade');
         
-        // 更新物品栏布局
         this.updateInventoryLayout();
-        
-        // 更新门的目标图标
-        const targetItem = window.ITEMS[this.levelData.target];
-        const doorIcon = document.getElementById('door-icon');
-        if (doorIcon) doorIcon.textContent = targetItem?.icon || '?';
-        
-        // 更新关卡信息
-        const levelName = document.getElementById('level-name');
-        if (levelName) levelName.textContent = this.levelData.name;
-        this.updateTargetDisplay(this.levelData.target);
         
         // 清空合成区
         const synthesisArea = document.getElementById('synthesis-area');
         if (synthesisArea) {
             synthesisArea.innerHTML = '<div class="workbench-texture"></div>';
         }
-        
-        // 门打开动画（0.5s后）
-        setTimeout(() => {
-            doorContainer.classList.remove('closing', 'closed');
-            doorContainer.classList.add('opening');
-            doorContainer.className = 'door-container stage-0 opening';
-            
-            // 显示过渡文字
-            const transitionText = this.getTransitionText();
-            if (transitionText) {
-                const textEl = document.createElement('div');
-                textEl.className = 'chapter-transition-text';
-                textEl.textContent = transitionText;
-                document.body.appendChild(textEl);
-                
-                setTimeout(() => textEl.remove(), 2500);
+
+        // 初始化交易站（特殊区域延后到对话结束）
+        if (!this.levelData.isSpecialArea) {
+            this.initTradeStation();
+        }
+
+        const doorRow = document.getElementById('door-row');
+
+        if (this.levelData.isSpecialArea) {
+            // 新关是特殊区域：隐藏门
+            doorRow.style.display = 'none';
+            doorRow.innerHTML = '';
+        } else {
+            // 恢复门可见
+            doorRow.style.display = '';
+        }
+
+        const isSingleToSingle = !this.isDualDoor
+            && !this.levelData.isSpecialArea
+            && !(this.levelData.doors && this.levelData.doors.length > 1);
+
+        if (isSingleToSingle) {
+            const hideTarget = !!this.levelData.recipeBookPhase;
+            const dc = document.getElementById('door-container');
+            if (dc) dc.className = 'door-container stage-0';
+            const doorIcon = document.getElementById('door-icon');
+            const tItem = !hideTarget && this.levelData.target ? window.ITEMS[this.levelData.target] : null;
+            if (doorIcon) {
+                doorIcon.style.transition = 'opacity 0.3s ease';
+                doorIcon.style.opacity = '0';
+                setTimeout(() => {
+                    doorIcon.textContent = hideTarget ? '' : (tItem?.icon || '');
+                    doorIcon.style.opacity = '1';
+                }, 300);
             }
-            
-            // 完成过渡
+
+            const targetDisplay = document.querySelector('.level-target-display');
+            if (hideTarget) {
+                if (targetDisplay) targetDisplay.style.display = 'none';
+            } else {
+                const targetNameEl = document.getElementById('target-name');
+                if (targetNameEl) targetNameEl.textContent = this.levelData.target || '';
+                if (targetDisplay) {
+                    targetDisplay.style.transform = 'scale(0)';
+                    targetDisplay.style.opacity = '0';
+                    targetDisplay.style.display = '';
+                }
+            }
+
+            this.doorStates = [{
+                idx: 0,
+                target: this.levelData.target,
+                stage: 0,
+                done: false,
+                container: dc,
+                wrapper: document.getElementById('door-wrapper-0')
+            }];
+
             setTimeout(() => {
-                doorContainer.classList.remove('opening');
                 inventoryArea.classList.remove('golden-fade');
                 this.isTransitioning = false;
-                
-                // 重启空闲计时器
                 this.startIdleTimer();
-                
-                // 如果关卡有专属提示，定时显示
-                if (this.levelData.levelHints && this.levelData.levelHints.length > 0) {
-                    this.showLevelHints();
+                this._autoShowRecipeBook();
+                this._playLevelDialogs();
+
+                if (!hideTarget && targetDisplay) {
+                    targetDisplay.style.transition = 'transform 0.5s cubic-bezier(0,0,0.2,1.2), opacity 0.4s ease-out';
+                    targetDisplay.style.transform = 'scale(1)';
+                    targetDisplay.style.opacity = '1';
+                    setTimeout(() => {
+                        targetDisplay.style.transition = '';
+                        targetDisplay.style.transform = '';
+                        targetDisplay.style.opacity = '';
+                        this.flashTargetDisplay();
+                    }, 550);
                 }
-            }, 800);
-            
-        }, 500);
+            }, 400);
+        } else {
+            // Full door rebuild for dual-door or special area transitions
+            const oldWrappers = Array.from(doorRow.querySelectorAll('.door-wrapper'));
+            oldWrappers.forEach(w => w.classList.add('scale-out'));
+
+            setTimeout(() => {
+                doorRow.innerHTML = '';
+
+                if (this.levelData.isSpecialArea) {
+                    // no door
+                } else if (this.levelData.doors && this.levelData.doors.length > 1) {
+                    this.isDualDoor = true;
+                    this.doorStates = [];
+                    doorRow.classList.add('dual-doors');
+                    this.initDualDoors();
+                } else {
+                    this.isDualDoor = false;
+                    this.doorStates = [];
+                    doorRow.classList.remove('dual-doors');
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'door-wrapper';
+                    wrapper.id = 'door-wrapper-0';
+                    const tItem = this.levelData.target ? window.ITEMS[this.levelData.target] : null;
+                    const hasTarget = !!this.levelData.target;
+                    wrapper.innerHTML = `
+                        <div class="door-container stage-0" id="door-container">
+                            <div class="door-aura"></div>
+                            <div class="door-frame">
+                                <div class="door-glow">
+                                    <div class="door-fog"></div>
+                                    <div class="door-target-silhouette" id="door-icon">${tItem?.icon || ''}</div>
+                                </div>
+                            </div>
+                            <div class="door-offer-hint">献上</div>
+                        </div>
+                        <div class="level-info">
+                            <div class="level-target-display" id="level-target" style="${hasTarget ? 'transform:scale(0);opacity:0' : 'display:none'}">
+                                <span class="target-label">目标</span>
+                                <span class="target-name" id="target-name">${this.levelData.target || ''}</span>
+                            </div>
+                        </div>
+                    `;
+                    doorRow.appendChild(wrapper);
+                    this.doorStates.push({
+                        idx: 0,
+                        target: this.levelData.target,
+                        stage: 0,
+                        done: false,
+                        container: wrapper.querySelector('.door-container'),
+                        wrapper: wrapper
+                    });
+                }
+
+                const newWrappers = Array.from(doorRow.querySelectorAll('.door-wrapper'));
+                newWrappers.forEach(w => w.classList.add('scale-in'));
+
+                setTimeout(() => {
+                    newWrappers.forEach(w => w.classList.remove('scale-in'));
+                    inventoryArea.classList.remove('golden-fade');
+                    this.isTransitioning = false;
+                    this.startIdleTimer();
+                    this._autoShowRecipeBook();
+                    this._playLevelDialogs();
+
+                    if (!this.levelData.isSpecialArea) {
+                        const td = document.querySelector('.level-target-display');
+                        if (td && td.style.display !== 'none') {
+                            td.style.transition = 'transform 0.5s cubic-bezier(0,0,0.2,1.2), opacity 0.4s ease-out';
+                            td.style.transform = 'scale(1)';
+                            td.style.opacity = '1';
+                            setTimeout(() => {
+                                td.style.transition = '';
+                                td.style.transform = '';
+                                td.style.opacity = '';
+                                this.flashTargetDisplay();
+                            }, 550);
+                        }
+                    }
+                }, 600);
+
+            }, 550);
+        }
         
     }, totalTransitionTime);
 };
@@ -673,10 +1044,79 @@ Game.prototype.showDoorStatus = function(text, duration = 0) {
     // duration = 0 时保持显示
 };
 
-// 长按物品处理 - 显示提取卡
+// 长按物品处理
 Game.prototype.onItemLongPress = function(itemEl) {
     const itemName = itemEl.dataset.name;
+    const itemData = window.ITEMS[itemName];
+
+    if (itemData && itemData.isRecipeBook) {
+        this.activateRecipeBook(itemEl);
+        return;
+    }
+
     this.showExtractCard(itemName, itemEl);
+};
+
+// 配方书激活：先显示按钮，然后物品飞向按钮消失
+Game.prototype.activateRecipeBook = function(itemEl) {
+    // 先显示按钮
+    this.showRecipeBookButton();
+
+    // 等按钮出现后（0.5s），物品飞向按钮
+    setTimeout(() => {
+        const btn = document.getElementById('recipe-book-btn');
+        if (!btn) { itemEl.remove(); return; }
+
+        const btnRect = btn.getBoundingClientRect();
+        const itemRect = itemEl.getBoundingClientRect();
+        const cx = itemRect.left + itemRect.width / 2;
+        const cy = itemRect.top + itemRect.height / 2;
+
+        // 创建飞行克隆体
+        const flyer = itemEl.cloneNode(true);
+        flyer.style.cssText = `
+            position: fixed;
+            left: ${cx - 42}px;
+            top: ${cy - 42}px;
+            width: 85px;
+            height: 85px;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 1;
+            animation: none;
+            border-radius: 50%;
+            border: 2px solid rgba(232, 200, 115, 0.6);
+            box-shadow: 0 0 15px rgba(232, 200, 115, 0.4);
+        `;
+        document.body.appendChild(flyer);
+        itemEl.remove();
+
+        const targetX = btnRect.left + btnRect.width / 2 - 42;
+        const targetY = btnRect.top + btnRect.height / 2 - 42;
+
+        flyer.offsetHeight;
+        flyer.style.transition = 'left 0.8s cubic-bezier(0.4, 0, 0.15, 1), top 0.8s cubic-bezier(0.4, 0, 0.15, 1), transform 0.8s cubic-bezier(0.4, 0, 0.15, 1), opacity 0.3s ease-in 0.5s';
+        flyer.style.left = targetX + 'px';
+        flyer.style.top = targetY + 'px';
+        flyer.style.transform = 'scale(0.2)';
+        flyer.style.opacity = '0';
+
+        // 飞到后按钮闪一下
+        setTimeout(() => {
+            flyer.remove();
+            if (btn) {
+                btn.style.transform = 'scale(1.2)';
+                btn.style.boxShadow = '0 0 16px rgba(232, 200, 115, 0.5)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = '';
+                }, 300);
+            }
+            if (this._recipeBookPhaseActive) {
+                setTimeout(() => this._revealRecipeBookPhase2(), 400);
+            }
+        }, 850);
+    }, 500);
 };
 
 // 取消物品的揭晓计时器
@@ -732,5 +1172,76 @@ Game.prototype.performExtraction = function(sourceItemEl, extractName) {
     
     // 触觉反馈
     try { if (navigator.vibrate) navigator.vibrate(20); } catch(e) {}
+};
+
+// 前五关结算画面
+Game.prototype.showSettlementScreen = function() {
+    return new Promise(resolve => {
+        const elapsed = window.LevelManager.getBasicLevelElapsedTime();
+        const timeStr = window.LevelManager.formatElapsedTime(elapsed);
+        const rating = window.LevelManager.getSpeedRating(elapsed);
+        const completed = (window.LevelManager.currentProgress.completedLevels || [])
+            .filter(id => id >= 101 && id <= 105).length;
+        const gems = completed * 50;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'settlement-overlay';
+        overlay.innerHTML =
+            '<div class="settlement-content">' +
+                '<div class="settlement-title">阶段完成</div>' +
+                '<div class="settlement-sep"></div>' +
+                '<div class="settlement-stats">' +
+                    '<div class="settlement-stat">' +
+                        '<span class="settlement-stat-icon">⏱</span>' +
+                        '<span>用时</span>' +
+                        '<span class="settlement-stat-value">' + timeStr + '</span>' +
+                    '</div>' +
+                    '<div class="settlement-stat">' +
+                        '<span class="settlement-stat-icon">' + rating.icon + '</span>' +
+                        '<span>评价</span>' +
+                        '<span class="settlement-stat-value" style="color:' + rating.color + '">' + rating.name + '</span>' +
+                    '</div>' +
+                    '<div class="settlement-stat">' +
+                        '<span class="settlement-stat-icon">💎</span>' +
+                        '<span>获得珠宝</span>' +
+                        '<span class="settlement-stat-value">' + gems + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="settlement-message">' +
+                    '你已经掌握了酿造的基础语言<br>' +
+                    '接下来将是一个挑战<br>' +
+                    '可以先休息一下' +
+                '</div>' +
+                '<div class="settlement-buttons">' +
+                    '<button class="settlement-btn settlement-btn-exit">休息一下</button>' +
+                    '<button class="settlement-btn settlement-btn-continue">继续挑战</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        overlay.offsetHeight;
+        overlay.classList.add('visible');
+
+        const exitBtn = overlay.querySelector('.settlement-btn-exit');
+        const continueBtn = overlay.querySelector('.settlement-btn-continue');
+
+        const dismiss = (goExit) => {
+            overlay.style.transition = 'background 0.6s ease, opacity 0.6s ease';
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+                if (goExit) {
+                    if (window.AudioManager) window.AudioManager.stopBGM();
+                    if (window.navigateTo) window.navigateTo('index.html');
+                    else window.location.href = 'index.html';
+                } else {
+                    resolve();
+                }
+            }, 650);
+        };
+
+        exitBtn.addEventListener('click', () => dismiss(true));
+        continueBtn.addEventListener('click', () => dismiss(false));
+    });
 };
 

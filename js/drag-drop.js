@@ -83,7 +83,8 @@ class DragSystem {
         
         // 防止重复触发（触摸+鼠标事件同时触发的情况）
         if (this.isDragging || this.activeItem) return;
-        
+
+
         // 如果是长按触发的，不进入拖拽
         if (this.isLongPress) return;
         
@@ -111,12 +112,6 @@ class DragSystem {
 
         e.preventDefault();
         
-        // 启动长按检测
-        this.longPressTarget = target;
-        this.longPressTimer = setTimeout(() => {
-            this.handleLongPress(target);
-        }, this.longPressDelay);
-        
         this.isDragging = true;
         
         // 播放拿起音效
@@ -140,22 +135,19 @@ class DragSystem {
         // 保存原始位置信息（用于放回物品栏）
         this.originRect = rect;
         this.originParent = target.parentElement;
-        this.sourceElement = target; // 保存源元素引用
+        this.sourceElement = target;
 
         if (this.fromInventory) {
-            // 从物品栏拖出：克隆一个拖拽用，原物品保持半透明占位
             this.activeItem = target.cloneNode(true);
             this.activeItem.classList.remove('in-inventory');
             this.activeItem.dataset.name = target.dataset.name;
             document.body.appendChild(this.activeItem);
             
-            // 原物品变成占位符（立即完全透明，无动画）
             target.classList.add('placeholder');
-            target.style.transition = 'none'; // 确保无动画
+            target.style.transition = 'none';
             target.style.opacity = '0';
             target.style.pointerEvents = 'none';
         } else {
-            // 从合成区域拖拽，直接使用原元素
             this.activeItem = target;
             this.activeItem.remove();
             document.body.appendChild(this.activeItem);
@@ -169,6 +161,14 @@ class DragSystem {
         this.activeItem.style.transition = 'transform 0.1s, box-shadow 0.1s';
         this.activeItem.style.transform = 'scale(1.1)';
         this.activeItem.style.boxShadow = '0 12px 30px rgba(0,0,0,0.2)';
+
+        // 启动长按检测 + 金色进度弧线（放在 activeItem 上，确保可见）
+        this.longPressTarget = target;
+        this._startLongPressRing(this.activeItem);
+        this.longPressTimer = setTimeout(() => {
+            this._completeLongPressRing(this.activeItem);
+            this.handleLongPress(target);
+        }, this.longPressDelay);
     }
     
     // 处理长按
@@ -178,7 +178,6 @@ class DragSystem {
         
         // 取消拖拽状态
         if (this.activeItem) {
-            // 如果已经开始拖拽，恢复物品位置
             if (!this.fromInventory) {
                 this.activeItem.style.position = 'absolute';
                 this.activeItem.style.transform = '';
@@ -188,6 +187,12 @@ class DragSystem {
                 this.synthesisArea.appendChild(this.activeItem);
             } else {
                 this.activeItem.remove();
+                // Restore the original inventory item
+                if (this.sourceElement) {
+                    this.sourceElement.classList.remove('placeholder');
+                    this.sourceElement.style.opacity = '';
+                    this.sourceElement.style.pointerEvents = '';
+                }
             }
             this.activeItem = null;
         }
@@ -199,13 +204,85 @@ class DragSystem {
         }
     }
     
-    // 取消长按检测
     cancelLongPress() {
         if (this.longPressTimer) {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
         }
+        if (this.activeItem) this._removeLongPressRing(this.activeItem);
+        if (this.longPressTarget) this._removeLongPressRing(this.longPressTarget);
         this.longPressTarget = null;
+    }
+
+    _startLongPressRing(target) {
+        const existing = target.querySelector('.lp-ring-svg');
+        if (existing) existing.remove();
+
+        const size = target.offsetWidth || 85;
+        const r = (size / 2) - 2;
+        const C = 2 * Math.PI * r;
+        const delay = this.longPressDelay;
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'lp-ring-svg');
+        svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+        svg.style.cssText = `
+            position:absolute; inset:0; width:100%; height:100%;
+            pointer-events:none; z-index:20;
+            transform: rotate(-90deg);
+            overflow: visible;
+        `;
+
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+        filter.setAttribute('id', 'lp-glow');
+        filter.setAttribute('x', '-40%'); filter.setAttribute('y', '-40%');
+        filter.setAttribute('width', '180%'); filter.setAttribute('height', '180%');
+        const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+        blur.setAttribute('stdDeviation', '3');
+        blur.setAttribute('result', 'blur');
+        const merge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
+        const m1 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+        m1.setAttribute('in', 'blur');
+        const m2 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+        m2.setAttribute('in', 'SourceGraphic');
+        merge.appendChild(m1); merge.appendChild(m2);
+        filter.appendChild(blur); filter.appendChild(merge);
+        defs.appendChild(filter);
+        svg.appendChild(defs);
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', size / 2);
+        circle.setAttribute('cy', size / 2);
+        circle.setAttribute('r', r);
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', '#E8C873');
+        circle.setAttribute('stroke-width', '3.5');
+        circle.setAttribute('stroke-linecap', 'round');
+        circle.setAttribute('filter', 'url(#lp-glow)');
+        circle.style.strokeDasharray = C;
+        circle.style.strokeDashoffset = C;
+        svg.appendChild(circle);
+        target.appendChild(svg);
+
+        // Force layout, then start transition
+        circle.getBoundingClientRect();
+        circle.style.transition = `stroke-dashoffset ${delay}ms linear`;
+        circle.style.strokeDashoffset = '0';
+    }
+
+    _completeLongPressRing(target) {
+        if (!target) return;
+        target.classList.add('lp-gold-burst');
+        const svg = target.querySelector('.lp-ring-svg');
+        if (svg) svg.remove();
+        setTimeout(() => target.classList.remove('lp-gold-burst'), 800);
+    }
+
+    _removeLongPressRing(target) {
+        if (!target) return;
+        const svg = target.querySelector('.lp-ring-svg');
+        if (svg) svg.remove();
     }
 
     drag(e) {
@@ -228,6 +305,9 @@ class DragSystem {
         
         // 门靠近检测
         this.checkDoorProximity();
+
+        // 交易站靠近检测
+        this.checkTradeProximity();
     }
     
     // 检测是否靠近门
@@ -255,6 +335,39 @@ class DragSystem {
         }
     }
 
+    // 交易站靠近检测（遍历所有物品交易台，珠宝交易台不参与拖拽）
+    checkTradeProximity() {
+        const stations = this.game.tradeStations;
+        if (!stations || !this.activeItem) return;
+        const itemRect = this.activeItem.getBoundingClientRect();
+        const ix = itemRect.left + itemRect.width / 2;
+        const iy = itemRect.top + itemRect.height / 2;
+        stations.forEach(ts => {
+            if (ts.type === 'gem' || ts.restocking || ts.soldOut) return;
+            const boxRect = ts.box.getBoundingClientRect();
+            const dx = (boxRect.left + boxRect.width / 2) - ix;
+            const dy = (boxRect.top + boxRect.height / 2) - iy;
+            if (Math.hypot(dx, dy) < 80) {
+                ts.box.classList.add('trade-hover');
+            } else {
+                ts.box.classList.remove('trade-hover');
+            }
+        });
+    }
+
+    // 检测物品是否落在任一物品交易站上
+    checkTradeHit(itemCenter) {
+        const stations = this.game.tradeStations;
+        if (!stations) return false;
+        return stations.some(ts => {
+            if (ts.type === 'gem' || ts.restocking || ts.soldOut) return false;
+            const boxRect = ts.box.getBoundingClientRect();
+            const dx = (boxRect.left + boxRect.width / 2) - itemCenter.x;
+            const dy = (boxRect.top + boxRect.height / 2) - itemCenter.y;
+            return Math.hypot(dx, dy) < 80;
+        });
+    }
+
     dragEnd(e) {
         // 取消长按检测
         this.cancelLongPress();
@@ -267,6 +380,12 @@ class DragSystem {
         // 清除门靠近状态
         if (this.doorContainer) {
             this.doorContainer.classList.remove('door-nearby');
+        }
+        // 清除所有交易站高亮
+        if (this.game.tradeStations) {
+            this.game.tradeStations.forEach(ts => {
+                if (ts.box) ts.box.classList.remove('trade-hover');
+            });
         }
         
         const synthesisRect = this.synthesisArea.getBoundingClientRect();
@@ -293,6 +412,23 @@ class DragSystem {
             }
         }
         
+        // 检查是否落在交易站上
+        if (this.checkTradeHit(itemCenter)) {
+            if (this.game.tradeStations) {
+                this.game.tradeStations.forEach(ts => {
+                    if (ts.box) ts.box.classList.remove('trade-hover');
+                });
+            }
+
+            const traded = this.game.executeTrade(this.activeItem);
+            if (traded) {
+                if (this.fromInventory) this.removePlaceholder();
+                this.clearAllHighlights();
+                this.activeItem = null;
+                return;
+            }
+        }
+
         // 检查是否放回物品栏
         const isInInventory = (
             itemCenter.y >= inventoryRect.top &&
@@ -342,6 +478,24 @@ class DragSystem {
 
             // 检查碰撞并执行合成
             this.checkCollisionAndSynthesize();
+
+            // 第二关首次放物品到合成区时，引导长按查看属性
+            if (this.game && this.game.levelId === 102
+                && !localStorage.getItem('tut_longPress')
+                && window.TutorialGuide && !window.TutorialGuide._active) {
+                localStorage.setItem('tut_longPress', '1');
+                const itemRef = this.activeItem;
+                setTimeout(() => {
+                    if (!itemRef || !itemRef.parentElement) return;
+                    window.TutorialGuide.show({
+                        target: itemRef,
+                        text: '长按物品可以查看属性',
+                        position: 'top',
+                        padding: 10,
+                        borderRadius: 50
+                    });
+                }, 400);
+            }
         } else if (this.fromInventory) {
             // 不在任何有效区域，但是从物品栏拖出的 -> 回到物品栏
             this.returnToInventory();

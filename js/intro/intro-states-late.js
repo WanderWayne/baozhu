@@ -2,7 +2,7 @@
 // ================================================
 
 IntroSystem.prototype.initBlueWash = function() {
-    // 背景荧光蓝渐变 - 更亮更温柔，有力量感
+    // 背景金色渐变 - 更亮更温柔，有力量感
     this.blueWashPhase = 'fadeIn';
     this.cyanOverlayAlpha = 0;
     this.blueWashMaxAlpha = 0.5;
@@ -16,7 +16,7 @@ IntroSystem.prototype.initBlueWash = function() {
     setTimeout(() => {
         this.blueWashPhase = 'fadeOut';
         
-        // 荧光蓝消退后，进入故事叙述（新流程：先讲故事，再上升）
+        // 金光消退后，进入故事叙述（新流程：先讲故事，再上升）
         setTimeout(() => {
             this.setState('storyNarration');
         }, 1500);
@@ -141,17 +141,14 @@ IntroSystem.prototype.startRiseAnimation = function() {
 // ==================== 粒子聚合成文字 ====================
 
 IntroSystem.prototype.initGatherToText = function() {
-    // 重新加载点阵目标
+    // 重新加载点阵目标（已使用 canvas.height * 0.28 居中，与主界面一致）
     this.loadTextDots();
     
     const riseY = this.riseOffset || 0;
-    const displayCenterY = this.centerY * 0.65;
-    const actualCenterY = displayCenterY - riseY;
     
-    // 调整目标位置
-    const offsetY = actualCenterY - this.centerY;
+    // 渲染时 renderY = p.y + riseY，所以目标需要减去 riseY 才能显示在正确的屏幕位置
     this.textDotTargets.forEach(t => {
-        t.y = t.y + offsetY;
+        t.y = t.y - riseY;
     });
     
     const needed = this.textDotTargets.length;
@@ -183,10 +180,11 @@ IntroSystem.prototype.initGatherToText = function() {
         }
     }
     
-    // 排序和分配目标
+    // 排序：离标题中心近的粒子优先分配
+    const gatherCenterY = this.canvas.height * 0.28 - riseY;
     const sortedParticles = [...this.particles].sort((a, b) => {
-        const distA = Math.hypot(a.x - this.centerX, a.y - actualCenterY);
-        const distB = Math.hypot(b.x - this.centerX, b.y - actualCenterY);
+        const distA = Math.hypot(a.x - this.centerX, a.y - gatherCenterY);
+        const distB = Math.hypot(b.x - this.centerX, b.y - gatherCenterY);
         return distA - distB;
     });
     
@@ -245,136 +243,69 @@ IntroSystem.prototype.initShowStartButton = function() {
     if (typeof this.showAmbienceLayers === 'function') {
         this.showAmbienceLayers();
     } else if (window.AmbienceSystem) {
-        // 后备方案：直接使用 AmbienceSystem
-        console.log('[Intro] 使用后备方案初始化环境层');
         this.ambience = new window.AmbienceSystem('intro-screen');
         this.ambience.init();
-    } else {
-        console.warn('showAmbienceLayers 和 AmbienceSystem 都不可用');
     }
     
-    // 创建按钮容器
+    // 标记开场已播放
+    sessionStorage.setItem('hasPlayedIntro_v5', 'true');
+    
+    // 直接显示正式主界面（覆盖在 intro 粒子上方）
     setTimeout(() => {
-        this.showIntroButtons();
+        this.showMainScreen();
     }, 500);
 };
 
-IntroSystem.prototype.showIntroButtons = function() {
-    const screen = document.getElementById('intro-screen');
-    
-    // 创建按钮容器
-    const btnContainer = document.createElement('div');
-    btnContainer.id = 'intro-buttons';
-    btnContainer.style.cssText = `
-        position: absolute;
-        top: 48%;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        z-index: 50;
-        opacity: 0;
-        transition: opacity 0.8s ease;
-    `;
-    
-    // 开始游戏按钮
-    const startBtn = document.createElement('button');
-    startBtn.textContent = '开始游戏';
-    startBtn.style.cssText = `
-        padding: 12px 24px;
-        font-size: 16px;
-        color: #6B5344;
-        background: transparent;
-        border: none;
-        border-top: 1px solid #A67C52;
-        cursor: pointer;
-        font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
-        letter-spacing: 4px;
-        transition: all 0.3s ease;
-    `;
-    startBtn.addEventListener('mouseenter', () => {
-        startBtn.style.color = '#E8C873';
-        startBtn.style.borderTopColor = '#E8C873';
-        startBtn.style.textShadow = '0 0 15px rgba(232, 200, 115, 0.4)';
-    });
-    startBtn.addEventListener('mouseleave', () => {
-        startBtn.style.color = '#6B5344';
-        startBtn.style.borderTopColor = '#A67C52';
-        startBtn.style.textShadow = 'none';
-    });
-    startBtn.addEventListener('click', () => {
-        if (window.AudioManager) {
-            window.AudioManager.playClickEnter();
-            window.AudioManager.fadeOutBGM(2000);
-        }
-        this.startSeedAndGoToLevels();
-    });
-    
-    // 设置按钮
-    const settingsBtn = document.createElement('button');
-    settingsBtn.textContent = '设置';
-    settingsBtn.style.cssText = `
-        padding: 8px 16px;
-        font-size: 14px;
-        color: #A67C52;
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid rgba(166, 124, 82, 0.3);
-        cursor: pointer;
-        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-        letter-spacing: 3px;
-        transition: all 0.3s ease;
-    `;
-    settingsBtn.addEventListener('mouseenter', () => {
-        settingsBtn.style.color = '#6B5344';
-        settingsBtn.style.borderBottomColor = '#A67C52';
-    });
-    settingsBtn.addEventListener('mouseleave', () => {
-        settingsBtn.style.color = '#A67C52';
-        settingsBtn.style.borderBottomColor = 'rgba(166, 124, 82, 0.3)';
-    });
-    settingsBtn.addEventListener('click', () => {
-        if (window.AudioManager) window.AudioManager.playClickEnter();
-        // 打开设置面板
-        const settingsOverlay = document.getElementById('settings-overlay');
-        if (settingsOverlay) settingsOverlay.classList.add('visible');
-    });
-    
-    btnContainer.appendChild(startBtn);
-    btnContainer.appendChild(settingsBtn);
-    screen.appendChild(btnContainer);
-    
-    // 淡入按钮
+IntroSystem.prototype.showMainScreen = function() {
+    const introScreen = document.getElementById('intro-screen');
+    const mainScreen = document.getElementById('main-screen');
+    if (!mainScreen) return;
+
+    // intro-screen 降到主界面下层，粒子继续渲染作为背景
+    introScreen.style.zIndex = '50';
+
+    // 主界面透明背景，让 intro 粒子透出来
+    mainScreen.style.display = 'flex';
+    mainScreen.style.background = 'transparent';
+    mainScreen.style.opacity = '0';
+    mainScreen.style.transition = 'opacity 0.8s ease';
+
+    // 隐藏主界面自带的粒子 canvas（用 intro 粒子代替）
+    const mainCanvas = document.getElementById('main-canvas');
+    if (mainCanvas) mainCanvas.style.display = 'none';
+
+    // 更新进度数据
+    if (typeof updateProgressPanel === 'function') {
+        updateProgressPanel();
+    }
+
+    // 淡入主界面菜单
     requestAnimationFrame(() => {
-        btnContainer.style.opacity = '1';
+        mainScreen.style.opacity = '1';
     });
 };
 
-// 播种时刻并跳转章节选择
+// 跳转章节选择（不再有播种动画）
 IntroSystem.prototype.startSeedAndGoToLevels = function() {
-    // 标记已播放
     sessionStorage.setItem('hasPlayedIntro_v5', 'true');
     
-    const screen = document.getElementById('intro-screen');
     const btnContainer = document.getElementById('intro-buttons');
-    
-    // 隐藏按钮
     if (btnContainer) {
         btnContainer.style.transition = 'opacity 0.5s ease';
         btnContainer.style.opacity = '0';
     }
     
-    // 粒子淡出
     this.particles.forEach(p => {
         p.targetAlpha = 0;
         p.gathering = true;
     });
     
-    // 播种动画
     setTimeout(() => {
-        this.showSeedMoment();
+        if (window.navigateTo) {
+            window.navigateTo('levels.html');
+        } else {
+            window.location.href = 'levels.html';
+        }
     }, 800);
 };
 
@@ -452,11 +383,11 @@ IntroSystem.prototype.showStoryText = function(container, text, duration, isGoal
     const fontSize = isSmallScreen ? '14px' : (isGoal ? '22px' : '24px');
     const letterSpacing = isSmallScreen ? '2px' : '4px';
     
-    // 故事叙述阶段背景仍是黑色，所以文字用原来的荧光色
+    // 故事叙述阶段背景仍是黑色，文字用金色系
     textEl.style.cssText = `
         font-size: ${fontSize};
         line-height: 1.8;
-        color: ${isGoal ? '#FFD700' : '#E0F7FA'};
+        color: ${isGoal ? '#FFD700' : '#FFF5D6'};
         font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
         letter-spacing: ${letterSpacing};
         opacity: 0;
@@ -464,7 +395,7 @@ IntroSystem.prototype.showStoryText = function(container, text, duration, isGoal
         transition: opacity 1s ease, transform 1s ease;
         text-shadow: ${isGoal 
             ? '0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3)' 
-            : '0 0 15px rgba(0, 200, 255, 0.6), 0 0 30px rgba(0, 200, 255, 0.3)'};
+            : '0 0 15px rgba(232, 200, 115, 0.6), 0 0 30px rgba(232, 200, 115, 0.3)'};
         margin: 20px 0;
         max-width: 80vw;
     `;

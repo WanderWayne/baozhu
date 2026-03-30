@@ -9,10 +9,22 @@ const RECIPES = [
     // 第1关：第一缕甜
     { ingredients: ["牛奶", "冰糖碎"], result: "甜牛奶", time: 0, msg: "甜蜜的开始" },
     
-    // 第2关：凝固之术
+    // 第2关：凝固之术（酸奶干扰项）
     { ingredients: ["牛奶", "酿造"], result: "奶酪", time: 5, msg: "100度低温烤制中..." },
+    { ingredients: ["牛奶", "酸奶菌"], result: "超酸酸奶", time: 3, msg: "酸得牙都掉了..." },
+    { ingredients: ["酸奶菌", "牛奶"], result: "超酸酸奶", time: 3, msg: "酸得牙都掉了..." },
+
+    // 第3关：酿酒之道（多种米干扰项）
+    { ingredients: ["糯米", "酿造"], result: "酒酿", time: 5, msg: "糯米发酵，甜香弥漫..." },
+    { ingredients: ["酿造", "糯米"], result: "酒酿", time: 5, msg: "糯米发酵，甜香弥漫..." },
+    { ingredients: ["大米", "酿造"], result: "米酒", time: 5, msg: "大米也能酿，但不是酒酿..." },
+    { ingredients: ["酿造", "大米"], result: "米酒", time: 5, msg: "大米也能酿，但不是酒酿..." },
+    { ingredients: ["黑米", "酿造"], result: "黑米露", time: 5, msg: "紫黑色的酒露，但不是目标..." },
+    { ingredients: ["酿造", "黑米"], result: "黑米露", time: 5, msg: "紫黑色的酒露，但不是目标..." },
+    { ingredients: ["小米", "酿造"], result: "小米黄酒", time: 5, msg: "小米黄酒，古朴的味道..." },
+    { ingredients: ["酿造", "小米"], result: "小米黄酒", time: 5, msg: "小米黄酒，古朴的味道..." },
     
-    // 第3关：双酪之约
+    // 第4关：双酪之约
     // 雪酪 = 甜牛奶 + 酿造（甜液体凝固 = 轻盈版酪）
     { ingredients: ["甜牛奶", "酿造"], result: "雪酪", time: 5, msg: "甜蜜凝固，轻盈雪酪诞生..." },
     { ingredients: ["酿造", "甜牛奶"], result: "雪酪", time: 5, msg: "甜蜜凝固，轻盈雪酪诞生..." },
@@ -146,6 +158,27 @@ const ITEMS = {
     "奥利奥碎": { icon: "🍪", type: "grain", desc: "奥利奥碎" },
     "可可粉": { icon: "🍫", type: "grain", desc: "生可可粉" },
     
+    // 功能 / 货币物品
+    "配方书": { icon: "📖", type: "special", desc: "记载着酿造配方的古书", isRecipeBook: true },
+    "银币": { icon: "🪙", type: "special", desc: "闪亮的银币，可用于交易" },
+
+    // 花卉原料（补充）
+    "菊花": { icon: "🏵️", type: "floral", desc: "清香菊花" },
+
+    // 干扰项原料
+    "酸奶菌": { icon: "🦠", type: "base", desc: "酸奶发酵菌，很酸" },
+    "糯米": { icon: "🍚", type: "base", desc: "圆润糯米，酒酿的灵魂" },
+    "大米": { icon: "🌾", type: "base", desc: "普通大米" },
+    "黑米": { icon: "🖤", type: "base", desc: "紫黑色的黑米" },
+    "小米": { icon: "🟡", type: "base", desc: "金黄的小米" },
+
+    // 干扰项产物
+    "超酸酸奶": { icon: "🤢", type: "mid", desc: "酸到怀疑人生" },
+    "酒酿": { icon: "🍶", type: "mid", desc: "糯米发酵的甜酒酿" },
+    "米酒": { icon: "🍶", type: "mid", desc: "大米酿的酒，不是酒酿" },
+    "黑米露": { icon: "🍷", type: "mid", desc: "紫黑色的黑米酒露" },
+    "小米黄酒": { icon: "🍺", type: "mid", desc: "古朴的小米黄酒" },
+
     // 特殊原料
     "香气封印": { icon: "🔮", type: "special", desc: "封印着花香的神秘容器", extracts: ["桂花原浆"] },
     "Kiri芝士": { icon: "🧀", type: "special", desc: "Kiri芝士酪乳" },

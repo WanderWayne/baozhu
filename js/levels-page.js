@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     initWorldMap();
     selectWorld(currentWorldId);
-    
+
     // 播放主界面BGM
     if (window.AudioManager) {
         window.AudioManager.playBGM('bgm-menu');
@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 返回按钮
     const backBtn = document.getElementById('back-btn');
     if (backBtn) {
+        if (window.LevelManager && window.LevelManager.hasAnyClaimableTask()) {
+            const dot = document.createElement('span');
+            dot.className = 'claimable-dot';
+            backBtn.appendChild(dot);
+        }
         backBtn.addEventListener('click', () => {
             if (window.AudioManager) {
                 window.AudioManager.playClickBack();
@@ -212,9 +217,13 @@ function createLevelDoor(level, index) {
     door.dataset.index = index;
     door.dataset.levelId = level.id;
     
-    // 目标文字格式化
+    // 目标文字格式化（双门关卡显示所有目标）
+    let targetLabel = level.target;
+    if (level.doors && level.doors.length > 1) {
+        targetLabel = level.doors.map(d => d.target).join(' + ');
+    }
     const targetText = isUnlocked 
-        ? `目标 · ${level.target}` 
+        ? `目标 · ${targetLabel}` 
         : '尚未解锁';
     
     // 进入按钮，最新解锁的加光波特效
@@ -379,4 +388,6 @@ function updateStorySection(worldId) {
         storyText.textContent = text;
     }
 }
+
+
 

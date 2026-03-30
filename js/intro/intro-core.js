@@ -20,25 +20,28 @@ class IntroSystem {
         
         // 配置 - 调整参数
         this.config = {
-            minParticles: 200, // 拼字用（确保足够）
-            ambientParticles: 150, // 初始环境粒子
-            linkedClusterCount: 8, // 连线粒子组数量
-            linkedClusterSpacing: 25, // 连线粒子间距
-            extraParticlesForText: 80, // 拼字时额外飞入的粒子
-            doorBreathDuration: 2000, // 呼吸周期 ms
+            minParticles: 200,
+            ambientParticles: 150,
+            linkedClusterCount: 8,
+            linkedClusterSpacing: 25,
+            extraParticlesForText: 80,
+            doorBreathDuration: 2000,
             doorBreathCount: 3,
-            particleBaseSize: 1.5, // 基础粒子大小（漂浮时小）
-            particleMaxSize: 2.5, // 最大粒子大小
-            textParticleSize: 8, // 拼字粒子大小
-            particleAlpha: 0.4, // 粒子透明度
+            particleBaseSize: 1.5,
+            particleMaxSize: 2.5,
+            textParticleSize: 5,
+            particleAlpha: 0.4,
         };
 
-        // iPhone 14 适配 (430x932) - 减少粒子数量，使用屏幕内生成
         this.isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 950;
+        // 粒子大小从共用配置读取（与主界面保持一致，见 main-particles.js 顶部 BAOZHU_TITLE_CONFIG）
+        const titleCfg = window.BAOZHU_TITLE_CONFIG;
+        this.config.textParticleSize = this.isSmallScreen
+            ? titleCfg.textParticleSize.small
+            : titleCfg.textParticleSize.normal;
         if (this.isSmallScreen) {
-            this.config.ambientParticles = 144; // 减少环境粒子（但仍需足够拼字）
-            this.config.linkedClusterCount = 4; // 减少连线粒子组
-            this.config.textParticleSize = 6; // 小屏幕上文字粒子更小
+            this.config.ambientParticles = 144;
+            this.config.linkedClusterCount = 4;
         }
         
         this.init();

@@ -87,7 +87,7 @@ body {
     gap: 18px;
     width: 90%;
     max-width: 320px;
-    margin-top: 32vh; /* 从38vh改为32vh，按钮整体往上 */
+    margin-top: 21vh;
     animation: fadeInUp 1s ease-out;
 }
 
@@ -226,6 +226,7 @@ body {
 }
 
 .main-link-btn {
+    position: relative;
     background: transparent;
     border: none;
     color: var(--caramel-brown);
@@ -427,6 +428,150 @@ body {
 .settings-info .info-sub {
     font-size: 11px;
     opacity: 0.7;
+}
+
+/* ========== 任务面板 ========== */
+.tasks-panel {
+    max-width: 480px;
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.task-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(166, 124, 82, 0.08);
+}
+
+.task-row:last-child {
+    border-bottom: none;
+}
+
+.task-row.task-done.task-claimed {
+    opacity: 0.5;
+}
+
+.task-left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.task-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.task-name {
+    font-size: 13px;
+    color: var(--old-wood);
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.task-done .task-name::after {
+    content: ' ✓';
+    color: var(--moss-green);
+}
+
+.task-desc {
+    font-size: 11px;
+    color: var(--caramel-brown);
+    opacity: 0.7;
+}
+
+.task-progress-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(166, 124, 82, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.task-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rice-wine-gold), var(--dawn-gold));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.task-progress-text {
+    font-size: 10px;
+    color: var(--caramel-brown);
+    opacity: 0.6;
+    letter-spacing: 1px;
+}
+
+.task-reward {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    text-align: right;
+}
+
+.task-reward-label {
+    font-size: 10px;
+    color: var(--caramel-brown);
+    opacity: 0.5;
+    letter-spacing: 1px;
+}
+
+.task-reward-value {
+    font-size: 11px;
+    color: var(--rice-wine-gold);
+    letter-spacing: 1px;
+}
+
+.task-reward.task-claimable {
+    position: relative;
+}
+
+.task-reward.task-claimable .task-reward-label {
+    color: var(--rice-wine-gold);
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* ========== 金色呼吸提示点 ========== */
+.claimable-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffd96b 30%, #e8c873 100%);
+    box-shadow: 0 0 6px 2px rgba(232, 200, 115, 0.6);
+    animation: claimableDotBreathe 1.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes claimableDotBreathe {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0.6;
+        box-shadow: 0 0 4px 1px rgba(232, 200, 115, 0.4);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+        box-shadow: 0 0 8px 3px rgba(232, 200, 115, 0.8);
+    }
 }
 
 /* ========== 动画 ========== */

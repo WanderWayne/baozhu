@@ -12,15 +12,25 @@ class LevelManager {
             const progress = JSON.parse(saved);
             // 确保新字段存在（向后兼容）
             if (!progress.fragments) progress.fragments = [];
+            if (progress.gems === undefined) progress.gems = 0;
+            // 向后兼容：为加入珠宝系统前已完成的关卡补发珠宝（只补一次）
+            if (!progress.retroactiveGemsAwarded && progress.completedLevels && progress.completedLevels.length > 0) {
+                progress.gems += progress.completedLevels.length * 50;
+                progress.retroactiveGemsAwarded = true;
+                console.log('[Gems] retroactive award:', progress.completedLevels.length * 50,
+                    'gems for', progress.completedLevels.length, 'completed levels');
+            }
             return progress;
         }
         return {
-            unlockedWorlds: [1],      // 默认解锁第一世界
-            unlockedLevels: [101],    // 默认解锁第一关（新教学关）
-            completedLevels: [],       // 已完成的关卡
-            discoveredItems: [],       // 已发现的物品
-            fragments: [],             // 收集的记忆碎片
-            achievements: []           // 成就
+            unlockedWorlds: [1],
+            unlockedLevels: [101],
+            completedLevels: [],
+            discoveredItems: [],
+            fragments: [],
+            achievements: [],
+            gems: 0,
+            retroactiveGemsAwarded: true
         };
     }
 
@@ -114,12 +124,32 @@ class LevelManager {
 
     // 完成关卡（非线性版本：不需要解锁下一关）
     completeLevel(levelId) {
-        if (!this.currentProgress.completedLevels.includes(levelId)) {
+        const alreadyDone = this.currentProgress.completedLevels.includes(levelId);
+        console.log('[Gems] completeLevel', levelId, '— already completed:', alreadyDone);
+        if (!alreadyDone) {
             this.currentProgress.completedLevels.push(levelId);
+            this.addGems(50);
             this.saveProgress();
             return true;
         }
         return false;
+    }
+
+    // 珠宝系统
+    addGems(amount) {
+        if (this.currentProgress.gems === undefined) this.currentProgress.gems = 0;
+        this.currentProgress.gems += amount;
+        this.saveProgress();
+        console.log('[Gems] addGems +' + amount + ', total now:', this.currentProgress.gems,
+            '— GameInstance:', !!window.GameInstance,
+            '— updateGemDisplay:', !!(window.GameInstance && window.GameInstance.updateGemDisplay));
+        if (window.GameInstance && window.GameInstance.updateGemDisplay) {
+            window.GameInstance.updateGemDisplay();
+        }
+    }
+
+    getGems() {
+        return this.currentProgress.gems || 0;
     }
 
     // 记录发现的物品
@@ -245,13 +275,14 @@ class LevelManager {
     resetProgress() {
         this.currentProgress = {
             unlockedWorlds: [1],
-            unlockedLevels: [101],  // 新教学关
+            unlockedLevels: [101],
             completedLevels: [],
             discoveredItems: [],
             fragments: [],
             achievements: [],
-            titleLevel: 1,  // 重置称号等级
-            chapterProgress: {}  // 章节进度
+            gems: 0,
+            titleLevel: 1,
+            chapterProgress: {}
         };
         this.saveProgress();
         
@@ -271,7 +302,7 @@ class LevelManager {
     
     // 基础关卡ID列表（前5关）
     getBasicLevelIds() {
-        return [101, 102, 2, 1, 104]; // 唤醒之手, 时间的答案, 酸奶阶梯, 冰酥门廊, 双酪启程
+        return [101, 102, 103, 104, 105, 106];
     }
     
     // 开始基础关卡计时（第一次进入基础关卡时调用）
@@ -408,6 +439,20 @@ class LevelManager {
         ];
         const level = this.currentProgress.titleLevel || 1;
         return titles.find(t => t.level === level) || titles[0];
+    }
+    hasAnyClaimableTask() {
+        const claimed = JSON.parse(localStorage.getItem('baozhu_claimed_tasks') || '[]');
+        const completed = this.currentProgress.completedLevels || [];
+        const discovered = this.currentProgress.discoveredItems || [];
+        const checks = [
+            { id: 'first_synthesis', done: discovered.length >= 1 },
+            { id: 'complete_first5', done: [101,102,103,104,105].every(id => completed.includes(id)) },
+            { id: 'complete_boss', done: completed.includes(106) },
+            { id: 'complete_chapter1', done: [101,102,103,104,105,106].every(id => completed.includes(id)) },
+            { id: 'discover_10', done: discovered.length >= 10 },
+            { id: 'discover_20', done: discovered.length >= 20 },
+        ];
+        return checks.some(c => c.done && !claimed.includes(c.id));
     }
 }
 

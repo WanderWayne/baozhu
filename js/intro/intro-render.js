@@ -38,9 +38,9 @@ IntroSystem.prototype.animate = function(time = 0) {
     // 始终清除主 Canvas，保持透明，让底层的背景色和环境层透出来
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // ==================== 荧光蓝覆层 ====================
+    // ==================== 金光覆层 ====================
     
-    // 荧光蓝覆层（献上后的效果）
+    // 金光覆层（献上后的效果）
     // 这个仍然画在 Canvas 上，因为它需要在粒子下面但在背景上面？
     // 不，这层半透明覆盖应该不影响环境层。
     if (this.state === 'blueWash' || this.state === 'storyNarration') {
@@ -55,7 +55,7 @@ IntroSystem.prototype.animate = function(time = 0) {
         }
         
         if (this.cyanOverlayAlpha > 0) {
-            this.ctx.fillStyle = `rgba(0, 200, 255, ${this.cyanOverlayAlpha})`;
+            this.ctx.fillStyle = `rgba(232, 200, 115, ${this.cyanOverlayAlpha})`;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
@@ -176,9 +176,9 @@ IntroSystem.prototype.showNarrative = function(text) {
         this.narrativeEl.textContent = text;
         this.narrativeEl.classList.add('visible');
         
-        // 荧光蓝色，发光效果，像灵魂的低语
-        this.narrativeEl.style.color = '#E0F7FA';
-        this.narrativeEl.style.textShadow = '0 0 10px rgba(0, 200, 255, 0.8), 0 0 20px rgba(0, 200, 255, 0.4)';
+        // 金色发光效果，像灵魂的低语
+        this.narrativeEl.style.color = '#FFF5D6';
+        this.narrativeEl.style.textShadow = '0 0 10px rgba(232, 200, 115, 0.8), 0 0 20px rgba(232, 200, 115, 0.4)';
     }
 };
 

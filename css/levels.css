@@ -87,14 +87,16 @@
 
 html, body {
     overscroll-behavior: none;
+    overflow: hidden;
+    height: 100%;
 }
 
 body {
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
     color: var(--text-primary);
-    min-height: 100vh;
+    height: 100vh;
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
     background: var(--chapter-bg, var(--milk-foam));
     transition: background-color 0.6s ease;
 }
@@ -118,8 +120,11 @@ body {
     max-width: 480px;
     margin: 0 auto;
     padding: 28px 24px;
-    padding-bottom: 60px;
-    min-height: 100vh;
+    padding-bottom: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* ========== 头部 ========== */
@@ -132,6 +137,7 @@ header {
 }
 
 .back-btn {
+    position: relative;
     width: 44px;
     height: 44px;
     background: var(--milk-foam);
@@ -345,9 +351,9 @@ h1 {
 /* ========== 关卡滑动选择器 ========== */
 .level-carousel-container {
     position: relative;
-    height: 440px;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
-    margin-bottom: 16px;
 }
 
 .level-carousel {
@@ -631,7 +637,8 @@ h1 {
     }
     
     .level-carousel-container {
-        height: 380px;
+        flex: 1;
+        min-height: 0;
     }
     
     .level-door {
@@ -696,7 +703,8 @@ h1 {
     }
     
     .level-carousel-container {
-        height: 500px;
+        flex: 1;
+        min-height: 0;
     }
     
     .level-door {
@@ -727,7 +735,7 @@ h1 {
 /* ========== 安全区域适配 ========== */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
     .container {
-        padding-bottom: calc(60px + env(safe-area-inset-bottom));
+        padding-bottom: calc(20px + env(safe-area-inset-bottom));
     }
 }
 
@@ -736,4 +744,32 @@ h1 {
     -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none;
     user-select: none;
+}
+
+/* ========== 可领取任务金色提示点 ========== */
+.claimable-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffd96b 30%, #e8c873 100%);
+    box-shadow: 0 0 6px 2px rgba(232, 200, 115, 0.6);
+    animation: claimableDotBreathe 1.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes claimableDotBreathe {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0.6;
+        box-shadow: 0 0 4px 1px rgba(232, 200, 115, 0.4);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+        box-shadow: 0 0 8px 3px rgba(232, 200, 115, 0.8);
+    }
 }

@@ -1,0 +1,333 @@
+.variant-lab-active #variant-map-viewport {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    touch-action: none;
+    z-index: 1;
+}
+
+.variant-lab-active #variant-map-world {
+    position: absolute;
+    width: 2400px;
+    height: 980px;
+    transform-origin: 0 0;
+    background: #fff;
+}
+
+.variant-lab-active #variant-ui-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 70;
+}
+
+.variant-lab-active #variant-ui-layer .back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 71;
+    pointer-events: auto;
+}
+
+.variant-lab-active #door-area,
+.variant-lab-active #synthesis-area {
+    position: absolute;
+    z-index: 5;
+}
+
+.variant-lab-active #door-area {
+    left: 140px;
+    top: 170px;
+    width: 280px;
+}
+
+.variant-lab-active #synthesis-area {
+    left: 0;
+    top: 0;
+    width: 2400px;
+    height: 980px;
+    min-height: 980px;
+    overflow: visible;
+    background: transparent;
+    z-index: 6;
+}
+
+.variant-lab-active #synthesis-area .workbench-texture,
+.variant-lab-active #synthesis-area::before {
+    display: none;
+}
+
+.variant-lab-active .variant-outer-boundary,
+.variant-lab-active .variant-wall-line,
+.variant-lab-active .variant-boundary-line {
+    position: absolute;
+    pointer-events: none;
+}
+
+.variant-lab-active #variant-map-world .milk-fog-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2400px;
+    height: 980px;
+    z-index: 0;
+}
+
+.variant-lab-active .variant-world-backdrop {
+    position: absolute;
+    background: #fff;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.variant-lab-active #variant-map-world #door-area,
+.variant-lab-active #variant-map-world #synthesis-area,
+.variant-lab-active #variant-map-world .variant-outer-boundary,
+.variant-lab-active #variant-map-world .variant-wall-line,
+.variant-lab-active #variant-map-world .variant-boundary-line,
+.variant-lab-active #variant-map-world .variant-outer-redzone,
+.variant-lab-active #variant-map-world .variant-zone {
+    z-index: 6;
+}
+
+.variant-lab-active #variant-map-world .variant-outer-boundary,
+.variant-lab-active #variant-map-world .variant-wall-line,
+.variant-lab-active #variant-map-world .variant-boundary-line {
+    z-index: 5;
+}
+
+.variant-lab-active #variant-map-world .sugar-sparkle.variant-sugar-sparkle {
+    position: absolute;
+    z-index: 2;
+}
+
+.variant-lab-active .variant-outer-boundary {
+    box-sizing: border-box;
+    border: 14px solid rgba(255, 56, 56, 0.98);
+    border-radius: 3px;
+    box-shadow:
+        0 0 0 1px rgba(255, 30, 30, 0.4),
+        0 0 12px rgba(255, 46, 46, 0.9),
+        0 0 28px rgba(255, 32, 32, 0.65),
+        0 0 52px rgba(160, 12, 12, 0.42),
+        inset 0 0 7px rgba(255, 118, 118, 0.35);
+}
+
+.variant-lab-active .variant-wall-line {
+    border: 6px solid #111;
+}
+
+.variant-lab-active .variant-boundary-line {
+    width: 18px;
+    border-radius: 10px;
+    background:
+        linear-gradient(90deg,
+            rgba(255, 90, 90, 0.12) 0%,
+            rgba(255, 48, 48, 0.75) 22%,
+            rgba(255, 54, 54, 1) 50%,
+            rgba(255, 48, 48, 0.75) 78%,
+            rgba(255, 90, 90, 0.12) 100%);
+    box-shadow:
+        0 0 8px rgba(255, 70, 70, 0.95),
+        0 0 18px rgba(255, 55, 55, 0.9),
+        0 0 42px rgba(255, 40, 40, 0.65),
+        0 0 76px rgba(255, 30, 30, 0.4);
+    opacity: 0.92;
+}
+
+.variant-lab-active .variant-boundary-line.opened {
+    opacity: 0.08;
+    box-shadow: none;
+}
+
+.variant-lab-active .variant-outer-redzone {
+    position: absolute;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.variant-lab-active .variant-outer-redzone.top {
+    background: linear-gradient(180deg, rgba(86, 8, 8, 0.34) 0%, rgba(86, 8, 8, 0.12) 58%, rgba(86, 8, 8, 0) 100%);
+}
+
+.variant-lab-active .variant-outer-redzone.bottom {
+    background: linear-gradient(0deg, rgba(86, 8, 8, 0.34) 0%, rgba(86, 8, 8, 0.12) 58%, rgba(86, 8, 8, 0) 100%);
+}
+
+.variant-lab-active .variant-outer-redzone.left {
+    background: linear-gradient(90deg, rgba(86, 8, 8, 0.34) 0%, rgba(86, 8, 8, 0.12) 58%, rgba(86, 8, 8, 0) 100%);
+}
+
+.variant-lab-active .variant-outer-redzone.right {
+    background: linear-gradient(270deg, rgba(86, 8, 8, 0.34) 0%, rgba(86, 8, 8, 0.12) 58%, rgba(86, 8, 8, 0) 100%);
+}
+
+.variant-lab-active .variant-boundary-redzone {
+    position: absolute;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.variant-lab-active .variant-boundary-redzone.opened {
+    opacity: 0;
+    transition: opacity 220ms ease;
+}
+
+.variant-lab-active .variant-zone {
+    position: absolute;
+    width: 110px;
+    min-height: 110px;
+    border: 5px solid #111;
+    border-radius: 18px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 8px;
+}
+
+.variant-lab-active .variant-node {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid #111;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+    background: #f8f8f8;
+}
+
+.variant-lab-active #inventory-area.variant-hotbar {
+    z-index: 40;
+    max-height: none;
+    height: 188px;
+    min-height: 188px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-content: stretch;
+    align-items: stretch;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+}
+
+.variant-lab-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(36, 30, 24, 0.2);
+    backdrop-filter: blur(5px);
+    z-index: 30;
+}
+
+.variant-lab-backpack {
+    position: fixed;
+    left: 7.5vw;
+    right: 7.5vw;
+    top: 20vh;
+    height: 50vh;
+    z-index: 61;
+    border-radius: 18px;
+    border: 2px solid rgba(17, 17, 17, 0.5);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.variant-lab-backpack-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+}
+
+.variant-lab-backpack-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 78px;
+    gap: 8px;
+    align-content: start;
+}
+
+.variant-slot,
+.variant-backpack-item {
+    min-height: 82px;
+    height: auto;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.variant-selected {
+    outline: 3px solid #d4a574;
+    outline-offset: 2px;
+}
+
+.variant-lab-open-btn {
+    position: fixed;
+    right: 12px;
+    bottom: calc(188px + env(safe-area-inset-bottom, 0px) - 1px);
+    z-index: 72;
+    width: 108px;
+    height: 42px;
+    border: 1px solid rgba(166, 124, 82, 0.26);
+    background: linear-gradient(180deg, rgba(255, 253, 247, 0.98) 0%, rgba(245, 240, 230, 0.96) 100%);
+    color: var(--old-wood);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    clip-path: polygon(16% 0, 84% 0, 100% 100%, 0 100%);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    box-shadow:
+        0 -2px 8px rgba(107, 83, 68, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.variant-lab-active #variant-ui-layer .back-btn.variant-back-btn-blur {
+    filter: blur(2px) saturate(0.85);
+    opacity: 0.7;
+}
+
+.variant-lab-active .identity-plaque,
+.variant-lab-active .level-info,
+.variant-lab-active #door-status,
+.variant-lab-active .door-container {
+    display: none !important;
+}
+
+.variant-lab-active #inventory-area.variant-hotbar .game-item.in-inventory,
+.variant-lab-active .variant-backpack-item .game-item {
+    width: min(100%, 84px);
+    max-width: none;
+    min-width: 0;
+    height: auto;
+    aspect-ratio: 1;
+}
+
+.variant-lab-active #door-icon {
+    display: none !important;
+}
+
+.variant-lab-backpack-grid {
+    grid-auto-rows: minmax(84px, auto);
+    row-gap: 8px;
+    column-gap: 8px;
+}

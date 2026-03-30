@@ -70,9 +70,11 @@ IntroSystem.prototype.loadTextDots = function() {
 
 IntroSystem.prototype.generateDotsFromMatrices = function(matrices) {
     const chars = ['宝', '珠', '奶', '酪'];
-    const dotSize = this.isSmallScreen ? 8 : 12;      // 每个点的间距（小屏更小）
-    const charGap = this.isSmallScreen ? 15 : 30;     // 字之间的间隔
-    const gridSize = 10;     // 点阵网格大小
+    // 从共用配置读取（与主界面保持一致，见 main-particles.js 顶部 BAOZHU_TITLE_CONFIG）
+    const titleCfg = window.BAOZHU_TITLE_CONFIG;
+    const dotSize = this.isSmallScreen ? titleCfg.dotSize.small : titleCfg.dotSize.normal;
+    const charGap = this.isSmallScreen ? titleCfg.charGap.small : titleCfg.charGap.normal;
+    const gridSize = 10;
     
     const charWidth = gridSize * dotSize;
     const charHeight = gridSize * dotSize;
@@ -81,8 +83,8 @@ IntroSystem.prototype.generateDotsFromMatrices = function(matrices) {
     const totalWidth = 2 * charWidth + charGap;
     const totalHeight = 2 * charHeight + charGap;
     const startX = this.centerX - totalWidth / 2;
-    // 注意：startY 已经是考虑了 displayCenterY 的偏移，这里先计算相对中心
-    const startY = this.centerY - totalHeight / 2;
+    const displayCenterY = this.canvas.height * 0.28;
+    const startY = displayCenterY - totalHeight / 2;
     
     this.textDotTargets = [];
     

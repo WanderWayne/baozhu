@@ -2,6 +2,18 @@
 // 基于 docs/baozhu-style-guide.md 和 growth-system.js
 // ================================================
 
+// =============================================
+// 【宝珠奶酪 标题粒子参数 — 开场动画与主界面共用】
+// 修改这里同时影响两个地方：
+//   1. 开场动画结束后粒子聚合成的标题（IntroSystem）
+//   2. 跳过开场时直接显示的主界面标题（MainParticleSystem）
+// =============================================
+window.BAOZHU_TITLE_CONFIG = {
+    dotSize:          { normal: 12, small: 8  }, // 每格点间距（px）
+    charGap:          { normal: 30, small: 15 }, // 字与字之间的间隔（px）
+    textParticleSize: { normal: 8,  small: 6  }, // 粒子圆点半径（px）
+};
+
 class MainParticleSystem {
     constructor() {
         this.canvas = null;
@@ -27,16 +39,16 @@ class MainParticleSystem {
             caramelBrown: { r: 166, g: 124, b: 82 }
         };
         
-        // 配置
-        this.config = {
-            textParticleSize: 8,
-        };
-
         // 小屏适配
         this.isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 950;
-        if (this.isSmallScreen) {
-            this.config.textParticleSize = 6;
-        }
+
+        // 粒子大小从共用配置读取（与开场动画保持一致，见文件顶部 BAOZHU_TITLE_CONFIG）
+        const titleCfg = window.BAOZHU_TITLE_CONFIG;
+        this.config = {
+            textParticleSize: this.isSmallScreen
+                ? titleCfg.textParticleSize.small
+                : titleCfg.textParticleSize.normal,
+        };
         
         this.spawnTimers = { bubble: 0, dust: 0 };
         
@@ -159,8 +171,10 @@ class MainParticleSystem {
     
     generateDotsFromMatrices(matrices) {
         const chars = ['宝', '珠', '奶', '酪'];
-        const dotSize = this.isSmallScreen ? 8 : 12;
-        const charGap = this.isSmallScreen ? 15 : 30;
+        // 从共用配置读取（与开场动画保持一致，见文件顶部 BAOZHU_TITLE_CONFIG）
+        const titleCfg = window.BAOZHU_TITLE_CONFIG;
+        const dotSize = this.isSmallScreen ? titleCfg.dotSize.small : titleCfg.dotSize.normal;
+        const charGap = this.isSmallScreen ? titleCfg.charGap.small : titleCfg.charGap.normal;
         const gridSize = 10;
         
         const charWidth = gridSize * dotSize;

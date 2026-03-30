@@ -34,23 +34,39 @@
     50% { transform: scale(1.1); opacity: 0.8; }
 }
 
-/* Stage 0: 沉睡 - 暗淡状态 */
+/* Stage 0: 沉睡 - 暗淡安静 */
+.door-container.stage-0 .door-frame {
+    border-color: rgba(150, 150, 150, 0.5);
+    box-shadow: 0 0 10px rgba(232, 200, 115, 0.05);
+}
+.door-container.stage-0 .door-glow::before {
+    opacity: 0;
+    animation: none;
+}
 .door-container.stage-0 .door-target-silhouette {
-    opacity: 0.2;
-    filter: blur(8px) grayscale(100%);
+    opacity: 0.4;
+    filter: blur(4px) grayscale(80%);
     animation: targetBreath 3s ease-in-out infinite;
 }
 
-/* Stage 1: 唤醒 (微光) - 荧光蓝开始显现 */
+/* Stage 1: 唤醒 - 呼吸光出现 */
 .door-container.stage-1 .door-frame {
-    border-color: rgba(0, 180, 200, 0.5);
-    box-shadow: 0 0 15px rgba(0, 180, 200, 0.2);
+    border-color: rgba(150, 150, 150, 0.6);
+    box-shadow: 0 0 15px rgba(232, 200, 115, 0.12);
+    animation: doorFrameBreathS1 2s ease-in-out infinite;
 }
-.door-container.stage-1 .door-glow {
-    box-shadow: inset 0 0 40px rgba(0, 200, 220, 0.25);
+@keyframes doorFrameBreathS1 {
+    0%, 100% {
+        border-color: rgba(150, 150, 150, 0.5);
+        box-shadow: 0 0 10px rgba(232, 200, 115, 0.08);
+    }
+    50% {
+        border-color: rgba(180, 170, 140, 0.65);
+        box-shadow: 0 0 20px rgba(232, 200, 115, 0.18);
+    }
 }
 .door-container.stage-1 .door-glow::before {
-    opacity: 0.7;
+    animation: doorBreathGlow 2s ease-in-out infinite;
 }
 .door-container.stage-1 .door-target-silhouette {
     opacity: 0.5;
@@ -62,29 +78,37 @@
     0%, 100% { transform: scale(0.95); opacity: 0.5; }
     50% { transform: scale(1); opacity: 0.6; }
 }
-.door-container.stage-1 .door-aura {
-    border-color: rgba(0, 180, 200, 0.3);
-    transform: scale(1.02);
-}
 
-/* Stage 2: 脉动 (即将开启) - 荧光蓝更强 */
+/* Stage 2: 脉动 - 呼吸更强 */
 .door-container.stage-2 .door-frame {
-    border-color: rgba(0, 220, 255, 0.7);
-    box-shadow: 0 0 25px rgba(0, 220, 255, 0.4);
+    border-color: rgba(200, 185, 140, 0.7);
+    box-shadow: 0 0 20px rgba(232, 200, 115, 0.25);
+    animation: doorFrameBreathS2 1.8s ease-in-out infinite;
 }
-.door-container.stage-2 .door-glow {
-    box-shadow: inset 0 0 50px rgba(0, 220, 255, 0.35);
-    animation: glowPulse 2s infinite;
+@keyframes doorFrameBreathS2 {
+    0%, 100% {
+        border-color: rgba(190, 175, 130, 0.6);
+        box-shadow: 0 0 15px rgba(232, 200, 115, 0.2);
+    }
+    50% {
+        border-color: rgba(220, 200, 150, 0.8);
+        box-shadow: 0 0 30px rgba(255, 220, 100, 0.35);
+    }
 }
 .door-container.stage-2 .door-glow::before {
-    opacity: 1;
-    background: radial-gradient(ellipse at center 30%, rgba(0, 220, 255, 0.2) 0%, transparent 60%);
+    background: radial-gradient(
+        ellipse at center 40%,
+        rgba(232, 200, 115, 0.35) 0%,
+        rgba(200, 170, 80, 0.12) 50%,
+        transparent 80%
+    );
+    animation: doorBreathGlow 1.6s ease-in-out infinite;
 }
 .door-container.stage-2 .door-target-silhouette {
     opacity: 0.8;
     filter: blur(1px) grayscale(20%);
     transform: scale(1);
-    text-shadow: 0 0 20px rgba(0, 220, 255, 0.6);
+    text-shadow: 0 0 15px rgba(232, 200, 115, 0.5);
     animation: targetBreathStage2 2s ease-in-out infinite;
 }
 @keyframes targetBreathStage2 {
@@ -92,8 +116,6 @@
     50% { transform: scale(1.05); opacity: 0.9; }
 }
 .door-container.stage-2 .door-aura {
-    border-color: rgba(0, 220, 255, 0.5);
-    box-shadow: 0 0 30px rgba(0, 220, 255, 0.3);
     animation: auraGlow 2s ease-in-out infinite;
 }
 @keyframes auraGlow {
@@ -101,21 +123,33 @@
     50% { opacity: 0.8; }
 }
 
-/* Stage 3: 开启 (高潮) - 充满光芒 */
+/* Stage 3: 开启 - 光芒充盈 */
 .door-container.stage-3 {
     transform: scale(1.05);
 }
 .door-container.stage-3 .door-frame {
-    border-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 40px rgba(0, 220, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.4);
-    background: transparent;
+    border-color: rgba(232, 200, 115, 0.7);
+    box-shadow: 0 0 30px rgba(232, 200, 115, 0.4);
+    animation: doorFrameBreathS3 1.2s ease-in-out infinite;
 }
-.door-container.stage-3 .door-glow {
-    background: radial-gradient(ellipse at center, rgba(0, 220, 255, 0.3) 0%, rgba(10, 10, 10, 0.9) 70%);
-    box-shadow: inset 0 0 60px rgba(0, 220, 255, 0.5);
+@keyframes doorFrameBreathS3 {
+    0%, 100% {
+        border-color: rgba(232, 200, 115, 0.6);
+        box-shadow: 0 0 25px rgba(232, 200, 115, 0.35);
+    }
+    50% {
+        border-color: rgba(255, 220, 100, 0.9);
+        box-shadow: 0 0 45px rgba(255, 220, 100, 0.6);
+    }
 }
 .door-container.stage-3 .door-glow::before {
-    opacity: 0;
+    background: radial-gradient(
+        ellipse at center 40%,
+        rgba(255, 220, 100, 0.5) 0%,
+        rgba(232, 200, 115, 0.2) 50%,
+        transparent 80%
+    );
+    animation: doorBreathGlow 1s ease-in-out infinite;
 }
 .door-container.stage-3 .door-target-silhouette {
     opacity: 1;
@@ -129,8 +163,6 @@
     50% { transform: scale(1.2); }
 }
 .door-container.stage-3 .door-aura {
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 0 50px rgba(0, 220, 255, 0.5);
     animation: auraGlowIntense 1.5s ease-in-out infinite;
 }
 @keyframes auraGlowIntense {
@@ -144,8 +176,8 @@
 }
 
 @keyframes awaitingPulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(0, 220, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.4); }
-    50% { box-shadow: 0 0 60px rgba(0, 220, 255, 1), 0 0 80px rgba(255, 255, 255, 0.6); }
+    0%, 100% { box-shadow: 0 0 30px rgba(255, 220, 100, 0.5); }
+    50% { box-shadow: 0 0 50px rgba(255, 220, 100, 0.8); }
 }
 
 /* 门靠近反馈 - 拖着物品靠近门时 */
@@ -154,16 +186,15 @@
 }
 
 .door-container.door-nearby .door-frame {
-    border-color: rgba(0, 220, 255, 0.8);
-    box-shadow: 0 0 35px rgba(0, 220, 255, 0.6);
+    border-color: rgba(255, 220, 100, 0.8);
+    box-shadow: 0 0 30px rgba(255, 220, 100, 0.4);
 }
 
-.door-container.door-nearby .door-glow {
-    box-shadow: inset 0 0 40px rgba(0, 220, 255, 0.4);
+.door-container.door-nearby .door-glow::before {
+    opacity: 1 !important;
 }
 
 .door-container.door-nearby .door-aura {
-    border-color: rgba(0, 220, 255, 0.6);
     animation: nearbyAura 0.8s ease-in-out infinite;
 }
 
@@ -313,6 +344,25 @@
     transform: translateX(-50%) translateY(0);
 }
 
+/* ========== 门出现/消失动画（缩放） ========== */
+.door-wrapper.scale-out {
+    animation: doorScaleOut 0.5s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.door-wrapper.scale-in {
+    animation: doorScaleIn 0.5s cubic-bezier(0, 0, 0.2, 1.2) forwards;
+}
+
+@keyframes doorScaleOut {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes doorScaleIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
 /* ========== 章节过渡 - 门关闭/开启动画 ========== */
 
 /* 星星进入门时的闪光 */
@@ -322,14 +372,13 @@
 
 @keyframes doorStarFlash {
     0% { 
-        box-shadow: inset 0 0 60px rgba(0, 220, 255, 0.5);
+        box-shadow: none;
     }
     50% { 
-        box-shadow: inset 0 0 100px rgba(255, 255, 255, 1),
-                    inset 0 0 150px rgba(255, 228, 181, 0.8);
+        box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.8);
     }
     100% { 
-        box-shadow: inset 0 0 60px rgba(0, 220, 255, 0.5);
+        box-shadow: none;
     }
 }
 
@@ -357,12 +406,10 @@
 
 @keyframes doorGlowClose {
     0% { 
-        background: radial-gradient(ellipse at center, rgba(0, 220, 255, 0.3) 0%, rgba(10, 10, 10, 0.9) 70%);
-        box-shadow: inset 0 0 60px rgba(0, 220, 255, 0.5);
+        background: #000;
     }
     100% { 
-        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 0%, rgba(5, 5, 5, 1) 100%);
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        background: #000;
     }
 }
 
@@ -405,16 +452,10 @@
 
 @keyframes doorGlowOpen {
     0% { 
-        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 0%, rgba(5, 5, 5, 1) 100%);
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-    50% {
-        background: radial-gradient(ellipse at center, rgba(0, 180, 220, 0.2) 0%, rgba(10, 10, 10, 0.95) 70%);
-        box-shadow: inset 0 0 40px rgba(0, 200, 220, 0.3);
+        background: #000;
     }
     100% { 
-        background: linear-gradient(180deg, #0a0a0a 0%, #050508 100%);
-        box-shadow: inset 0 0 30px rgba(0, 180, 200, 0.15);
+        background: #000;
     }
 }
 
@@ -440,8 +481,8 @@
     font-size: 20px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.95);
-    text-shadow: 0 0 20px rgba(0, 200, 220, 0.8),
-                 0 0 40px rgba(0, 200, 220, 0.4);
+    text-shadow: 0 0 20px rgba(232, 200, 115, 0.8),
+                 0 0 40px rgba(232, 200, 115, 0.4);
     letter-spacing: 4px;
     white-space: nowrap;
     z-index: 3000;
@@ -486,10 +527,14 @@
     background: rgba(0, 0, 0, 0.6);
 }
 
-/* ========== 门关闭状态（黑色内部）========== */
+/* ========== 门关闭状态（完全黑暗）========== */
 .door-container.closed .door-glow {
-    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 0%, rgba(5, 5, 5, 1) 100%) !important;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8) !important;
+    background: #000 !important;
+}
+
+.door-container.closed .door-glow::before {
+    opacity: 0 !important;
+    animation: none !important;
 }
 
 .door-container.closed .door-target-silhouette {
@@ -498,12 +543,12 @@
 
 .door-container.closed .door-frame {
     border-color: rgba(100, 100, 100, 0.4);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    animation: none;
 }
 
 .door-container.closed .door-aura {
     opacity: 0.2;
-    border-color: rgba(100, 100, 100, 0.2);
 }
 
 /* ========== 背景暖度变化（更明显的变化）========== */

@@ -13,11 +13,12 @@ IntroSystem.prototype.initDoorExpand = function() {
         window.AudioManager.playSFX('click-dot');
     }
     
-    // 白点渐隐
+    // 白点渐隐并禁用交互
     const dotEl = document.getElementById('intro-dot');
     if (dotEl) {
         dotEl.style.transition = 'opacity 0.2s ease';
         dotEl.style.opacity = '0';
+        dotEl.style.pointerEvents = 'none';
     }
     
     // 屏幕闪白
@@ -223,14 +224,13 @@ IntroSystem.prototype.initFirstSynthesis = function() {
                 this.items = this.items.filter(i => i.name !== '糯米' && i.name !== '酿造');
                 this.synthesisResult = this.createSynthesisResult('酒酿', '🍶', centerX, centerY);
                 
-                // 门变活跃
+                // 门变活跃，自动献上
                 setTimeout(() => {
                     if (this.doorEl) {
                         this.doorEl.classList.add('active');
                     }
-                    this.showNarrative('快...放进来...');
-                    this.setState('waitOffer');
-                }, 300);
+                    this.setState('offerToDoor');
+                }, 500);
             }, 200);
         }, 600);  // 改为600ms匹配旋转时间
     }, 250);  // 改为250ms
