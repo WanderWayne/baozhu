@@ -136,8 +136,8 @@ IntroSystem.prototype.updateItemAnimations = function(dt) {
     if (this.synthesisResult && this.synthesisResult.animPhase === 'offering') {
         const item = this.synthesisResult;
         if (item.animTarget) {
-            item.x += (item.animTarget.x - item.x) * 0.12;
-            item.y += (item.animTarget.y - item.y) * 0.12;
+            item.x += (item.animTarget.x - item.x) * 0.04;
+            item.y += (item.animTarget.y - item.y) * 0.04;
             this.updateItemPosition(item);
         }
     }
@@ -176,9 +176,8 @@ IntroSystem.prototype.showNarrative = function(text) {
         this.narrativeEl.textContent = text;
         this.narrativeEl.classList.add('visible');
         
-        // 金色发光效果，像灵魂的低语
-        this.narrativeEl.style.color = '#FFF5D6';
-        this.narrativeEl.style.textShadow = '0 0 10px rgba(232, 200, 115, 0.8), 0 0 20px rgba(232, 200, 115, 0.4)';
+        this.narrativeEl.style.color = 'rgba(255,255,255,0.92)';
+        this.narrativeEl.style.textShadow = '0 0 10px rgba(255,255,255,0.7), 0 0 25px rgba(255,255,255,0.3)';
     }
 };
 

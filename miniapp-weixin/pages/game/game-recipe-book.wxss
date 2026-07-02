@@ -1,0 +1,249 @@
+.recipe-book-btn {
+  position: fixed;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  right: 20px;
+  padding: 6px 14px;
+  background: #FFFDF7;
+  border: 1px solid rgba(166, 124, 82, 0.2);
+  border-radius: 16px;
+  font-size: 13px;
+  color: #6B5344;
+  z-index: 25;
+  box-shadow: 0 2px 8px rgba(107, 83, 68, 0.08);
+  letter-spacing: 1px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recipe-book-btn.golden-pulse {
+  border-color: rgba(232, 200, 115, 0.6);
+  box-shadow: 0 0 8px rgba(232, 200, 115, 0.3);
+}
+
+.recipe-book-btn.btn-flash {
+  transform: scale(1.2);
+  box-shadow: 0 0 16px rgba(232, 200, 115, 0.5);
+}
+
+.recipe-book-flyer {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  border: 2px solid rgba(232, 200, 115, 0.6);
+  box-shadow: 0 0 15px rgba(232, 200, 115, 0.4);
+  transition:
+    left 0.8s cubic-bezier(0.4, 0, 0.15, 1),
+    top 0.8s cubic-bezier(0.4, 0, 0.15, 1),
+    transform 0.8s cubic-bezier(0.4, 0, 0.15, 1),
+    opacity 0.3s ease-in 0.5s;
+}
+
+.recipe-book-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 12, 10, 0.6);
+  z-index: 10002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.recipe-book-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.recipe-book-page {
+  width: 88%;
+  max-width: 360px;
+  max-height: 80vh;
+  background: #FDF8EE;
+  border-radius: 4px;
+  padding: 28px 24px 20px;
+  box-shadow:
+    4px 4px 0 rgba(166, 124, 82, 0.15),
+    8px 8px 0 rgba(166, 124, 82, 0.08),
+    0 16px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0, 0, 0.2, 1.2);
+  border-left: 3px solid rgba(166, 124, 82, 0.2);
+}
+
+.recipe-book-overlay.visible .recipe-book-page {
+  transform: scale(1);
+}
+
+.recipe-book-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.recipe-book-title {
+  font-size: 18px;
+  font-weight: 400;
+  color: #6B5344;
+  letter-spacing: 6px;
+}
+
+.recipe-book-close {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid rgba(166, 124, 82, 0.15);
+  border-radius: 50%;
+  color: #A67C52;
+  font-size: 14px;
+  line-height: 28px;
+  text-align: center;
+}
+
+.recipe-book-search {
+  margin-bottom: 10px;
+}
+
+.recipe-search-input {
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px solid rgba(166, 124, 82, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 253, 247, 0.8);
+  font-size: 13px;
+  color: #6B5344;
+  box-sizing: border-box;
+}
+
+.recipe-book-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(166, 124, 82, 0.12);
+  margin-bottom: 10px;
+}
+
+.recipe-tab {
+  flex: 1;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 13px;
+  color: #B8A590;
+  letter-spacing: 3px;
+  border-bottom: 2px solid transparent;
+}
+
+.recipe-tab.active {
+  color: #6B5344;
+  border-bottom-color: #A67C52;
+}
+
+.recipe-book-tab-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  color: #A8917A;
+  line-height: 1.45;
+}
+
+.recipe-book-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(166, 124, 82, 0.25), transparent);
+  margin-bottom: 12px;
+}
+
+.recipe-book-content {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 42vh;
+}
+
+.recipe-empty {
+  text-align: center;
+  padding: 32px 0;
+  font-size: 13px;
+  color: #C4B5A3;
+  letter-spacing: 2px;
+  font-style: italic;
+}
+
+.recipe-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(140, 105, 70, 0.7);
+  letter-spacing: 3px;
+  padding: 6px 4px 2px;
+  border-bottom: 1px solid rgba(166, 124, 82, 0.12);
+  margin-top: 4px;
+}
+
+.recipe-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: rgba(255, 253, 247, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(166, 124, 82, 0.06);
+}
+
+.recipe-entry.recipe-dual-cheese-hint {
+  border-color: rgba(232, 200, 115, 0.5);
+  animation: recipeDualGoldenPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes recipeDualGoldenPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(232, 200, 115, 0.22),
+      0 0 12px rgba(232, 200, 115, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(232, 200, 115, 0.42),
+      0 0 22px rgba(232, 200, 115, 0.32);
+  }
+}
+
+.recipe-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.recipe-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B5344;
+  letter-spacing: 2px;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.recipe-formula {
+  font-size: 12px;
+  color: #A67C52;
+  letter-spacing: 1px;
+  line-height: 1.4;
+  display: block;
+}
+
+.recipe-book-footer {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #C4B5A3;
+  letter-spacing: 2px;
+}

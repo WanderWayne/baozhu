@@ -1,0 +1,114 @@
+<view class="main-page {{postIntroHandoff ? 'post-intro-handoff' : ''}}" style="background-color: {{bgColor}};">
+  <view wx:if="{{loadError}}" class="load-error">
+    <text class="load-error-text">加载失败：{{loadError}}</text>
+  </view>
+
+  <view wx:if="{{showCanvas}}" class="canvas-stack">
+    <canvas
+      type="2d"
+      id="ambience-canvas"
+      class="ambience-canvas"
+      style="opacity: {{ambienceOpacity}};"
+    ></canvas>
+    <canvas type="2d" id="main-canvas" class="main-canvas"></canvas>
+  </view>
+
+  <view class="main-ui {{menuVisible ? 'menu-visible' : ''}} {{postIntroHandoff ? 'post-intro-handoff' : ''}}">
+    <view class="main-menu-container">
+      <view class="main-menu-block">
+        <view class="main-btn primary" hover-class="menu-row-flash" bindtap="onContinue">开始游戏</view>
+
+        <view class="main-progress-row" hover-class="menu-row-flash" bindtap="onCodex">
+          <text class="progress-label">宝珠图谱</text>
+          <view class="progress-bar">
+            <view class="progress-fill" style="width: {{codexPercent}}%;"></view>
+          </view>
+          <text class="progress-text">{{codexText}}</text>
+        </view>
+
+        <view class="main-progress-row" hover-class="menu-row-flash" bindtap="onGallery">
+          <text class="progress-label">记忆碎片</text>
+          <view class="progress-bar">
+            <view class="progress-fill" style="width: {{fragmentPercent}}%;"></view>
+          </view>
+          <text class="progress-text">{{fragmentText}}</text>
+        </view>
+
+        <view class="main-btn secondary" hover-class="menu-row-flash-secondary" bindtap="onSettings">设置</view>
+      </view>
+
+      <view class="main-footer-row">
+        <view class="main-footer-side main-footer-side-left">
+          <view class="main-link-btn" hover-class="link-btn-flash" bindtap="onReset">重置进度</view>
+        </view>
+        <text class="main-footer-divider">·</text>
+        <view class="main-footer-side main-footer-side-right">
+          <view class="main-link-btn-wrap">
+            <view class="main-link-btn" hover-class="link-btn-flash" bindtap="onTasks">任务</view>
+            <view wx:if="{{showClaimableDot}}" class="claimable-dot footer-claimable-dot"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 任务面板 -->
+  <view class="panel-overlay {{tasksVisible ? 'visible' : ''}}" bindtap="onTasksOverlayTap">
+    <view class="panel tasks-panel" catchtap="noop">
+      <button class="panel-close" bindtap="onCloseTasks">✕</button>
+      <view class="panel-title">任务</view>
+      <view class="tasks-list">
+        <view
+          wx:for="{{taskRows}}"
+          wx:key="id"
+          class="task-row {{item.done ? 'task-done' : ''}} {{item.alreadyClaimed ? 'task-claimed' : ''}}"
+        >
+          <view class="task-left">
+            <view class="task-info">
+              <text class="task-name">{{item.name}}<text wx:if="{{item.done}}" class="task-check"> ✓</text></text>
+              <text class="task-desc">{{item.description}}</text>
+            </view>
+            <view class="task-progress-bar">
+              <view class="task-progress-fill" style="width: {{item.percent}}%;"></view>
+            </view>
+            <text class="task-progress-text">{{item.current}} / {{item.total}}</text>
+          </view>
+          <view
+            class="task-reward {{item.canClaim ? 'task-claimable' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="onClaimTask"
+          >
+            <view wx:if="{{item.canClaim}}" class="claimable-dot"></view>
+            <text class="task-reward-label">{{item.rewardLabel}}</text>
+            <text class="task-reward-value">{{item.reward}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设置面板 -->
+  <view class="panel-overlay {{settingsVisible ? 'visible' : ''}}" bindtap="onSettingsOverlayTap">
+    <view class="panel settings-panel" catchtap="noop">
+      <button class="panel-close" bindtap="onCloseSettings">✕</button>
+      <view class="panel-title">设置</view>
+      <view class="settings-content">
+        <view class="settings-row">
+          <text class="settings-label">🎵 背景音乐</text>
+          <slider class="volume-slider" min="0" max="100" value="{{bgmVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="16" bindchanging="onBgmChanging" bindchange="onBgmChange" />
+          <text class="volume-value">{{bgmVolume}}%</text>
+        </view>
+        <view class="settings-row">
+          <text class="settings-label">🔊 音效</text>
+          <slider class="volume-slider" min="0" max="100" value="{{sfxVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="16" bindchanging="onSfxChanging" bindchange="onSfxChange" />
+          <text class="volume-value">{{sfxVolume}}%</text>
+        </view>
+        <view class="settings-divider"></view>
+        <view class="settings-info">
+          <text>宝珠酿造 v1.0</text>
+          <text class="info-sub">唤醒酿造之力</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

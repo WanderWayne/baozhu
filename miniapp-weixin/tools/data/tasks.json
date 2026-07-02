@@ -1,0 +1,44 @@
+[
+  {
+    "id": "first_synthesis",
+    "name": "初次合成",
+    "description": "完成第一次物品合成",
+    "reward": "💎 30",
+    "gems": 30
+  },
+  {
+    "id": "complete_first5",
+    "name": "崭露头角",
+    "description": "完成前五关",
+    "reward": "💎 150",
+    "gems": 150
+  },
+  {
+    "id": "complete_boss",
+    "name": "经典之作",
+    "description": "酿出冰酒酿桂花酪",
+    "reward": "💎 300",
+    "gems": 300
+  },
+  {
+    "id": "complete_chapter1",
+    "name": "酪之初启",
+    "description": "完成奶酪谷全部 6 关",
+    "reward": "💎 200",
+    "gems": 200
+  },
+  {
+    "id": "discover_10",
+    "name": "见多识广",
+    "description": "发现 10 种物品",
+    "reward": "💎 100",
+    "gems": 100
+  },
+  {
+    "id": "discover_20",
+    "name": "酿造百科",
+    "description": "发现 20 种物品",
+    "reward": "💎 250",
+    "gems": 250
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "description": "Baozhu Cocos WeChat Mini Game project shell",
+  "miniprogramRoot": "build/wechatgame/",
+  "compileType": "game",
+  "appid": "wxa6bda97e215d2e6d",
+  "projectname": "baozhu-cocos-minigame",
+  "setting": {
+    "es6": true,
+    "minified": true,
+    "urlCheck": false
+  }
+}
+

@@ -25,25 +25,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (introScreen) introScreen.style.display = 'none';
         if (mainScreen) {
             mainScreen.style.display = 'flex';
-            
+            const ch1MainEntrance = sessionStorage.getItem('chapter1_main_entrance');
+            if (ch1MainEntrance) {
+                mainScreen.style.opacity = '0';
+            }
+
             // 初始化成长系统 CSS 变量
             if (window.GrowthSystem) {
                 window.GrowthSystem.applyCSSVariables();
             }
-            
+
             // 初始化主界面粒子系统
             if (window.MainParticleSystem && !window.mainParticleSystem) {
                 window.mainParticleSystem = new window.MainParticleSystem();
             }
-            
+
             // 初始化主界面环境层（氛围系统）
             if (window.initMainScreenAmbience) {
                 window.initMainScreenAmbience();
             }
-            
+
             // 播放主界面BGM
             if (window.AudioManager) {
                 window.AudioManager.playBGM('bgm-menu');
+            }
+
+            if (ch1MainEntrance) {
+                try {
+                    sessionStorage.removeItem('chapter1_main_entrance');
+                } catch (e) {}
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        mainScreen.style.transition = 'opacity 1.1s ease-out';
+                        mainScreen.style.opacity = '1';
+                    });
+                });
             }
         }
     }

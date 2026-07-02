@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝珠奶酪 - 艺术风格测试</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+        .screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transition: background 2s ease, color 2s ease;
+        }
+
+        /* ========== 夜间主题（默认）========== */
+        .screen.theme-night {
+            background: linear-gradient(180deg, #0a0e1a 0%, #0f1525 40%, #141b2d 100%);
+            color: #a0b8e0;
+        }
+
+        /* ========== 白天主题 ========== */
+        .screen.theme-day {
+            background: linear-gradient(180deg, #87CEEB 0%, #B8D4E8 35%, #E8DCC4 70%, #D4C4A0 100%);
+            color: #4a5568;
+        }
+
+        /* z-index 1: Far hills silhouette */
+        .layer-landscape-far {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 45%;
+            z-index: 1;
+        }
+        .layer-landscape-far svg {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: bottom;
+            filter: blur(6px);
+            transition: filter 1.5s ease;
+        }
+        .theme-day .layer-landscape-far svg { filter: blur(8px); }
+
+        .layer-landscape-far .fill-1 { fill: var(--landscape-far-1); transition: fill 1.5s ease; }
+        .layer-landscape-far .fill-2 { fill: var(--landscape-far-2); transition: fill 1.5s ease; }
+        .theme-night { --landscape-far-1: #0b1220; --landscape-far-2: #0d1522; }
+        .theme-day   { --landscape-far-1: #5a7a9a; --landscape-far-2: #6b8aaa; }
+
+        /* z-index 2: Far fog */
+        .layer-fog-far {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 120%; height: 50%;
+            z-index: 2;
+            animation: fogDriftFar 25s ease-in-out infinite;
+            pointer-events: none;
+            transition: background 2s ease;
+        }
+        .theme-night .layer-fog-far {
+            background: linear-gradient(180deg, transparent 20%, rgba(20, 35, 60, 0.4) 60%, rgba(30, 50, 80, 0.25) 100%);
+        }
+        .theme-day .layer-fog-far {
+            background: linear-gradient(180deg, transparent 15%, rgba(200, 220, 240, 0.25) 50%, rgba(220, 230, 245, 0.15) 100%);
+        }
+
+        /* z-index 3: Mid rock/plant silhouettes */
+        .layer-landscape-mid {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 50%;
+            z-index: 3;
+        }
+        .layer-landscape-mid svg {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: bottom;
+            filter: blur(2px);
+        }
+        .theme-day .layer-landscape-mid svg { filter: blur(3px); }
+
+        .layer-landscape-mid .fill-1 { fill: var(--landscape-mid-1); transition: fill 1.5s ease; }
+        .layer-landscape-mid .fill-2 { fill: var(--landscape-mid-2); transition: fill 1.5s ease; }
+        .layer-landscape-mid .fill-3 { fill: var(--landscape-mid-3); transition: fill 1.5s ease; }
+        .layer-landscape-mid .fill-4 { fill: var(--landscape-mid-4); transition: fill 1.5s ease; }
+        .theme-night { --landscape-mid-1: #0f1828; --landscape-mid-2: #111c2a; --landscape-mid-3: #0e1624; --landscape-mid-4: #101a28; }
+        .theme-day   { --landscape-mid-1: #7a9ab5; --landscape-mid-2: #8aa8c0; --landscape-mid-3: #6e8fa8; --landscape-mid-4: #7a9cb5; }
+
+        /* z-index 4: Near fog */
+        .layer-fog-near {
+            position: absolute;
+            bottom: 0; left: -5%;
+            width: 110%; height: 40%;
+            z-index: 4;
+            animation: fogDriftNear 20s ease-in-out infinite;
+            pointer-events: none;
+            transition: background 2s ease;
+        }
+        .theme-night .layer-fog-near {
+            background: linear-gradient(180deg, transparent 30%, rgba(40, 65, 100, 0.2) 80%, rgba(50, 80, 120, 0.15) 100%);
+        }
+        .theme-day .layer-fog-near {
+            background: linear-gradient(180deg, transparent 40%, rgba(220, 230, 248, 0.2) 85%, rgba(230, 238, 250, 0.1) 100%);
+        }
+
+        /* z-index 5: Near ground/plants */
+        .layer-landscape-near {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 55%;
+            z-index: 5;
+        }
+        .layer-landscape-near svg {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: bottom;
+        }
+        .layer-landscape-near .fill-1 { fill: var(--landscape-near-1); transition: fill 1.5s ease; }
+        .layer-landscape-near .fill-2 { fill: var(--landscape-near-2); transition: fill 1.5s ease; }
+        .layer-landscape-near .fill-3 { fill: var(--landscape-near-3); transition: fill 1.5s ease; }
+        .theme-night { --landscape-near-1: #131e32; --landscape-near-2: #152238; --landscape-near-3: #16203a; --landscape-near-4: #141d35; }
+        .theme-day   { --landscape-near-1: #8fa8c0; --landscape-near-2: #9eb5cc; --landscape-near-3: #7a94ad; --landscape-near-4: #849cb5; }
+
+        @keyframes fogDriftFar {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-3%); }
+        }
+        @keyframes fogDriftNear {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(2%); }
+        }
+
+        /* z-index 6: Ambient light overlays */
+        .light-source {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            transition: background 2s ease, filter 2s ease;
+        }
+        .light-source.main {
+            width: 520px; height: 520px;
+            left: 50%; top: 28%;
+            transform: translate(-50%, -50%);
+            filter: blur(45px);
+            z-index: 6;
+        }
+        .theme-night .light-source.main {
+            background: radial-gradient(circle, rgba(190, 210, 255, 0.14) 0%, rgba(130, 170, 230, 0.05) 50%, transparent 70%);
+        }
+        .theme-day .light-source.main {
+            background: radial-gradient(circle, rgba(255, 248, 220, 0.35) 0%, rgba(255, 230, 180, 0.12) 45%, transparent 70%);
+            filter: blur(55px);
+        }
+        .light-source.warm {
+            width: 300px; height: 300px;
+            right: 15%; bottom: 25%;
+            filter: blur(35px);
+            z-index: 6;
+        }
+        .theme-night .light-source.warm {
+            background: radial-gradient(circle, rgba(220, 200, 160, 0.06) 0%, transparent 65%);
+        }
+        .theme-day .light-source.warm {
+            background: radial-gradient(circle, rgba(255, 220, 150, 0.15) 0%, rgba(255, 200, 120, 0.05) 60%, transparent 75%);
+            filter: blur(40px);
+        }
+
+        /* z-index 10: Canvas */
+        #main-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* z-index 20: Menu UI */
+        .menu-container {
+            position: absolute;
+            left: 50%; bottom: 18%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 90%;
+            max-width: 320px;
+        }
+        .menu-btn {
+            width: 100%;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 4px;
+            background: transparent;
+            cursor: pointer;
+            font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
+            transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .theme-night .menu-btn {
+            color: rgba(200, 220, 255, 0.95);
+            border: 1px solid rgba(160, 190, 255, 0.25);
+        }
+        .theme-night .menu-btn:hover {
+            border-color: rgba(180, 210, 255, 0.5);
+            color: rgba(230, 240, 255, 1);
+            box-shadow: 0 0 20px rgba(160, 200, 255, 0.15);
+        }
+        .theme-day .menu-btn {
+            color: rgba(60, 70, 90, 0.95);
+            border: 1px solid rgba(80, 90, 110, 0.35);
+        }
+        .theme-day .menu-btn:hover {
+            border-color: rgba(100, 110, 130, 0.5);
+            color: rgba(40, 50, 70, 1);
+            box-shadow: 0 2px 16px rgba(80, 90, 110, 0.2);
+        }
+        .menu-btn.secondary {
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+        .theme-night .menu-btn.secondary {
+            color: rgba(160, 190, 255, 0.6);
+            border-color: rgba(140, 170, 220, 0.15);
+        }
+        .theme-day .menu-btn.secondary {
+            color: rgba(70, 85, 110, 0.8);
+            border-color: rgba(90, 105, 130, 0.25);
+        }
+        .menu-footer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .menu-link {
+            background: none;
+            border: none;
+            font-size: 11px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: color 0.3s ease;
+        }
+        .theme-night .menu-link { color: rgba(140, 170, 220, 0.5); }
+        .theme-night .menu-link:hover { color: rgba(180, 210, 255, 0.8); }
+        .theme-day .menu-link { color: rgba(80, 95, 120, 0.65); }
+        .theme-day .menu-link:hover { color: rgba(60, 75, 100, 0.95); }
+        .menu-divider { transition: color 0.3s ease; }
+        .theme-night .menu-divider { color: rgba(140, 170, 220, 0.3); }
+        .theme-day .menu-divider { color: rgba(90, 105, 130, 0.4); }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 25;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(160, 190, 255, 0.3);
+            background: rgba(30, 45, 70, 0.4);
+            color: rgba(200, 220, 255, 0.9);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .theme-night .theme-toggle:hover {
+            border-color: rgba(180, 210, 255, 0.5);
+            box-shadow: 0 0 16px rgba(160, 200, 255, 0.2);
+        }
+        .theme-day .theme-toggle {
+            border-color: rgba(90, 100, 120, 0.4);
+            background: rgba(255, 252, 245, 0.5);
+            color: rgba(80, 90, 110, 0.9);
+        }
+        .theme-day .theme-toggle:hover {
+            border-color: rgba(100, 110, 130, 0.5);
+            box-shadow: 0 2px 12px rgba(80, 90, 110, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="screen theme-night" id="screen">
+        <!-- 昼夜切换 -->
+        <button type="button" class="theme-toggle" id="theme-toggle" title="昼夜切换" aria-label="昼夜切换">🌙</button>
+        <!-- z-index 1: Far hills -->
+        <div class="layer-landscape-far">
+            <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
+                <path class="fill-1" d="M0,400 L0,280 Q180,200 360,260 T720,220 T1080,280 T1440,240 L1440,400 Z"/>
+                <path class="fill-2" d="M0,400 L0,320 Q250,240 500,300 T1000,260 T1440,320 L1440,400 Z"/>
+            </svg>
+        </div>
+
+        <!-- z-index 2: Far fog -->
+        <div class="layer-fog-far"></div>
+
+        <!-- z-index 3: Mid silhouettes -->
+        <div class="layer-landscape-mid">
+            <svg viewBox="0 0 1440 500" preserveAspectRatio="xMidYMax slice">
+                <path class="fill-1" d="M0,500 L0,380 Q200,300 400,360 T800,320 T1200,380 T1440,340 L1440,500 Z"/>
+                <path class="fill-2" d="M-50,500 L100,400 Q300,350 550,400 Q800,360 1000,420 L1440,380 L1440,500 Z"/>
+                <ellipse class="fill-3" cx="200" cy="420" rx="80" ry="30"/>
+                <ellipse class="fill-4" cx="1100" cy="450" rx="120" ry="40"/>
+            </svg>
+        </div>
+
+        <!-- z-index 4: Near fog -->
+        <div class="layer-fog-near"></div>
+
+        <!-- z-index 5: Near ground/plants -->
+        <div class="layer-landscape-near">
+            <svg viewBox="0 0 1440 550" preserveAspectRatio="xMidYMax slice">
+                <path class="fill-1" d="M0,550 L0,420 Q150,360 350,420 T700,380 T1050,440 T1440,400 L1440,550 Z"/>
+                <path class="fill-2" d="M0,550 L80,480 Q280,420 500,480 T900,440 T1300,500 L1440,460 L1440,550 Z"/>
+                <path class="fill-3" d="M180,550 L180,480 Q160,460 180,440 L200,460 Q180,440 200,420 L180,400 L180,550 Z"/>
+                <path class="fill-4" d="M320,550 L310,500 L330,500 Z"/>
+                <path class="fill-4" d="M1150,550 L1140,490 L1160,490 Z"/>
+                <path class="fill-3" d="M1280,550 L1270,470 L1290,470 Z"/>
+            </svg>
+        </div>
+
+        <!-- z-index 6: Light sources -->
+        <div class="light-source main"></div>
+        <div class="light-source warm"></div>
+
+        <!-- z-index 10: Canvas for particles + title -->
+        <canvas id="main-canvas"></canvas>
+
+        <!-- z-index 20: Menu -->
+        <div class="menu-container">
+            <button class="menu-btn" id="start-btn">开始游戏</button>
+            <button class="menu-btn secondary">设置</button>
+            <div class="menu-footer">
+                <button class="menu-link">重置进度</button>
+                <span class="menu-divider">·</span>
+                <button class="menu-link">自由世界</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+(function() {
+    const canvas = document.getElementById('main-canvas');
+    const ctx = canvas.getContext('2d');
+    const screen = document.getElementById('screen');
+    const themeToggle = document.getElementById('theme-toggle');
+    let textDotTargets = [];
+    let particles = [];
+    let dust = [];
+    const gridSize = 10;
+    const dotSize = 12;
+    const charGap = 30;
+
+    function isDay() { return screen.classList.contains('theme-day'); }
+    function updateThemeButton() {
+        themeToggle.textContent = isDay() ? '☀️' : '🌙';
+        themeToggle.setAttribute('title', isDay() ? '切换到夜晚' : '切换到白天');
+    }
+    themeToggle.addEventListener('click', function() {
+        screen.classList.toggle('theme-night');
+        screen.classList.toggle('theme-day');
+        updateThemeButton();
+    });
+
+    const dotMatrices = {
+        '宝': [
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,2,0,0,0,0,0],
+            [0,1,1,1,1,1,1,1,1,0],
+            [0,1,0,0,0,0,0,0,1,0],
+            [0,0,2,2,2,2,2,0,0,0],
+            [0,0,0,0,2,0,0,0,0,0],
+            [0,0,2,2,2,2,2,0,0,0],
+            [0,0,0,0,2,0,0,0,0,0],
+            [0,2,2,2,2,2,2,2,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+        ],
+        '珠': [
+            [0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,0,0],
+            [4,4,4,0,1,0,1,0,0],
+            [0,4,0,0,1,1,1,1,0],
+            [4,4,4,0,0,0,1,0,0],
+            [0,4,0,0,1,1,1,1,1],
+            [4,4,4,0,0,3,1,0,0],
+            [0,0,0,4,1,0,1,1,1],
+            [0,0,0,0,0,0,1,0,0],
+            [0,0,0,0,0,0,0,0,0],
+        ],
+        '奶': [
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,3,0,0,0,0,0,0,0,0],
+            [0,3,0,3,2,2,2,2,0,0],
+            [3,3,3,3,3,2,0,2,0,0],
+            [0,3,0,3,0,2,0,2,2,0],
+            [0,3,0,3,0,2,0,0,2,0],
+            [0,3,0,3,0,2,0,0,2,0],
+            [0,3,3,3,3,2,0,0,2,0],
+            [0,0,0,3,0,0,0,2,2,0],
+            [0,0,0,0,0,0,0,0,0,0],
+        ],
+        '酪': [
+            [0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0],
+            [0,1,1,1,1,1,0,2,0,0,0],
+            [0,0,1,0,1,0,0,1,1,0,0],
+            [0,1,1,1,1,1,2,3,4,-2,0],
+            [0,1,0,1,0,1,0,0,1,0,0],
+            [0,1,1,0,1,1,2,2,0,1,1],
+            [0,1,3,3,3,1,0,3,3,3,0],
+            [0,1,0,0,0,1,0,3,0,3,0],
+            [0,0,0,0,0,0,0,3,3,3,0],
+        ],
+    };
+
+    function generateDotsFromMatrices() {
+        const chars = ['宝', '珠', '奶', '酪'];
+        const charWidth = gridSize * dotSize;
+        const charHeight = gridSize * dotSize;
+        const totalWidth = 2 * charWidth + charGap;
+        const totalHeight = 2 * charHeight + charGap;
+        const centerX = canvas.width / 2;
+        const displayCenterY = canvas.height * 0.28;
+        const startX = centerX - totalWidth / 2;
+        const startY = displayCenterY - totalHeight / 2;
+
+        textDotTargets = [];
+        chars.forEach((char, index) => {
+            const matrix = dotMatrices[char];
+            if (!matrix) return;
+            const rowIdx = Math.floor(index / 2);
+            const colIdx = index % 2;
+            const charOffsetX = startX + colIdx * (charWidth + charGap);
+            const charOffsetY = startY + rowIdx * (charHeight + charGap);
+
+            for (let row = 0; row < matrix.length; row++) {
+                for (let col = 0; col < matrix[row].length; col++) {
+                    const val = matrix[row][col];
+                    if (val === 0) continue;
+                    let x = charOffsetX + col * dotSize;
+                    let y = charOffsetY + row * dotSize;
+                    if (val === 2) x += dotSize / 2;
+                    else if (val === 3) y += dotSize / 2;
+                    else if (val === 4) { x += dotSize / 2; y += dotSize / 2; }
+                    textDotTargets.push({ x, y });
+                }
+            }
+        });
+    }
+
+    function createTextParticles() {
+        particles = textDotTargets.map(target => ({
+            x: target.x,
+            y: target.y,
+            targetX: target.x,
+            targetY: target.y,
+            size: 8,
+            breathPhase: Math.random() * Math.PI * 2,
+            breathSpeed: 0.02 + Math.random() * 0.03,
+        }));
+    }
+
+    function initDust() {
+        dust = [];
+        for (let i = 0; i < 18; i++) {
+            dust.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: 1 + Math.random() * 2,
+                alpha: 0.03 + Math.random() * 0.06,
+                vx: (Math.random() - 0.5) * 0.15,
+                vy: (Math.random() - 0.5) * 0.1 - 0.05,
+                breathPhase: Math.random() * Math.PI * 2,
+                breathSpeed: 0.002 + Math.random() * 0.004,
+            });
+        }
+    }
+
+    function resize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (w <= 0 || h <= 0) return;
+        canvas.width = w;
+        canvas.height = h;
+        generateDotsFromMatrices();
+        createTextParticles();
+    }
+
+    function updateDust() {
+        dust.forEach(d => {
+            d.x += d.vx;
+            d.y += d.vy;
+            d.breathPhase += d.breathSpeed;
+            if (d.x < -20) d.x = canvas.width + 20;
+            if (d.x > canvas.width + 20) d.x = -20;
+            if (d.y < -20) d.y = canvas.height + 20;
+            if (d.y > canvas.height + 20) d.y = -20;
+        });
+    }
+
+    function drawDust() {
+        const day = isDay();
+        dust.forEach(d => {
+            const breathAlpha = d.alpha * (0.6 + Math.sin(d.breathPhase) * 0.4);
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.shadowBlur = day ? 6 : 8;
+            ctx.shadowColor = day ? `rgba(230, 210, 170, ${breathAlpha})` : `rgba(180, 200, 255, ${breathAlpha})`;
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+            ctx.fillStyle = day ? `rgba(250, 235, 210, ${breathAlpha})` : `rgba(200, 220, 255, ${breathAlpha})`;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+        });
+    }
+
+    function drawTitleParticles() {
+        const day = isDay();
+        const shadowBlur = day ? 16 : 18;
+        const shadowColor = day ? 'rgba(255, 235, 200, 0.85)' : 'rgba(190, 225, 255, 0.9)';
+        const fillStyle = day ? 'rgba(255, 248, 230, 0.92)' : 'rgba(210, 235, 255, 0.95)';
+        particles.forEach(p => {
+            p.breathPhase += p.breathSpeed;
+            const scale = 1 + Math.sin(p.breathPhase) * 0.06;
+            const r = p.size * scale;
+
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.shadowBlur = shadowBlur;
+            ctx.shadowColor = shadowColor;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+        });
+    }
+
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        updateDust();
+        drawDust();
+        drawTitleParticles();
+        requestAnimationFrame(loop);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => { resize(); initDust(); loop(); });
+    } else {
+        resize();
+        initDust();
+        loop();
+    }
+    window.addEventListener('resize', resize);
+})();
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<view class="gallery-page">
+  <header style="padding-top: {{statusBarHeight}}px;">
+    <button class="back-btn" bindtap="onBack">←</button>
+    <text class="page-title">记忆长廊</text>
+    <text class="header-progress">{{progressText}}</text>
+  </header>
+
+  <view class="category-row">
+    <button
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="category-btn {{currentCategory === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onCategoryTap"
+    >{{item.label}}</button>
+  </view>
+
+  <view class="progress-bar-wrap">
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPercent}}%;"></view>
+    </view>
+  </view>
+
+  <view class="fragment-grid">
+    <view
+      wx:for="{{fragments}}"
+      wx:key="id"
+      class="fragment-card {{item.collected ? 'collected' : 'locked'}}"
+      data-id="{{item.id}}"
+      bindtap="onFragmentTap"
+    >
+      <text class="fragment-image">{{item.collected ? item.image : '❓'}}</text>
+      <text class="fragment-category">{{item.categoryLabel}}</text>
+    </view>
+  </view>
+
+  <view class="ultimate-preview {{allCollected ? 'unlocked' : ''}}">
+    <text class="ultimate-icon">✨</text>
+    <text class="ultimate-hint">{{ultimateHint}}</text>
+  </view>
+
+  <view class="modal {{detailVisible ? 'visible' : ''}}" bindtap="hideDetail">
+    <view class="modal-panel" catchtap="noop">
+      <text class="detail-image">{{detail.image}}</text>
+      <text class="detail-category">{{detail.categoryLabel}}</text>
+      <text class="detail-story">{{detail.story}}</text>
+      <text class="detail-trigger">{{detail.trigger}}</text>
+      <button class="modal-close" bindtap="hideDetail">关闭</button>
+    </view>
+  </view>
+</view>

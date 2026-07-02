@@ -1,0 +1,188 @@
+/* 宝珠图谱 · 方形衬底 + SVG 莲花意象放射分区 */
+
+.atlas-intro {
+    font-size: 12px;
+    color: var(--text-light, #9c8c74);
+    line-height: 1.55;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: var(--card-bg, rgba(255, 255, 255, 0.9));
+    border-radius: 12px;
+    border: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.atlas-board-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.atlas-board-square {
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1;
+    padding: 14px;
+    background:
+        radial-gradient(ellipse 85% 85% at 50% 48%, rgba(255, 252, 245, 1) 0%, rgba(248, 242, 232, 0.97) 55%, rgba(240, 228, 212, 0.35) 100%);
+    border: 2px solid #9a8578;
+    border-radius: 8px;
+    box-shadow:
+        0 8px 28px rgba(107, 83, 68, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.atlas-ring-outer,
+.atlas-ring-inner {
+    pointer-events: none;
+}
+
+.atlas-ring-outer .atlas-decor-petal {
+    fill: rgba(212, 165, 140, 0.045);
+    stroke: rgba(154, 133, 120, 0.22);
+    stroke-width: 0.42;
+    vector-effect: non-scaling-stroke;
+}
+
+/* 内圈小叶：叠在中圈之上，贴近花心 */
+.atlas-ring-inner .atlas-decor-petal {
+    fill: rgba(232, 200, 115, 0.06);
+    stroke: rgba(154, 133, 120, 0.32);
+    stroke-width: 0.48;
+    vector-effect: non-scaling-stroke;
+}
+
+.atlas-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* 花心与花瓣之间的「舆图」分界 */
+.atlas-map-iris {
+    fill: none;
+    stroke: rgba(154, 133, 120, 0.22);
+    stroke-width: 0.4;
+    stroke-dasharray: 1.6 1.1;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
+/* 花瓣分区（中圈 · 地图板块） */
+.atlas-slot .atlas-wedge-outline {
+    fill: rgba(154, 133, 120, 0.055);
+    stroke: rgba(154, 133, 120, 0.4);
+    stroke-width: 0.5;
+    vector-effect: non-scaling-stroke;
+}
+
+.atlas-slot.kind-reserved .atlas-wedge-outline {
+    fill: rgba(154, 133, 120, 0.03);
+    stroke: rgba(154, 133, 120, 0.22);
+    stroke-dasharray: 1.2 1;
+}
+
+.atlas-slot .atlas-wedge-fill {
+    fill: transparent;
+    stroke: none;
+    pointer-events: none;
+    transition: fill 0.55s ease, opacity 0.55s ease;
+}
+
+.atlas-slot.unlocked .atlas-wedge-fill {
+    fill: rgba(232, 200, 115, 0.48);
+    stroke: rgba(212, 180, 95, 0.55);
+    stroke-width: 0.35;
+}
+
+.atlas-slot.unlocked .atlas-wedge-outline {
+    stroke: rgba(212, 180, 95, 0.75);
+}
+
+.atlas-slot.unlocked.slot-flash .atlas-wedge-fill {
+    animation: atlasPieceGlow 0.85s ease-out;
+}
+
+@keyframes atlasPieceGlow {
+    0% {
+        filter: brightness(1.35);
+    }
+    100% {
+        filter: brightness(1);
+    }
+}
+
+/* 中央「谱」 */
+.atlas-center-slot .atlas-center-fill-back {
+    fill: rgba(245, 228, 190, 0.38);
+    stroke: rgba(154, 133, 120, 0.48);
+    stroke-width: 0.5;
+}
+
+.atlas-center-slot.unlocked .atlas-center-fill-back {
+    fill: rgba(232, 200, 115, 0.52);
+    stroke: rgba(212, 180, 95, 0.85);
+}
+
+.atlas-center-letter {
+    font-family: "PingFang SC", "Microsoft YaHei", serif;
+    font-size: 11px;
+    font-weight: 600;
+    fill: #9a8578;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+}
+
+.atlas-center-slot.unlocked .atlas-center-letter {
+    opacity: 0;
+}
+
+.atlas-center-slot.unlocked.slot-flash .atlas-center-fill-back {
+    animation: atlasPieceGlow 0.85s ease-out;
+}
+
+/* 配方一览折叠 */
+.recipes-drawer-toggle {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    background: var(--card-bg, rgba(255, 255, 255, 0.9));
+    border: 1px solid rgba(212, 165, 116, 0.28);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--brand-color, #d4a574);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.recipes-drawer-toggle .drawer-chevron {
+    transition: transform 0.25s ease;
+    opacity: 0.7;
+}
+
+.recipes-drawer-toggle.open .drawer-chevron {
+    transform: rotate(180deg);
+}
+
+.recipes-drawer-panel {
+    display: none;
+}
+
+.recipes-drawer-panel.open {
+    display: block;
+}
+
+.atlas-progress-meta {
+    font-size: 11px;
+    color: var(--text-light);
+    text-align: center;
+    margin-top: -12px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 380px) {
+    .atlas-board-square {
+        padding: 10px;
+    }
+}

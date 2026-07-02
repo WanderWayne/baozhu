@@ -1,0 +1,366 @@
+<view
+  class="game-page {{themeClass}}"
+  style="{{layoutStyle}}"
+  catchtouchmove="onPageTouchMove"
+  catchtouchend="onPageTouchEnd"
+>
+  <view class="door-area">
+    <view
+      wx:if="{{recipeBookBtnVisible}}"
+      id="recipe-book-btn"
+      class="recipe-book-btn {{recipeBookBtnPulse ? 'golden-pulse' : ''}} {{recipeBookBtnFlash ? 'btn-flash' : ''}}"
+      catchtap="onRecipeBookTap"
+    >📖 配方书</view>
+    <view
+      class="door-container stage-{{doorStage}} {{targetReady && !doorOffering ? 'awaiting-offer' : ''}} {{doorStarEntering ? 'star-entering' : ''}} {{doorClosing ? 'closing' : ''}} {{doorClosed ? 'closed' : ''}} {{doorOffering ? 'offering' : ''}}"
+      id="door-container"
+      catchtap="onDoorTap"
+    >
+      <view class="door-aura"></view>
+      <view class="door-frame">
+        <view class="door-glow">
+          <view class="door-fog"></view>
+          <text class="door-target-silhouette">{{levelIcon}}</text>
+        </view>
+      </view>
+      <text class="door-offer-hint" wx:if="{{targetReady && !doorOffering}}">献上</text>
+    </view>
+    <view class="level-info">
+      <text class="level-name">{{levelName}}</text>
+      <view class="level-target-display {{targetHidden ? 'target-hidden' : ''}} {{targetPopIn ? 'target-pop-in' : ''}} {{targetFlash ? 'target-flash' : ''}} {{multiTargetRows.length ? 'multi-target-mode' : ''}}">
+        <text class="target-label">目标</text>
+        <view class="multi-target-list" wx:if="{{multiTargetRows.length}}">
+          <view
+            wx:for="{{multiTargetRows}}"
+            wx:key="name"
+            class="multi-target-item {{item.done ? 'mt-done' : ''}}"
+          >
+            <text class="mt-num">{{item.num}}.</text>
+            <text class="mt-name">{{item.name}}</text>
+          </view>
+        </view>
+        <text class="target-name" wx:else>{{levelTarget}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="milk-fog-layer">
+    <view class="milk-fog-edge-fade"></view>
+    <view
+      wx:for="{{milkFogParticles}}"
+      wx:key="id"
+      class="milk-fog-particle"
+      style="width: {{item.size}}px; height: {{item.size}}px; left: {{item.left}}%; top: {{item.top}}%; animation-duration: {{item.duration}}s; animation-delay: {{item.delay}}s;"
+    ></view>
+  </view>
+
+  <view class="bg-decor-layer">
+    <view
+      wx:for="{{grassClumps}}"
+      wx:key="id"
+      class="grass-clump"
+      style="left: {{item.left}}%; top: {{item.top}}%; opacity: {{item.opacity}};"
+    >
+      <view
+        wx:for="{{item.blades}}"
+        wx:for-item="blade"
+        wx:key="index"
+        class="grass-blade"
+        style="width: {{blade.w}}px; height: {{blade.h}}px; margin-left: {{blade.offset}}px; background: {{blade.color}}; --base-rot: {{blade.angle}}deg; --sway: {{blade.sway}}deg; animation-duration: {{blade.duration}}s; animation-delay: {{blade.delay}}s;"
+      ></view>
+    </view>
+    <view
+      wx:for="{{bgDust}}"
+      wx:key="id"
+      class="bg-dust"
+      style="left: {{item.left}}%; top: {{item.top}}%; width: {{item.size}}px; height: {{item.size}}px; --dx: {{item.dx}}px; --dy: {{item.dy}}px; animation-duration: {{item.duration}}s;"
+    ></view>
+  </view>
+
+  <view class="synthesis-area" id="synthesis-area">
+    <view class="workbench-texture"></view>
+    <view
+      wx:for="{{workshopItems}}"
+      wx:key="id"
+      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.hasEffect ? 'has-effect' : ''}} {{item.selected ? 'selected' : ''}} {{item.isTarget ? 'target-item' : ''}} {{item.targetEntry ? 'target-entry' : ''}} {{item.offeringFlight ? 'offering-flight' : ''}} {{item.shrinking ? 'shrinking' : ''}} {{item.synthesisAnim ? 'synthesis-anim' : ''}} {{item.shakeAnim ? 'shake-anim' : ''}} {{item.revealedItem ? 'revealed-item' : ''}} {{item.recipeBookSpawn ? 'recipe-book-spawn' : ''}}"
+      style="left: {{item.x}}px; top: {{item.y}}px;"
+      data-id="{{item.id}}"
+      catchtouchstart="onWorkshopTouchStart"
+      catchtouchmove="onWorkshopTouchMove"
+      catchtouchend="onWorkshopTouchEnd"
+      bindlongpress="onWorkshopLongPress"
+    >
+      <view class="item-icon-wrap">
+        <text class="item-icon">{{item.icon}}</text>
+      </view>
+      <text class="item-name">{{item.name}}</text>
+    </view>
+    <view
+      wx:for="{{brewings}}"
+      wx:key="id"
+      class="brewing-item {{item.dragging ? 'brew-dragging' : ''}}"
+      style="left: {{item.x}}px; top: {{item.y}}px;"
+      data-id="{{item.id}}"
+      catchtouchstart="onBrewingTouchStart"
+      catchtouchmove="onBrewingTouchMove"
+      catchtouchend="onBrewingTouchEnd"
+    >
+      <view class="brew-ring-track"></view>
+      <view class="brew-ring-spin"></view>
+      <view class="brew-inner">
+        <text class="brew-name">{{item.name}}</text>
+        <text class="brew-timer">{{item.secondsLeft}}s</text>
+      </view>
+    </view>
+
+    <!-- 合成粒子飞溅 -->
+    <view
+      wx:for="{{synthParticles}}"
+      wx:key="id"
+      class="synth-particle"
+      style="left:{{item.cx}}px;top:{{item.cy}}px;width:{{item.size}}px;height:{{item.size}}px;--tx:{{item.tx}}px;--ty:{{item.ty}}px;"
+    ></view>
+
+    <!-- 献门轨迹粒子 -->
+    <view
+      wx:for="{{trailParticles}}"
+      wx:key="id"
+      class="trail-particle"
+      style="left:{{item.x}}px;top:{{item.y}}px;width:{{item.size}}px;height:{{item.size}}px;animation-delay:{{item.delay}}s;"
+    ></view>
+  </view>
+
+  <view class="trade-row {{tradeRowHidden ? 'trade-hidden' : ''}}" wx:if="{{tradeStations.length}}">
+    <view
+      wx:for="{{tradeStations}}"
+      wx:key="output"
+      class="trade-btn"
+      data-input="{{item.input}}"
+      data-output="{{item.output}}"
+      catchtap="onTradeTap"
+    >{{item.input}} → {{item.output}}</view>
+  </view>
+
+  <view class="inventory-area {{inventoryRowsClass}} {{inventoryGoldenGlow ? 'golden-glow' : ''}} {{inventoryGoldenFade ? 'golden-fade' : ''}}" id="inventory-area">
+    <view
+      wx:for="{{inventoryItems}}"
+      wx:key="id"
+      wx:if="{{!item.hidden}}"
+      class="inventory-item-slot {{item.popDone ? 'pop-done' : ''}}"
+    >
+      <view
+        class="item-pop-body {{item.popPhase === 'hold' ? 'pop-hold' : ''}} {{item.popPhase === 'out' ? 'bubble-pop' : ''}} {{item.popPhase === 'in' ? 'item-pop-in' : ''}} {{item.goldenOutline && item.popPhase !== 'in' && item.popPhase !== 'hold' ? 'golden-outline' : ''}}"
+      >
+        <view
+          class="game-item in-inventory type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.hasEffect ? 'has-effect' : ''}} {{item.placeholder ? 'placeholder' : ''}} {{item.appearing ? 'appearing' : ''}}"
+          data-id="{{item.id}}"
+          catchtouchstart="onInventoryTouchStart"
+          catchtouchmove="onInventoryTouchMove"
+          catchtouchend="onInventoryTouchEnd"
+          catchtouchcancel="onInventoryTouchEnd"
+        >
+          <view class="item-pop-glow" wx:if="{{item.popPhase === 'in'}}"></view>
+          <view class="item-icon-wrap">
+            <text class="item-icon">{{item.icon}}</text>
+          </view>
+          <text class="item-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view
+    wx:if="{{doorBubbleText}}"
+    id="door-bubble"
+    class="door-bubble {{doorBubbleTail}} {{doorBubbleVisible ? 'visible' : ''}} {{doorBubbleFading ? 'fade-out' : ''}}"
+    style="left: {{doorBubbleLeft}}px; top: {{doorBubbleTop}}px; max-width: {{doorBubbleMaxWidth}}px;"
+  >
+    <text class="door-bubble-text">{{doorBubbleText}}</text>
+    <view class="door-bubble-tail"></view>
+  </view>
+
+  <view
+    wx:if="{{dragGhost.visible}}"
+    class="drag-ghost game-item type-{{dragGhost.itemType}} {{dragGhost.tone ? 'tone-' + dragGhost.tone : ''}}"
+    style="left: {{dragGhost.x}}px; top: {{dragGhost.y}}px;"
+  >
+    <view class="item-icon-wrap">
+      <text class="item-icon">{{dragGhost.icon}}</text>
+    </view>
+    <text class="item-name">{{dragGhost.name}}</text>
+  </view>
+
+  <view
+    wx:for="{{foamParticles}}"
+    wx:key="id"
+    class="foam-burst"
+    style="left: {{item.left}}px; top: {{item.top}}px;"
+  >
+    <view
+      class="foam-particle {{item.large ? 'large' : ''}}"
+      style="width: {{item.size}}px; height: {{item.size}}px; --foam-x: {{item.fx}}px; --foam-y: {{item.fy}}px; animation-delay: {{item.delay}}s;"
+    ></view>
+  </view>
+
+  <view class="toast" wx:if="{{toastMessage}}">{{toastMessage}}</view>
+  <view class="task-toast" wx:if="{{taskToastVisible}}">{{taskToastText}}</view>
+
+  <view class="level-complete-pop {{levelCompletePopVisible ? 'visible' : ''}}" wx:if="{{levelCompletePopVisible}}">
+    <text>{{levelCompletePopText}}</text>
+  </view>
+
+  <view class="level-intro-overlay {{showIntro ? 'visible' : ''}} {{introFadeOut ? 'fade-out' : ''}}" catchtap="dismissIntro">
+    <view class="level-intro-content">
+      <text class="intro-level-name">{{introTitle}}</text>
+      <view class="intro-separator"></view>
+      <text class="intro-target" wx:if="{{introTarget}}">{{introTarget}}</text>
+      <text class="intro-desc" wx:if="{{introDesc}}">{{introDesc}}</text>
+      <text class="intro-tip">点击任意处继续</text>
+    </view>
+  </view>
+
+  <view class="success-overlay" wx:if="{{successVisible}}">
+    <view class="success-panel">
+      <text class="success-title">✨ 过关 ✨</text>
+      <text class="success-text">{{successText}}</text>
+      <view class="success-btn" catchtap="dismissSuccess">继续</view>
+    </view>
+  </view>
+
+  <view class="ending-overlay" wx:if="{{endingVisible}}">
+    <view class="ending-panel">
+      <text class="ending-line">你通过了。</text>
+      <text class="ending-line dim">门已经为你打开。</text>
+      <text class="ending-line story">十三年日落月升，终归于一碗。</text>
+      <view class="success-btn" catchtap="dismissEnding">回主菜单</view>
+    </view>
+  </view>
+
+  <view
+    wx:if="{{recipeBookFlyer.visible}}"
+    class="recipe-book-flyer game-item type-{{recipeBookFlyer.itemType}} {{recipeBookFlyer.tone ? 'tone-' + recipeBookFlyer.tone : ''}}"
+    style="left: {{recipeBookFlyer.x}}px; top: {{recipeBookFlyer.y}}px; opacity: {{recipeBookFlyer.opacity != null ? recipeBookFlyer.opacity : 1}}; transform: scale({{recipeBookFlyer.scale != null ? recipeBookFlyer.scale : 1}});"
+  >
+    <view class="item-icon-wrap">
+      <text class="item-icon">{{recipeBookFlyer.icon}}</text>
+    </view>
+    <text class="item-name">{{recipeBookFlyer.name}}</text>
+  </view>
+
+  <view
+    class="recipe-book-overlay {{recipeBookOverlayVisible ? 'visible' : ''}}"
+    wx:if="{{recipeBookOverlayVisible}}"
+    catchtap="onRecipeBookOverlayTap"
+  >
+    <view class="recipe-book-page" catchtap="onRecipeBookPanelTap">
+      <view class="recipe-book-header">
+        <text class="recipe-book-title">酿 造 手 札</text>
+        <view class="recipe-book-close" catchtap="onRecipeBookClose">✕</view>
+      </view>
+      <view class="recipe-book-search">
+        <input
+          class="recipe-search-input"
+          placeholder="搜索配方..."
+          value="{{recipeBookSearch}}"
+          bindinput="onRecipeBookSearchInput"
+        />
+      </view>
+      <view class="recipe-book-tabs">
+        <view
+          class="recipe-tab {{recipeBookTab === 'recorded' ? 'active' : ''}}"
+          data-tab="recorded"
+          catchtap="onRecipeBookTabTap"
+        >记载</view>
+        <view
+          class="recipe-tab {{recipeBookTab === 'discovered' ? 'active' : ''}}"
+          data-tab="discovered"
+          catchtap="onRecipeBookTabTap"
+        >发现</view>
+      </view>
+      <view class="recipe-book-tab-hint">
+        <text>记载：配方书中的固定配方</text>
+        <text>发现：你游玩中自行解锁的配方</text>
+      </view>
+      <view class="recipe-book-divider"></view>
+      <scroll-view class="recipe-book-content" scroll-y>
+        <view wx:if="{{recipeBookEmptyText}}" class="recipe-empty">{{recipeBookEmptyText}}</view>
+        <block wx:for="{{recipeBookSections}}" wx:key="label" wx:for-item="section">
+          <view wx:if="{{section.label}}" class="recipe-group-label">{{section.label}}</view>
+          <view
+            wx:for="{{section.entries}}"
+            wx:for-item="entry"
+            wx:key="name"
+            class="recipe-entry {{entry.dualCheeseHint ? 'recipe-dual-cheese-hint' : ''}}"
+          >
+            <text class="recipe-icon">{{entry.icon}}</text>
+            <view class="recipe-detail">
+              <text class="recipe-name">{{entry.name}}</text>
+              <text class="recipe-formula">{{entry.formula}}</text>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+      <view class="recipe-book-footer">— 记载于宝珠酿造坊 —</view>
+    </view>
+  </view>
+
+  <view class="basic-completion-overlay" wx:if="{{basicCompletionVisible}}">
+    <view class="completion-content">
+      <view class="completion-section" wx:if="{{basicCompletionPhase === 'stats' || basicCompletionPhase === 'reward' || basicCompletionPhase === 'continue'}}">
+        <text class="completion-title">✨ 你已完成所有基础关卡 ✨</text>
+        <view class="stats-row">
+          <text class="stats-label">耗时</text>
+          <text class="stats-value">{{basicCompletionTime}}</text>
+          <view class="speed-badge tier-{{basicSpeedTier}}">
+            <text class="speed-icon">{{basicSpeedIcon}}</text>
+            <text class="speed-name">{{basicSpeedName}}</text>
+          </view>
+        </view>
+        <view class="stats-row">
+          <text class="stats-label">探索了宝珠</text>
+          <text class="stats-value">{{basicCompletionProgress}}</text>
+          <text class="stats-percent">%</text>
+        </view>
+      </view>
+      <view class="completion-section" wx:if="{{basicCompletionPhase === 'stats'}}">
+        <view class="claim-reward-btn" catchtap="onClaimBasicReward">
+          <text class="btn-text">领取奖励</text>
+        </view>
+      </view>
+      <view class="completion-section" wx:if="{{basicCompletionPhase === 'reward' || basicCompletionPhase === 'continue'}}">
+        <text class="reward-label">你已获得</text>
+        <view class="reward-content">
+          <view class="title-upgrade">
+            <view class="old-title">
+              <text class="title-icon">{{basicOldTitleIcon}}</text>
+              <text class="title-name">{{basicOldTitleName}}</text>
+            </view>
+            <text class="upgrade-arrow">→</text>
+            <view class="new-title">
+              <text class="title-icon">{{basicNewTitleIcon}}</text>
+              <text class="title-name">{{basicNewTitleName}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="completion-section" wx:if="{{basicCompletionPhase === 'continue'}}">
+        <view class="continue-message">
+          <text>前方的迷雾正在散去，</text>
+          <text>更深的酿造秘境在等待着你......</text>
+        </view>
+        <view class="continue-buttons">
+          <view class="continue-btn primary" catchtap="onBasicCompletionExplore">继续探索</view>
+          <view class="continue-btn secondary" catchtap="onBasicCompletionRest">暂时休息</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 固定顶层，避免被 intro / 合成区遮挡 -->
+  <view class="game-nav-back" catchtap="onBack">
+    <view class="back-btn">
+      <text class="back-arrow">←</text>
+      <view wx:if="{{showClaimableDot}}" class="claimable-dot"></view>
+    </view>
+  </view>
+</view>

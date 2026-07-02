@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测试关 - 同款物品与物品栏</title>
+    <link rel="stylesheet" href="css/game.css">
+    <style>
+        body {
+            background: #fff !important;
+            display: flex;
+            justify-content: center;
+        }
+        .mobile-shell {
+            position: relative;
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            overflow: hidden;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            background: #fff;
+        }
+        #map-viewport {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            overflow: hidden;
+            touch-action: none;
+            cursor: grab;
+            z-index: 1;
+        }
+        #map-viewport.panning { cursor: grabbing; }
+        #map-world {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1500px;
+            height: 920px;
+            background:
+                linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
+            background-size: 34px 34px;
+            background-color: #fff;
+            will-change: transform;
+        }
+        #outer-boundary {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            width: calc(100% - 40px);
+            height: calc(100% - 40px);
+            border: 10px solid #111;
+            pointer-events: none;
+            z-index: 2;
+        }
+        #boundary-line {
+            position: absolute;
+            left: 724px;
+            top: 20px;
+            width: 14px;
+            height: calc(100% - 40px);
+            background: #111;
+            pointer-events: none;
+            z-index: 3;
+            transition: opacity 0.2s ease;
+        }
+        #boundary-line.open { opacity: 0; }
+        .wall-line-room {
+            position: absolute;
+            border: 10px solid #111;
+            background: transparent;
+            z-index: 3;
+            pointer-events: none;
+        }
+        #synthesis-area {
+            width: 620px;
+            height: 620px;
+            left: 70px;
+            top: 96px;
+            bottom: auto;
+            border: 2px solid #111;
+            border-radius: 12px;
+            background: #fff;
+            z-index: 4;
+        }
+        #inventory-area {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 45;
+            border-top: 2px solid #111;
+            background: #fff;
+            max-height: 118px;
+        }
+        #top-hud {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            pointer-events: none;
+        }
+        #goal-label {
+            font-size: 12px;
+            background: rgba(255,255,255,0.95);
+            border: 2px solid #111;
+            border-radius: 8px;
+            padding: 6px 8px;
+            pointer-events: auto;
+        }
+        .hud-btn {
+            font-size: 12px;
+            border: 2px solid #111;
+            background: #fff;
+            border-radius: 8px;
+            padding: 5px 8px;
+            pointer-events: auto;
+        }
+        #gate-lock, #chest {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 4px solid #111;
+            border-radius: 10px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            z-index: 6;
+        }
+        #gate-lock { left: 700px; top: 404px; }
+        #chest { left: 980px; top: 404px; }
+        #chest.opened { opacity: 0.55; }
+        #backpack-wrap {
+            position: absolute;
+            right: 8px;
+            bottom: 140px;
+            z-index: 52;
+        }
+        #backpack-btn {
+            border: 2px solid #111;
+            background: #fff;
+            border-radius: 8px;
+            padding: 6px 9px;
+            font-size: 12px;
+        }
+        #backpack-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(2.5px);
+            -webkit-backdrop-filter: blur(2.5px);
+            z-index: 40;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease;
+        }
+        #backpack-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #backpack-panel {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(85vw, 365px);
+            top: 18vh;
+            height: 50vh;
+            overflow-y: auto;
+            border: 3px solid #111;
+            background: #fff;
+            border-radius: 12px;
+            display: none;
+            padding: 8px;
+            font-size: 12px;
+            z-index: 60;
+        }
+        #backpack-panel.open { display: block; }
+        .bag-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .bag-cell {
+            position: relative;
+            border: 2px solid #111;
+            background: #fff;
+            border-radius: 10px;
+            min-height: 78px;
+            padding: 6px 4px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            text-align: center;
+            font-size: 11px;
+        }
+        .bag-cell.in-hotbar {
+            box-shadow: inset 0 0 0 2px #111;
+        }
+        .selected-cell {
+            outline: 3px solid #111;
+            outline-offset: -3px;
+            background: #f3f3f3 !important;
+        }
+        .bag-cell .bag-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .bag-cell .bag-name {
+            font-size: 10px;
+            line-height: 1.1;
+            word-break: break-all;
+        }
+        .bag-cell .bag-count {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            border: 1px solid #111;
+            border-radius: 999px;
+            padding: 0 5px;
+            font-size: 9px;
+            background: #fff;
+        }
+        .npc-item {
+            border-style: dashed !important;
+            border-color: #666 !important;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+        .variant-zone {
+            position: absolute;
+            width: 180px;
+            height: 120px;
+            border: 2px solid #111;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 7;
+            padding: 6px;
+        }
+        .zone-title {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .zone-node {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #111;
+            border-radius: 10px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: absolute;
+            left: 8px;
+            top: 36px;
+        }
+        .zone-note {
+            position: absolute;
+            left: 62px;
+            right: 8px;
+            top: 42px;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        #zone-fragment { left: 96px; top: 760px; }
+        #zone-mechanism { left: 330px; top: 760px; }
+        #zone-trade { left: 564px; top: 760px; }
+        #fragment-gate-mini {
+            position: absolute;
+            right: 10px;
+            top: 36px;
+            width: 10px;
+            height: 56px;
+            background: #111;
+            border-radius: 4px;
+            transition: opacity 0.2s ease;
+        }
+        #fragment-gate-mini.open {
+            opacity: 0.15;
+        }
+        #mechanism-gap {
+            position: absolute;
+            right: 12px;
+            top: 56px;
+            width: 68px;
+            height: 6px;
+            background: #111;
+            border-radius: 3px;
+        }
+        #mechanism-bridge {
+            position: absolute;
+            left: 72px;
+            top: 56px;
+            width: 0;
+            height: 6px;
+            background: #111;
+            border-radius: 3px;
+            transition: width 0.24s ease;
+        }
+        #mechanism-bridge.on {
+            width: 66px;
+        }
+        #reward-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 70;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+        }
+        #reward-overlay.open {
+            display: flex;
+        }
+        #reward-card {
+            width: min(92%, 360px);
+            border: 3px solid #111;
+            border-radius: 12px;
+            background: #fff;
+            text-align: center;
+            padding: 18px 14px 14px;
+        }
+        #reward-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        #reward-icon {
+            font-size: 66px;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        #reward-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        #reward-progress {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 14px;
+        }
+        #reward-next {
+            border: 2px solid #111;
+            background: #fff;
+            border-radius: 8px;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="mobile-shell">
+    <div id="map-viewport">
+        <div id="map-world">
+            <div id="outer-boundary"></div>
+            <div id="boundary-line"></div>
+            <div id="gate-lock">🔒</div>
+            <div id="chest">📦</div>
+            <div id="synthesis-area">
+                <div class="workbench-texture"></div>
+            </div>
+            <div class="variant-zone" id="zone-fragment">
+                <div class="zone-title">钥匙碎片制</div>
+                <div class="zone-node" id="fragment-altar">🧿</div>
+                <div class="zone-note" id="fragment-note">用冰酥酪献祭<br>碎片 0 / 3</div>
+                <div id="fragment-gate-mini"></div>
+            </div>
+            <div class="variant-zone" id="zone-mechanism">
+                <div class="zone-title">环境机关制</div>
+                <div class="zone-node" id="mechanism-core">⚙️</div>
+                <div class="zone-note" id="mechanism-note">献上冰酥酪激活机关<br>桥：关闭</div>
+                <div id="mechanism-gap"></div>
+                <div id="mechanism-bridge"></div>
+            </div>
+            <div class="variant-zone" id="zone-trade">
+                <div class="zone-title">交换交易站制</div>
+                <div class="zone-node" id="trade-station">♻️</div>
+                <div class="zone-note" id="trade-note">用冰酥酪换物资包<br>未交易</div>
+            </div>
+        </div>
+    </div>
+    <div id="top-hud">
+        <div id="goal-label">目标：做出「冰酥酪」并拖到锁</div>
+        <button class="hud-btn" id="debug-open">调试开门</button>
+    </div>
+    <div id="backpack-overlay"></div>
+    <div id="backpack-wrap">
+        <button id="backpack-btn">背包</button>
+        <div id="backpack-panel"></div>
+    </div>
+    <div id="inventory-area"></div>
+    <div id="reward-overlay">
+        <div id="reward-card">
+            <div id="reward-title">获得新物品</div>
+            <div id="reward-icon">❓</div>
+            <div id="reward-name">未知</div>
+            <div id="reward-progress">1 / 1</div>
+            <button id="reward-next">继续</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const viewport = document.getElementById('map-viewport');
+    const world = document.getElementById('map-world');
+    const synthesis = document.getElementById('synthesis-area');
+    const inventory = document.getElementById('inventory-area');
+    const boundaryLine = document.getElementById('boundary-line');
+    const gateLock = document.getElementById('gate-lock');
+    const chest = document.getElementById('chest');
+    const goalLabel = document.getElementById('goal-label');
+    const backpackBtn = document.getElementById('backpack-btn');
+    const backpackPanel = document.getElementById('backpack-panel');
+    const backpackOverlay = document.getElementById('backpack-overlay');
+    const rewardOverlay = document.getElementById('reward-overlay');
+    const rewardIcon = document.getElementById('reward-icon');
+    const rewardName = document.getElementById('reward-name');
+    const rewardProgress = document.getElementById('reward-progress');
+    const rewardNextBtn = document.getElementById('reward-next');
+    const fragmentAltar = document.getElementById('fragment-altar');
+    const fragmentNote = document.getElementById('fragment-note');
+    const fragmentGateMini = document.getElementById('fragment-gate-mini');
+    const mechanismCore = document.getElementById('mechanism-core');
+    const mechanismNote = document.getElementById('mechanism-note');
+    const mechanismBridge = document.getElementById('mechanism-bridge');
+    const tradeStation = document.getElementById('trade-station');
+    const tradeNote = document.getElementById('trade-note');
+
+    const WORLD_W = 1500;
+    const WORLD_H = 920;
+    const OUTER_MIN_X = 30;
+    const OUTER_MIN_Y = 30;
+    const OUTER_MAX_X = WORLD_W - OUTER_MIN_X;
+    const OUTER_MAX_Y = WORLD_H - OUTER_MIN_Y;
+    const LOCK_LINE_X = 724;
+    const VIEW_PREVIEW_RIGHT = 160;
+    const INVENTORY_SAFE_GAP = 16;
+    const GRID = 8;
+    const ITEM_HALF = 42;
+    const overscroll = 54;
+
+    let mapX = 0, mapY = 0;
+    let panStart = { x: 0, y: 0 }, panOrigin = { x: 0, y: 0 };
+    let isPanning = false, springId = null;
+    let gateOpen = false, chestOpened = false;
+    let connectivity = null;
+    let rewardQueue = [];
+    let rewardIndex = 0;
+    let fragmentCount = 0;
+    let mechanismActivated = false;
+    let tradeTimes = 0;
+
+    const wallRooms = [
+        { left: 240, top: 190, right: 405, bottom: 345 },
+        { left: 460, top: 420, right: 620, bottom: 575 },
+        { left: 540, top: 640, right: 675, bottom: 775 }
+    ];
+    wallRooms.forEach(r => {
+        const el = document.createElement('div');
+        el.className = 'wall-line-room';
+        el.style.left = r.left + 'px';
+        el.style.top = r.top + 'px';
+        el.style.width = (r.right - r.left) + 'px';
+        el.style.height = (r.bottom - r.top) + 'px';
+        world.appendChild(el);
+    });
+
+    const recipes = [
+        { a: '牛奶', b: '蜂蜜', result: '甜奶', mode: 'timer', duration: 3 },
+        { a: '甜奶', b: '米酒', result: '冰酥酪', mode: 'instant' },
+        { a: '花瓣', b: '牛奶', result: '花奶', mode: 'instant' },
+        { a: '花奶', b: '蜂蜜', result: '香甜奶', mode: 'timer', duration: 2 }
+    ];
+    const iconMap = {
+        '米酒': '🍶',
+        '牛奶': '🥛',
+        '蜂蜜': '🍯',
+        '花瓣': '🌸',
+        '冰块': '🧊',
+        '可可': '🍫',
+        '果酱': '🍓',
+        '香草': '🌿',
+        '坚果': '🥜',
+        '门印记碎片A': '🔹',
+        '门印记碎片B': '🔸',
+        '门印记碎片C': '💠',
+        '甜奶': '🥛',
+        '花奶': '🥛',
+        '香甜奶': '🍮',
+        '冰酥酪': '🍨',
+        '矿石': '💎'
+    };
+
+    const ownedItems = ['米酒', '牛奶', '蜂蜜', '花瓣', '冰块'];
+    const hotbar = ['米酒','牛奶','蜂蜜','花瓣','冰块',null,null,null];
+    let selectedCell = null; // { source:'hotbar'|'bag', index:number, name:string|null }
+
+    function isBackpackOpen() {
+        return backpackPanel.classList.contains('open');
+    }
+    function hotbarIndexOf(name) {
+        return hotbar.findIndex(v => v === name);
+    }
+    function addOwnedItem(name, preferHotbar = true) {
+        if (ownedItems.includes(name)) return false;
+        ownedItems.push(name);
+        if (preferHotbar) {
+            const empty = hotbar.findIndex(v => v === null);
+            if (empty >= 0) hotbar[empty] = name;
+        }
+        return true;
+    }
+    function nodeWorldCenter(el) {
+        const rect = el.getBoundingClientRect();
+        // 节点本身在 map-world 内是嵌套绝对定位，必须通过屏幕坐标反算世界坐标
+        return worldFromClient(
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2
+        );
+    }
+    function nearNode(center, nodeEl, threshold = 64) {
+        const node = nodeWorldCenter(nodeEl);
+        return Math.hypot(center.x - node.x, center.y - node.y) <= threshold;
+    }
+    function updateVariantNotes() {
+        fragmentNote.innerHTML = `用冰酥酪献祭<br>碎片 ${fragmentCount} / 3`;
+        if (fragmentCount >= 3) {
+            fragmentGateMini.classList.add('open');
+        } else {
+            fragmentGateMini.classList.remove('open');
+        }
+        mechanismNote.innerHTML = `献上冰酥酪激活机关<br>桥：${mechanismActivated ? '已开启' : '关闭'}`;
+        mechanismBridge.classList.toggle('on', mechanismActivated);
+        tradeNote.innerHTML = `用冰酥酪换物资包<br>已交易 ${tradeTimes} 次`;
+    }
+    function tryHandleVariantDrop(itemName, center) {
+        if (itemName !== '冰酥酪') return false;
+        // 钥匙碎片测试区：每次献祭产出一个碎片，3个后小门线打开
+        if (nearNode(center, fragmentAltar, 70)) {
+            const fragmentRewards = ['门印记碎片A', '门印记碎片B', '门印记碎片C'];
+            if (fragmentCount < fragmentRewards.length) {
+                const newName = fragmentRewards[fragmentCount];
+                const gained = addOwnedItem(newName, true);
+                fragmentCount += 1;
+                if (gained) {
+                    renderInventory();
+                    renderBackpack();
+                    showRewardSequence([newName]);
+                }
+                updateVariantNotes();
+                goalLabel.innerHTML = fragmentCount >= 3
+                    ? '碎片测试完成：已集齐3个门印记碎片'
+                    : `碎片测试：已获得 ${fragmentCount} / 3`;
+            }
+            return true;
+        }
+        // 环境机关测试区：献祭目标物激活桥（可达）
+        if (nearNode(center, mechanismCore, 70)) {
+            mechanismActivated = true;
+            updateVariantNotes();
+            goalLabel.innerHTML = '机关测试：桥已激活，通路可达';
+            return true;
+        }
+        // 交换交易站测试区：献祭目标物换物资包（去重）
+        if (nearNode(center, tradeStation, 70)) {
+            const tradePool = ['可可', '果酱', '香草', '坚果'];
+            const gained = [];
+            for (let i = 0; i < tradePool.length; i++) {
+                if (addOwnedItem(tradePool[i], true)) {
+                    gained.push(tradePool[i]);
+                    if (gained.length >= 2) break;
+                }
+            }
+            tradeTimes += 1;
+            updateVariantNotes();
+            renderInventory();
+            renderBackpack();
+            if (gained.length > 0) {
+                showRewardSequence(gained);
+                goalLabel.innerHTML = '交易测试：已换到新物资';
+            } else {
+                goalLabel.innerHTML = '交易测试：可换物资已全部拥有';
+            }
+            return true;
+        }
+        return false;
+    }
+    function clearSelectionVisual() {
+        inventory.querySelectorAll('.selected-cell').forEach(el => el.classList.remove('selected-cell'));
+        backpackPanel.querySelectorAll('.selected-cell').forEach(el => el.classList.remove('selected-cell'));
+    }
+    function clearSelection() {
+        selectedCell = null;
+        clearSelectionVisual();
+    }
+    function applySelectionVisual() {
+        clearSelectionVisual();
+        if (!selectedCell) return;
+        if (selectedCell.source === 'hotbar') {
+            const target = inventory.querySelector(`.game-item[data-slot="${selectedCell.index}"]`);
+            if (target) target.classList.add('selected-cell');
+        } else if (selectedCell.source === 'bag') {
+            const target = backpackPanel.querySelector(`.bag-cell[data-bag-index="${selectedCell.index}"]`);
+            if (target) target.classList.add('selected-cell');
+        }
+    }
+    function swapHotbar(a, b) {
+        const t = hotbar[a];
+        hotbar[a] = hotbar[b];
+        hotbar[b] = t;
+    }
+    function swapBagOrder(a, b) {
+        const t = ownedItems[a];
+        ownedItems[a] = ownedItems[b];
+        ownedItems[b] = t;
+    }
+    function moveOrSwapBetweenBagAndHotbar(hotbarIndex, bagName) {
+        const existing = hotbarIndexOf(bagName);
+        if (existing >= 0) {
+            swapHotbar(hotbarIndex, existing);
+            return;
+        }
+        hotbar[hotbarIndex] = bagName;
+    }
+    function commitSelectionSwap(from, to) {
+        if (!from || !to) return;
+        if (from.source === 'hotbar' && to.source === 'hotbar') {
+            swapHotbar(from.index, to.index);
+            return;
+        }
+        if (from.source === 'bag' && to.source === 'bag') {
+            swapBagOrder(from.index, to.index);
+            return;
+        }
+        if (from.source === 'bag' && to.source === 'hotbar') {
+            moveOrSwapBetweenBagAndHotbar(to.index, from.name);
+            return;
+        }
+        if (from.source === 'hotbar' && to.source === 'bag') {
+            if (!from.name) return;
+            const existing = hotbarIndexOf(to.name);
+            if (existing >= 0) {
+                swapHotbar(from.index, existing);
+            } else {
+                hotbar[from.index] = to.name;
+            }
+        }
+    }
+    function handleSelectionPick(next) {
+        if (!next) return;
+        if (!selectedCell) {
+            selectedCell = next;
+        } else {
+            if (selectedCell.source === next.source && selectedCell.index === next.index) {
+                selectedCell = null;
+            } else {
+                commitSelectionSwap(selectedCell, next);
+                selectedCell = null;
+                renderInventory();
+                renderBackpack();
+            }
+        }
+        applySelectionVisual();
+    }
+
+    function createGameItem(name, extraClass = '') {
+        const el = document.createElement('div');
+        el.className = 'game-item type-base ' + extraClass;
+        el.dataset.name = name;
+        el.innerHTML = '<div class="icon">' + (iconMap[name] || '❓') + '</div><div class="name">' + name + '</div>';
+        return el;
+    }
+
+    function renderInventory() {
+        inventory.innerHTML = '';
+        hotbar.forEach((name, idx) => {
+            const slot = document.createElement('div');
+            slot.className = 'game-item in-inventory';
+            slot.dataset.slot = String(idx);
+            if (name) {
+                slot.dataset.name = name;
+                slot.innerHTML = '<div class="icon">' + (iconMap[name] || '❓') + '</div><div class="name">' + name + '</div>';
+            } else {
+                slot.dataset.name = '';
+                slot.innerHTML = '<div class="icon">＋</div><div class="name">空</div>';
+                slot.style.opacity = '0.45';
+            }
+            inventory.appendChild(slot);
+        });
+        inventory.classList.remove('rows-1', 'rows-2', 'rows-3-plus');
+        inventory.classList.add('rows-2');
+        applySelectionVisual();
+    }
+
+    function renderBackpack() {
+        backpackPanel.innerHTML = '';
+        const grid = document.createElement('div');
+        grid.className = 'bag-grid';
+        ownedItems.forEach((name, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'bag-cell';
+            cell.dataset.bagIndex = String(idx);
+            if (hotbarIndexOf(name) >= 0) {
+                cell.classList.add('in-hotbar');
+            }
+            cell.innerHTML =
+                '<div class="bag-icon">' + (iconMap[name] || '❓') + '</div>' +
+                '<div class="bag-name">' + name + '</div>' +
+                '<div class="bag-count">' + (hotbarIndexOf(name) >= 0 ? '栏内' : '背包') + '</div>';
+            grid.appendChild(cell);
+        });
+        backpackPanel.appendChild(grid);
+        applySelectionVisual();
+    }
+
+    function setBackpackOpen(open) {
+        backpackPanel.classList.toggle('open', open);
+        backpackOverlay.classList.toggle('open', open);
+        if (!open) clearSelection();
+    }
+    backpackBtn.addEventListener('click', () => {
+        setBackpackOpen(!backpackPanel.classList.contains('open'));
+    });
+    backpackOverlay.addEventListener('click', () => {
+        setBackpackOpen(false);
+    });
+
+    function setRewardOpen(open) {
+        rewardOverlay.classList.toggle('open', open);
+    }
+    function renderRewardStep() {
+        if (rewardQueue.length === 0) return;
+        const name = rewardQueue[rewardIndex];
+        rewardIcon.textContent = iconMap[name] || '❓';
+        rewardName.textContent = name;
+        rewardProgress.textContent = `${rewardIndex + 1} / ${rewardQueue.length}`;
+        rewardNextBtn.textContent = rewardIndex + 1 >= rewardQueue.length ? '完成' : '继续';
+    }
+    function showRewardSequence(items) {
+        rewardQueue = items.slice();
+        rewardIndex = 0;
+        if (rewardQueue.length === 0) return;
+        setBackpackOpen(false);
+        setRewardOpen(true);
+        renderRewardStep();
+    }
+    rewardNextBtn.addEventListener('click', () => {
+        if (rewardQueue.length === 0) {
+            setRewardOpen(false);
+            return;
+        }
+        rewardIndex += 1;
+        if (rewardIndex >= rewardQueue.length) {
+            setRewardOpen(false);
+            rewardQueue = [];
+            rewardIndex = 0;
+            goalLabel.innerHTML = '宝箱已开：新物品已收入';
+            return;
+        }
+        renderRewardStep();
+    });
+
+    function rightLimit() {
+        return gateOpen ? OUTER_MAX_X : (LOCK_LINE_X - 7);
+    }
+    function viewRightLimit() {
+        // 关门时允许玩家稍微看到边界线后面的空间，减少“贴边盲区”
+        return gateOpen ? OUTER_MAX_X : Math.min(OUTER_MAX_X, LOCK_LINE_X + VIEW_PREVIEW_RIGHT);
+    }
+    function camBounds() {
+        const viewportRect = viewport.getBoundingClientRect();
+        const inventoryRect = inventory.getBoundingClientRect();
+        // 真实可视下边界是“物品栏顶部”，并预留一点安全边距避免贴边被挡
+        const usableHeight = Math.max(0, inventoryRect.top - viewportRect.top - INVENTORY_SAFE_GAP);
+        const bounds = {
+            minX: viewport.clientWidth - viewRightLimit(),
+            maxX: -OUTER_MIN_X,
+            minY: usableHeight - OUTER_MAX_Y,
+            maxY: -OUTER_MIN_Y
+        };
+        // 如果某个方向可视范围已经完整包含边界，就锁定该方向，避免弹簧抖动
+        if (bounds.minX > bounds.maxX) {
+            const centerX = (bounds.minX + bounds.maxX) / 2;
+            bounds.minX = centerX;
+            bounds.maxX = centerX;
+        }
+        if (bounds.minY > bounds.maxY) {
+            const centerY = (bounds.minY + bounds.maxY) / 2;
+            bounds.minY = centerY;
+            bounds.maxY = centerY;
+        }
+        return bounds;
+    }
+    function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+    }
+    function elastic(v, min, max) {
+        if (v < min) return min - Math.min(overscroll, overscroll * (1 - 1 / ((min - v) / overscroll + 1)));
+        if (v > max) return max + Math.min(overscroll, overscroll * (1 - 1 / ((v - max) / overscroll + 1)));
+        return v;
+    }
+    function applyTransform() {
+        world.style.transform = `translate3d(${mapX}px, ${mapY}px, 0)`;
+    }
+    function springBack() {
+        const b = camBounds();
+        const tx = clamp(mapX, b.minX, b.maxX);
+        const ty = clamp(mapY, b.minY, b.maxY);
+        if (Math.abs(tx - mapX) < 0.4 && Math.abs(ty - mapY) < 0.4) return;
+        function tick() {
+            const dx = tx - mapX;
+            const dy = ty - mapY;
+            // 无振荡缓动：每帧按固定比例逼近目标
+            mapX += dx * 0.22;
+            mapY += dy * 0.22;
+            applyTransform();
+            if (Math.abs(dx) < 0.35 && Math.abs(dy) < 0.35) {
+                mapX = tx; mapY = ty; applyTransform(); return;
+            }
+            springId = requestAnimationFrame(tick);
+        }
+        springId = requestAnimationFrame(tick);
+    }
+    function initCamera() {
+        const b = camBounds();
+        mapX = clamp((viewport.clientWidth - viewRightLimit()) / 2, b.minX, b.maxX);
+        mapY = clamp(-72, b.minY, b.maxY);
+        applyTransform();
+    }
+    function worldFromClient(cx, cy) {
+        const rect = viewport.getBoundingClientRect();
+        const localX = cx - rect.left;
+        const localY = cy - rect.top;
+        return { x: localX - mapX, y: localY - mapY };
+    }
+
+    function inBoundary(x, y) {
+        return x >= OUTER_MIN_X && x <= rightLimit() && y >= OUTER_MIN_Y && y <= OUTER_MAX_Y;
+    }
+    function inWallInterior(x, y) {
+        return wallRooms.some(r => x > r.left + 10 && x < r.right - 10 && y > r.top + 10 && y < r.bottom - 10);
+    }
+    function rebuildConnectivity() {
+        const cols = Math.floor(WORLD_W / GRID);
+        const rows = Math.floor(WORLD_H / GRID);
+        const acc = new Uint8Array(cols * rows);
+        function idx(cx, cy) { return cy * cols + cx; }
+        function cellAllowed(cx, cy) {
+            const x = cx * GRID + GRID / 2;
+            const y = cy * GRID + GRID / 2;
+            if (!inBoundary(x, y)) return false;
+            if (inWallInterior(x, y)) return false;
+            return true;
+        }
+        const q = [];
+        const start = { x: Math.floor(120 / GRID), y: Math.floor(180 / GRID) };
+        if (cellAllowed(start.x, start.y)) {
+            acc[idx(start.x, start.y)] = 1;
+            q.push(start);
+        }
+        const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+        while (q.length) {
+            const c = q.shift();
+            dirs.forEach(([dx,dy]) => {
+                const nx = c.x + dx, ny = c.y + dy;
+                if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) return;
+                const i = idx(nx, ny);
+                if (acc[i]) return;
+                if (!cellAllowed(nx, ny)) return;
+                acc[i] = 1;
+                q.push({ x: nx, y: ny });
+            });
+        }
+        connectivity = { cols, rows, acc };
+    }
+    function connected(x, y) {
+        const cx = Math.floor(x / GRID), cy = Math.floor(y / GRID);
+        if (!connectivity || cx < 0 || cy < 0 || cx >= connectivity.cols || cy >= connectivity.rows) return false;
+        return connectivity.acc[cy * connectivity.cols + cx] === 1;
+    }
+    function itemAllowed(x, y) {
+        const pts = [
+            [x, y],
+            [x - ITEM_HALF + 6, y - ITEM_HALF + 6],
+            [x + ITEM_HALF - 6, y - ITEM_HALF + 6],
+            [x - ITEM_HALF + 6, y + ITEM_HALF - 6],
+            [x + ITEM_HALF - 6, y + ITEM_HALF - 6]
+        ];
+        return pts.every(([px, py]) => connected(px, py));
+    }
+    function segmentAllowed(ax, ay, bx, by) {
+        const dist = Math.hypot(bx - ax, by - ay);
+        const steps = Math.max(1, Math.ceil(dist / (GRID / 2)));
+        for (let i = 1; i <= steps; i++) {
+            const t = i / steps;
+            const x = ax + (bx - ax) * t;
+            const y = ay + (by - ay) * t;
+            if (!itemAllowed(x, y)) return false;
+        }
+        return true;
+    }
+
+    function findRecipe(a, b) {
+        return recipes.find(r => (r.a === a && r.b === b) || (r.a === b && r.b === a));
+    }
+    function trySynthesis(item) {
+        const candidates = Array.from(synthesis.querySelectorAll('.game-item')).filter(el => !el.classList.contains('npc-item'));
+        const r1 = item.getBoundingClientRect();
+        const c1 = { x: r1.left + r1.width/2, y: r1.top + r1.height/2 };
+        let nearestNoRecipe = null;
+        let nearestNoRecipeDist = Infinity;
+        for (const other of candidates) {
+            if (other === item) continue;
+            const r2 = other.getBoundingClientRect();
+            const c2 = { x: r2.left + r2.width/2, y: r2.top + r2.height/2 };
+            const dist = Math.hypot(c1.x - c2.x, c1.y - c2.y);
+            if (dist > 130) continue;
+            const rec = findRecipe(item.dataset.name, other.dataset.name);
+            if (!rec) {
+                if (dist < nearestNoRecipeDist) {
+                    nearestNoRecipeDist = dist;
+                    nearestNoRecipe = other;
+                }
+                continue;
+            }
+            const centerX = (c1.x + c2.x) / 2;
+            const centerY = (c1.y + c2.y) / 2;
+            item.remove(); other.remove();
+            const newItem = createGameItem(rec.result);
+            const synthRect = synthesis.getBoundingClientRect();
+            newItem.style.left = (centerX - synthRect.left - ITEM_HALF) + 'px';
+            newItem.style.top = (centerY - synthRect.top - ITEM_HALF) + 'px';
+            synthesis.appendChild(newItem);
+            if (addOwnedItem(rec.result, true)) {
+                renderInventory();
+                renderBackpack();
+            }
+            if (rec.result === '冰酥酪') {
+                goalLabel.innerHTML = '目标：把「冰酥酪」拖到锁';
+            }
+            if (rec.mode === 'timer') {
+                const overlay = document.createElement('div');
+                overlay.className = 'timer-overlay';
+                overlay.innerHTML = '<div class="timer-number">' + rec.duration + '</div>';
+                newItem.appendChild(overlay);
+                let left = rec.duration;
+                const t = setInterval(() => {
+                    left -= 1;
+                    if (left <= 0) {
+                        clearInterval(t);
+                        overlay.remove();
+                    } else {
+                        overlay.querySelector('.timer-number').textContent = String(left);
+                    }
+                }, 1000);
+            }
+            return;
+        }
+        if (nearestNoRecipe) {
+            // 明确反馈“发生了接触但无配方”，避免误以为没互动
+            item.classList.add('shake-anim');
+            nearestNoRecipe.classList.add('shake-anim');
+            setTimeout(() => {
+                item.classList.remove('shake-anim');
+                nearestNoRecipe.classList.remove('shake-anim');
+            }, 360);
+        }
+    }
+
+    function openGate() {
+        if (gateOpen) return;
+        gateOpen = true;
+        boundaryLine.classList.add('open');
+        gateLock.textContent = '🔓';
+        goalLabel.innerHTML = '门已开：去右侧开宝箱';
+        rebuildConnectivity();
+        springBack();
+    }
+    function openChest() {
+        if (!gateOpen || chestOpened) return;
+        chestOpened = true;
+        chest.classList.add('opened');
+        chest.textContent = '📭';
+        const rewards = ['可可','果酱','香草'];
+        const gained = [];
+        rewards.forEach(n => {
+            if (addOwnedItem(n, true)) {
+                gained.push(n);
+            }
+        });
+        renderInventory();
+        renderBackpack();
+        if (gained.length > 0) {
+            showRewardSequence(gained);
+        } else {
+            goalLabel.innerHTML = '宝箱已开：这批物品你已经拥有';
+        }
+    }
+    chest.addEventListener('click', openChest);
+    document.getElementById('debug-open').addEventListener('click', openGate);
+    window.testUnlockNextRoom = openGate;
+
+    let dragEl = null;
+    let dragSource = null;
+    let dragOffset = { x: 0, y: 0 };
+    let lastAllowed = null;
+
+    document.addEventListener('pointerdown', (e) => {
+        if (isBackpackOpen() || rewardOverlay.classList.contains('open')) return;
+        const invItem = e.target.closest('#inventory-area .game-item');
+        const worldItem = e.target.closest('#synthesis-area .game-item');
+
+        if (invItem && invItem.dataset.name) {
+            dragSource = 'inventory';
+            dragEl = createGameItem(invItem.dataset.name);
+            dragEl.style.position = 'fixed';
+            dragEl.style.left = e.clientX - ITEM_HALF + 'px';
+            dragEl.style.top = e.clientY - ITEM_HALF + 'px';
+            dragEl.style.zIndex = '1000';
+            document.body.appendChild(dragEl);
+            dragOffset = { x: ITEM_HALF, y: ITEM_HALF };
+            lastAllowed = null;
+            e.preventDefault();
+            return;
+        }
+        if (worldItem && !worldItem.classList.contains('npc-item')) {
+            dragSource = 'world';
+            dragEl = worldItem;
+            const rect = worldItem.getBoundingClientRect();
+            dragOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            // 从合成区拖起时先挂到 body，避免被 synthesis-area 裁剪导致“消失”
+            dragEl.remove();
+            document.body.appendChild(dragEl);
+            dragEl.style.position = 'fixed';
+            dragEl.style.left = rect.left + 'px';
+            dragEl.style.top = rect.top + 'px';
+            dragEl.style.zIndex = '1000';
+            const c = worldFromClient(rect.left + ITEM_HALF, rect.top + ITEM_HALF);
+            lastAllowed = itemAllowed(c.x, c.y) ? c : null;
+            e.preventDefault();
+            return;
+        }
+        if (e.target.closest('#map-viewport')) {
+            isPanning = true;
+            if (springId) cancelAnimationFrame(springId);
+            panStart = { x: e.clientX, y: e.clientY };
+            panOrigin = { x: mapX, y: mapY };
+            viewport.classList.add('panning');
+        }
+    });
+
+    document.addEventListener('pointermove', (e) => {
+        if (dragEl) {
+            const left = e.clientX - dragOffset.x;
+            const top = e.clientY - dragOffset.y;
+            const c = worldFromClient(left + ITEM_HALF, top + ITEM_HALF);
+            // 不在 move 阶段做硬限制，保证拖拽和合成交互流畅；仅在松手时判定是否合法
+            dragEl.style.left = left + 'px';
+            dragEl.style.top = top + 'px';
+            if (itemAllowed(c.x, c.y)) {
+                lastAllowed = c;
+            }
+            return;
+        }
+        if (!isPanning) return;
+        const b = camBounds();
+        mapX = elastic(panOrigin.x + (e.clientX - panStart.x), b.minX, b.maxX);
+        mapY = elastic(panOrigin.y + (e.clientY - panStart.y), b.minY, b.maxY);
+        applyTransform();
+    });
+
+    document.addEventListener('pointerup', () => {
+        if (dragEl) {
+            const rect = dragEl.getBoundingClientRect();
+            const center = worldFromClient(rect.left + ITEM_HALF, rect.top + ITEM_HALF);
+            if (tryHandleVariantDrop(dragEl.dataset.name, center)) {
+                dragEl.remove();
+                dragEl = null;
+                dragSource = null;
+                lastAllowed = null;
+                return;
+            }
+            const nearLock = Math.hypot(center.x - 730, center.y - 434) < 72;
+            if (dragEl.dataset.name === '冰酥酪' && nearLock && !gateOpen) {
+                dragEl.remove();
+                dragEl = null;
+                openGate();
+                return;
+            }
+            if (itemAllowed(center.x, center.y)) {
+                dragEl.style.position = 'absolute';
+                dragEl.style.left = (center.x - ITEM_HALF - synthesis.offsetLeft) + 'px';
+                dragEl.style.top = (center.y - ITEM_HALF - synthesis.offsetTop) + 'px';
+                dragEl.style.zIndex = '';
+                synthesis.appendChild(dragEl);
+                trySynthesis(dragEl);
+            } else {
+                if (dragSource === 'inventory') {
+                    dragEl.remove();
+                } else {
+                    const safe = lastAllowed || { x: 130, y: 180 };
+                    dragEl.style.position = 'absolute';
+                    dragEl.style.left = (safe.x - ITEM_HALF - synthesis.offsetLeft) + 'px';
+                    dragEl.style.top = (safe.y - ITEM_HALF - synthesis.offsetTop) + 'px';
+                    dragEl.style.zIndex = '';
+                    synthesis.appendChild(dragEl);
+                }
+            }
+            dragEl = null;
+            dragSource = null;
+            lastAllowed = null;
+            return;
+        }
+        if (isPanning) {
+            isPanning = false;
+            viewport.classList.remove('panning');
+            springBack();
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        const b = camBounds();
+        mapX = clamp(mapX, b.minX, b.maxX);
+        mapY = clamp(mapY, b.minY, b.maxY);
+        applyTransform();
+    });
+
+    const npc1 = createGameItem('矿石', 'npc-item');
+    npc1.style.left = (280 - synthesis.offsetLeft) + 'px';
+    npc1.style.top = (220 - synthesis.offsetTop) + 'px';
+    synthesis.appendChild(npc1);
+    const npc2 = createGameItem('矿石', 'npc-item');
+    npc2.style.left = (520 - synthesis.offsetLeft) + 'px';
+    npc2.style.top = (470 - synthesis.offsetTop) + 'px';
+    synthesis.appendChild(npc2);
+
+    rebuildConnectivity();
+    updateVariantNotes();
+    renderInventory();
+    renderBackpack();
+    initCamera();
+
+    inventory.addEventListener('click', (e) => {
+        if (!isBackpackOpen()) return;
+        const slot = e.target.closest('.game-item[data-slot]');
+        if (!slot) return;
+        const index = Number(slot.dataset.slot);
+        handleSelectionPick({
+            source: 'hotbar',
+            index,
+            name: hotbar[index] || null
+        });
+    });
+    backpackPanel.addEventListener('click', (e) => {
+        if (!isBackpackOpen()) return;
+        const cell = e.target.closest('.bag-cell[data-bag-index]');
+        if (!cell) return;
+        const index = Number(cell.dataset.bagIndex);
+        const name = ownedItems[index];
+        handleSelectionPick({
+            source: 'bag',
+            index,
+            name: name || null
+        });
+    });
+})();
+</script>
+</body>
+</html>

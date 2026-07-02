@@ -32,25 +32,39 @@ class AudioManager {
             'click-back': 'audio files/SFX7 click low-pitch.mp3',
             'timer-tick': 'audio files/SFX8 clock-ticking-365218.mp3',
             'wave': 'audio files/SFX10 Wave.mp3',
-            'error': 'audio files/SFX11 error.mp3',
+            'error': 'audio files/SFX32 error.mp3',
             'hum': 'audio files/SFX13 hum.mp3',
-            'craft-target': 'audio files/SFX14 levelup final-craft.mp3',
+            'craft-target': 'audio files/SFX41 success.mp3',
             'craft-normal': 'audio files/SFX15 levelup.mp3',
             'drop': 'audio files/SFX17 pop-low.mp3',
             'pickup': 'audio files/SFX18 pop.mp3',
             'craft-fragment': 'audio files/SFX20 success craft.mp3',
             'text-appear': 'audio files/SFX21 text appear.mp3',
-            'door-absorb': 'audio files/SFX22 transition-soft-long.mp3'
+            'door-absorb': 'audio files/SFX22 transition-soft-long.mp3',
+
+            // SFX24–41 扩展（按需接线）
+            'inventory-slot-pop': 'audio files/SFX37 bubblepoph.mp3',
+            'click-open': 'audio files/SFX35 click_open.mp3',
+            'click-ui': 'audio files/SFX36 click_close.mp3',
+            'task-reward-gem': 'audio files/SFX39 moneyless.mp3',
+            'task-milestone': 'audio files/SFX27 reminder.mp3',
+            'gem-earn': 'audio files/SFX40 moneymuch.mp3',
+            'settlement-phase-complete': 'audio files/SFX33 complete.mp3',
+            'recipe-book': 'audio files/SFX30 page.mp3',
+            'recipe-tab': 'audio files/SFX28 wooden_click.mp3',
+            'trade': 'audio files/SFX26 trade.mp3'
         };
         
         // 时长限制 (秒)
         this.durationLimits = {
-            'click-dot': 6,
-            'craft-target': 3
+            'click-dot': 6
         };
         
         // 当前播放的计时器
         this.activeTimers = new Map();
+
+        /** @type {ReturnType<typeof setInterval> | null} */
+        this._bgmFadeInterval = null;
         
         // 循环播放的音效
         this.loopingSFX = new Map();
@@ -93,14 +107,21 @@ class AudioManager {
     
     // 加载保存的音量设置
     loadVolumeSettings() {
+        // 曾有一版在每次启动时强制静音并写入 0，一次性恢复为默认 80%
+        if (!localStorage.getItem('baozhu_volume_mute_bug_fixed')) {
+            localStorage.setItem('baozhu_bgm_volume', '80');
+            localStorage.setItem('baozhu_sfx_volume', '80');
+            localStorage.setItem('baozhu_volume_mute_bug_fixed', '1');
+        }
+
         const savedBGM = localStorage.getItem('baozhu_bgm_volume');
         const savedSFX = localStorage.getItem('baozhu_sfx_volume');
-        
-        if (savedBGM !== null) {
-            this.bgmVolume = parseInt(savedBGM) / 100;
+
+        if (savedBGM !== null && savedBGM !== '') {
+            this.bgmVolume = parseInt(savedBGM, 10) / 100;
         }
-        if (savedSFX !== null) {
-            this.sfxVolume = parseInt(savedSFX) / 100;
+        if (savedSFX !== null && savedSFX !== '') {
+            this.sfxVolume = parseInt(savedSFX, 10) / 100;
         }
     }
     
@@ -111,7 +132,17 @@ class AudioManager {
             audio.preload = 'auto';
             
             if (name.startsWith('bgm-')) {
-                audio.loop = true;
+                // 开场曲播一遍即止；其余 BGM 循环
+                const loop = name !== 'bgm-intro';
+                audio.loop = loop;
+                if (name === 'bgm-intro') {
+                    audio.addEventListener('ended', () => {
+                        if (this.currentBGM === audio && this.currentBGMName === 'bgm-intro') {
+                            this.currentBGM = null;
+                            this.currentBGMName = null;
+                        }
+                    });
+                }
                 this.bgm[name] = audio;
             } else {
                 this.sfx[name] = audio;
@@ -155,9 +186,10 @@ class AudioManager {
         // 停止当前BGM
         this.stopBGM();
         
-        // 播放新BGM
+        // 播放新BGM（除开场曲外均循环；每次播放时显式写入，避免被其它逻辑改掉）
         this.currentBGM = this.bgm[name];
         this.currentBGMName = name;
+        this.currentBGM.loop = name !== 'bgm-intro';
         this.currentBGM.volume = this.bgmVolume;
         this.currentBGM.currentTime = 0;
         this.currentBGM.play().catch(e => {
@@ -177,25 +209,40 @@ class AudioManager {
         }
     }
     
-    // 淡出BGM
-    fadeOutBGM(duration = 1000) {
-        if (!this.currentBGM) return;
-        
+    /**
+     * 淡出当前 BGM 至静音并停止；结束后可选回调。
+     * @param {number} [duration]
+     * @param {() => void} [onComplete]
+     */
+    fadeOutBGM(duration = 1000, onComplete) {
+        if (this._bgmFadeInterval) {
+            clearInterval(this._bgmFadeInterval);
+            this._bgmFadeInterval = null;
+        }
+
+        if (!this.currentBGM) {
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
+
         const bgm = this.currentBGM;
         const startVolume = bgm.volume;
-        const fadeStep = startVolume / (duration / 50);
-        
-        const fadeInterval = setInterval(() => {
+        const steps = Math.max(1, Math.ceil(duration / 50));
+        const fadeStep = startVolume / steps;
+
+        this._bgmFadeInterval = setInterval(() => {
             bgm.volume = Math.max(0, bgm.volume - fadeStep);
             if (bgm.volume <= 0) {
-                clearInterval(fadeInterval);
+                clearInterval(this._bgmFadeInterval);
+                this._bgmFadeInterval = null;
                 bgm.pause();
                 bgm.currentTime = 0;
-                bgm.volume = this.bgmVolume; // 重置音量
+                bgm.volume = this.bgmVolume;
                 if (this.currentBGM === bgm) {
                     this.currentBGM = null;
                     this.currentBGMName = null;
                 }
+                if (typeof onComplete === 'function') onComplete();
             }
         }, 50);
     }
@@ -304,14 +351,40 @@ class AudioManager {
     
     // ==================== 便捷方法 ====================
     
-    // 播放点击进入音效
+    // 进入 / 通用按钮 / 「点击任意处继续」（SFX35）
+    playClickOpen() {
+        this.playSFX('click-open');
+    }
+
+    // 退出 / 关闭 / 取消（SFX36）
+    playClickExit() {
+        this.playSFX('click-ui');
+    }
+
+    // 播放点击进入音效（关卡列表「进入关卡」保留）
     playClickEnter() {
         this.playSFX('click-enter');
     }
-    
-    // 播放点击返回音效
+
+    // 历史兼容：返回类交互 → 退出音
     playClickBack() {
-        this.playSFX('click-back');
+        this.playClickExit();
+    }
+
+    /**
+     * 关卡转场时物品栏单项消失/出现（SFX37）。消失时略降调；出现为原速。
+     * 使用独立 Audio 实例以支持短时间内重叠播放。
+     * @param {boolean} isDisappear
+     * @param {{ volumeMul?: number }} [opts] volumeMul：相对全局 SFX 音量的倍率（默认压低，避免重叠过响）
+     */
+    playInventoryTransitionSlot(isDisappear, opts = {}) {
+        const path = this.audioFiles['inventory-slot-pop'];
+        if (!path) return;
+        const volumeMul = typeof opts.volumeMul === 'number' ? opts.volumeMul : 0.42;
+        const audio = new Audio(path);
+        audio.volume = Math.min(1, this.sfxVolume * volumeMul);
+        audio.playbackRate = isDisappear ? 0.88 : 1;
+        audio.play().catch(() => {});
     }
 }
 

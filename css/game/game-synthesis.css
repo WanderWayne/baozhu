@@ -188,13 +188,38 @@
     background: linear-gradient(145deg, #FFFCF5 0%, #FFF5E0 100%); 
     border-color: rgba(212, 160, 58, 0.2); 
 }
-.game-item.type-special { 
-    background: linear-gradient(145deg, #F8FCFF 0%, #E8F2FF 100%); 
-    border-color: rgba(137, 180, 200, 0.2); 
+/* 工艺类（酿造 / 发酵）：与倒计时合成呼应的淡金黄底色 */
+.game-item.type-process {
+    background: linear-gradient(145deg, #FFFDF7 0%, #FFF4D8 100%);
+    border-color: rgba(212, 175, 95, 0.38);
 }
-.game-item.type-mid { 
-    background: linear-gradient(145deg, #FCF8FF 0%, #F0E8F5 100%); 
-    border-color: rgba(184, 165, 199, 0.2); 
+
+/* 同类属性卡片底色：酪族（厚实 / 轻盈 / 合体） */
+.game-item.type-mid.tone-cheese,
+.game-item.type-deadend.tone-cheese {
+    background: linear-gradient(145deg, #F5FBFF 0%, #E8F4FA 100%);
+    border-color: rgba(110, 175, 205, 0.32);
+}
+
+/* 同类属性卡片底色：谷酒 / 花酒酿 / 奶酒类中间产物 */
+.game-item.type-mid.tone-wine,
+.game-item.type-deadend.tone-wine {
+    background: linear-gradient(145deg, #FFFBF5 0%, #FFF2E4 100%);
+    border-color: rgba(200, 145, 95, 0.32);
+}
+
+.game-item.type-deadend.tone-cheese,
+.game-item.type-deadend.tone-wine {
+    opacity: 0.85;
+}
+
+    background: linear-gradient(145deg, #FCF8FF 0%, #F0E8F5 100%);
+    border-color: rgba(184, 165, 199, 0.2);
+}
+.game-item.type-deadend {
+    background: linear-gradient(145deg, #F0EDEA 0%, #E0DDD8 100%);
+    border-color: rgba(160, 150, 140, 0.15);
+    opacity: 0.85;
 }
 .game-item.type-final { 
     background: linear-gradient(145deg, #FFFBF5 0%, #FFF0E0 100%); 
@@ -280,6 +305,20 @@
     margin-bottom: 2px;
     filter: drop-shadow(0 1px 2px rgba(107, 83, 68, 0.08));
     transition: transform 0.2s;
+}
+
+.game-item .icon.item-svg {
+    font-size: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-item .icon.item-svg svg {
+    width: 100%;
+    height: 100%;
 }
 
 .game-item:active .icon {
@@ -403,34 +442,66 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255,255,255,0.95);
-    border-radius: 16px;
+    background: rgba(255, 253, 247, 0.92);
+    border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 6;
+    pointer-events: none;
 }
 
-.timer-circle {
-    width: 36px;
-    height: 36px;
-    border: 3px solid #eee;
-    border-top-color: var(--brand-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 8px;
+.timer-overlay .timer-ring-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.timer-ring-track {
+    stroke: rgba(200, 190, 175, 0.35);
+    stroke-width: 3;
+}
+
+.timer-ring-spin {
+    stroke: var(--brand-color, #c4956a);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-dasharray: 72 217;
+    filter: drop-shadow(0 0 4px rgba(232, 200, 115, 0.45));
+}
+
+.timer-ring-spinner {
+    transform-origin: 50px 50px;
+    animation: timerRingOrbit 1.05s linear infinite;
+}
+
+@keyframes timerRingOrbit {
+    to { transform: rotate(360deg); }
+}
+
+.timer-count {
+    position: relative;
+    z-index: 2;
+    font-size: 26px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--brand-color, #c4956a);
+    line-height: 1;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .timer-text {
-    font-size: 10px;
+    position: relative;
+    z-index: 2;
+    margin-top: 6px;
+    font-size: 9px;
     color: var(--text-light);
     text-align: center;
-    padding: 0 5px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
+    padding: 0 8px;
+    line-height: 1.35;
+    max-width: 78px;
 }
 
 /* ========== 静置揭晓（Mystery Item） ========== */
@@ -612,10 +683,10 @@
     filter: blur(2px);
 }
 
-/* ========== 交易站（矩形点击式）========== */
+/* ========== 交易站（直角长方形神坛样式）========== */
 .trade-station {
     position: absolute;
-    right: 8px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     z-index: 1;
@@ -664,60 +735,134 @@
     100% { transform: translateY(-50%) scale(1); opacity: 1; }
 }
 
-/* 交易台主体 — 横向矩形 */
+/* 交易台主体 — 直角长方形神坛样式 */
 .ts-body {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    background: rgba(255, 253, 247, 0.92);
-    border: 1.5px solid rgba(166, 124, 82, 0.25);
-    border-radius: 14px;
-    box-shadow: 0 3px 14px rgba(107, 83, 68, 0.1);
-    transition: transform 0.15s ease;
+    gap: 12px;
+    padding: 14px 16px;
+    /* 神坛底色：老木褐渐变 */
+    background: linear-gradient(145deg, #8B7355 0%, #7A6548 50%, #6B5344 100%);
+    border: 2px solid #A08060;
+    border-radius: 4px; /* 轻微圆角保持精致感，接近直角 */
+    box-shadow:
+        /* 外发光 */
+        0 4px 20px rgba(107, 83, 68, 0.25),
+        /* 顶部高光 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        /* 内部阴影 */
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+/* 神坛独特纹路 - 使用伪元素添加装饰性边框 */
+.ts-body::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(232, 200, 115, 0.25);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* 神坛角落装饰 */
+.ts-body::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border: 1px solid rgba(160, 130, 100, 0.15);
+    pointer-events: none;
 }
 
 .trade-station:active .ts-body {
-    transform: scale(0.96);
+    transform: scale(0.98);
+    box-shadow:
+        0 2px 12px rgba(107, 83, 68, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* 圆形槽位 */
+/* 圆形槽位 - 神坛风格 */
 .ts-slot {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 16px;
     gap: 1px;
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
+    /* 添加内部阴影增加立体感 */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .ts-slot-name {
     font-size: 8px;
-    color: var(--old-wood, #6B5344);
+    color: #F0E8D8;
     white-space: nowrap;
     letter-spacing: 0.5px;
     line-height: 1;
     margin-top: -2px;
     pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* 左：输入槽（虚线，空） */
+/* 左：输入槽（虚线，空）- 神坛风格 */
 .ts-slot-input {
-    border: 2px dashed rgba(166, 124, 82, 0.3);
-    background: rgba(232, 200, 115, 0.04);
+    border: 2px dashed rgba(232, 200, 115, 0.4);
+    background: rgba(60, 50, 40, 0.3);
 }
 
 .ts-slot-input .ts-ghost-icon {
-    opacity: 0.18;
-    font-size: 18px;
+    opacity: 0.35;
+    font-size: 15px;
     line-height: 1;
+    color: rgba(240, 220, 180, 0.6);
+}
+
+.ts-slot-input .ts-ghost-svg {
+    font-size: 0;
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    max-width: 72%;
+    max-height: 72%;
+    align-items: center;
+    justify-content: center;
+}
+
+.ts-slot-output .ts-ghost-icon {
+    font-size: 15px;
+    line-height: 1;
+    opacity: 0.9;
+}
+
+.ts-slot-output .ts-ghost-svg {
+    font-size: 0;
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    max-width: 72%;
+    max-height: 72%;
+    align-items: center;
+    justify-content: center;
+}
+
+.ts-ghost-svg svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
 }
 
 .ts-slot-input .ts-gem-cost {
@@ -726,76 +871,118 @@
     gap: 1px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--old-wood, #6B5344);
+    color: #F0E8D8;
     white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ts-gem-icon {
     font-size: 13px;
+    color: #E8C873;
 }
 
-/* 右：输出槽（实线） */
+.ts-gem-svg {
+    font-size: 0;
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+.ts-gem-svg svg {
+    width: 100%;
+    height: 100%;
+}
+
+.confirm-gem-svg {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+.confirm-gem-svg svg {
+    width: 100%;
+    height: 100%;
+}
+
+.confirm-item-svg {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+.confirm-item-svg svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* 右：输出槽（实线）- 神坛风格 */
 .ts-slot-output {
-    border: 2px solid rgba(166, 124, 82, 0.2);
-    background: rgba(232, 200, 115, 0.06);
+    border: 2px solid rgba(232, 200, 115, 0.35);
+    background: rgba(80, 70, 55, 0.4);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* 中间箭头 + 标签 */
+/* 中间箭头 + 标签 - 神坛风格 */
 .ts-middle {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
+    gap: 2px;
     flex-shrink: 0;
 }
 
 .ts-arrow {
     font-size: 20px;
-    color: var(--caramel-brown, #A67C52);
-    opacity: 0.55;
+    color: #D4B060;
+    opacity: 0.8;
     line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ts-label {
     font-size: 10px;
-    color: var(--caramel-brown, #A67C52);
+    color: #E8C873;
     letter-spacing: 3px;
     font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* 拖拽命中区域 */
+/* 拖拽命中区域 - 神坛风格 */
 .trade-station-hitbox {
     position: absolute;
     inset: 0;
-    border-radius: 14px;
+    border-radius: 4px;
     z-index: 3;
     transition: box-shadow 0.3s, background 0.3s;
 }
 
 .trade-station-hitbox.trade-hover {
-    box-shadow: 0 0 18px rgba(232, 200, 115, 0.5), inset 0 0 8px rgba(232, 200, 115, 0.15);
-    background: rgba(232, 200, 115, 0.08);
+    box-shadow: 0 0 20px rgba(232, 200, 115, 0.4), inset 0 0 12px rgba(232, 200, 115, 0.2);
+    background: rgba(232, 200, 115, 0.1);
 }
 
 .trade-station-hitbox.trade-wrong {
     animation: shake 0.4s ease-in-out;
 }
 
-/* 进货中遮罩 */
+/* 进货中遮罩 - 神坛风格 */
 .trade-restock-overlay {
     display: none;
     position: absolute;
     inset: 0;
-    background: rgba(255, 253, 247, 0.92);
-    border: 1px solid rgba(166, 124, 82, 0.2);
-    border-radius: 14px;
+    background: linear-gradient(145deg, #8B7355 0%, #7A6548 100%);
+    border: 2px solid #A08060;
+    border-radius: 4px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1px;
+    gap: 4px;
     pointer-events: none;
     z-index: 10;
-    backdrop-filter: blur(4px);
     animation: restockFadeIn 0.3s ease-out;
 }
 
@@ -810,28 +997,37 @@
 
 .trade-restock-title {
     font-size: 11px;
-    color: var(--caramel-brown, #A67C52);
+    color: #E8C873;
     letter-spacing: 2px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .trade-restock-countdown {
     font-size: 26px;
     font-weight: 600;
-    color: var(--old-wood, #6B5344);
+    color: #F0E8D8;
     line-height: 1.1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .trade-restock-unit {
     font-size: 12px;
-    color: var(--caramel-brown, #A67C52);
+    color: #D4B060;
     letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* 断货状态 */
+/* 断货状态 - 神坛风格 */
 .trade-station.trade-sold-out {
-    opacity: 0.5;
+    opacity: 0.6;
     pointer-events: none;
-    filter: grayscale(0.4);
+    filter: grayscale(0.5);
+}
+
+.trade-station.trade-sold-out .ts-body {
+    background: linear-gradient(145deg, #6B5B4A 0%, #5A4A3A 100%);
+    border-color: #807060;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ========== 交易确认弹窗 ========== */
@@ -965,22 +1161,34 @@
 
 .recipe-book-btn.golden-pulse {
     border-color: rgba(232, 200, 115, 0.6);
-    box-shadow:
-        0 0 8px rgba(232, 200, 115, 0.3),
-        0 0 20px rgba(232, 200, 115, 0.15);
-    animation: recipeBookPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(232, 200, 115, 0.3);
+    overflow: visible;
 }
 
-@keyframes recipeBookPulse {
-    0%, 100% {
-        box-shadow:
-            0 0 8px rgba(232, 200, 115, 0.3),
-            0 0 20px rgba(232, 200, 115, 0.15);
+.recipe-book-btn.golden-pulse::before,
+.recipe-book-btn.golden-pulse::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(232, 200, 115, 0.6);
+    box-shadow: 0 0 8px rgba(232, 200, 115, 0.3);
+    animation: recipeBookWave 2.4s ease-out infinite;
+    pointer-events: none;
+}
+
+.recipe-book-btn.golden-pulse::after {
+    animation-delay: 1.2s;
+}
+
+@keyframes recipeBookWave {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
     }
-    50% {
-        box-shadow:
-            0 0 14px 4px rgba(232, 200, 115, 0.55),
-            0 0 30px 8px rgba(232, 200, 115, 0.25);
+    100% {
+        transform: scale(1.5, 2.2);
+        opacity: 0;
     }
 }
 
@@ -1015,10 +1223,41 @@
         8px 8px 0 rgba(166, 124, 82, 0.08),
         0 16px 40px rgba(0, 0, 0, 0.2);
     position: relative;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     transform: scale(0.9);
     transition: transform 0.3s cubic-bezier(0, 0, 0.2, 1.2);
     border-left: 3px solid rgba(166, 124, 82, 0.2);
+}
+
+.recipe-book-header,
+.recipe-book-search,
+.recipe-book-tabs,
+.recipe-book-tab-hint,
+.recipe-book-divider {
+    flex-shrink: 0;
+}
+
+.recipe-book-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-right: -8px;
+    padding-right: 8px;
+}
+
+.recipe-book-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.recipe-book-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.recipe-book-content::-webkit-scrollbar-thumb {
+    background: rgba(166, 124, 82, 0.2);
+    border-radius: 2px;
 }
 
 .recipe-book-overlay.visible .recipe-book-page {
@@ -1053,10 +1292,17 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    z-index: 100;
+    position: relative;
+    pointer-events: auto;
 }
 
 .recipe-book-close:active {
     transform: scale(0.9);
+}
+
+.recipe-book-close:hover {
+    background: rgba(166, 124, 82, 0.1);
 }
 
 /* 搜索框 */
@@ -1113,6 +1359,17 @@
     border-bottom-color: #A67C52;
 }
 
+.recipe-book-tab-hint {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+    font-size: 10px;
+    color: #A8917A;
+    letter-spacing: 0.4px;
+    line-height: 1.45;
+}
+
 .recipe-book-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(166, 124, 82, 0.25), transparent);
@@ -1135,6 +1392,16 @@
     gap: 14px;
 }
 
+.recipe-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(140, 105, 70, 0.7);
+    letter-spacing: 3px;
+    padding: 6px 4px 2px;
+    border-bottom: 1px solid rgba(166, 124, 82, 0.12);
+    margin-top: 4px;
+}
+
 .recipe-entry {
     display: flex;
     align-items: flex-start;
@@ -1145,11 +1412,59 @@
     border: 1px solid rgba(166, 124, 82, 0.06);
 }
 
+/* 双酪配方尚未揭晓：栏位边缘金光 */
+.recipe-entry.recipe-dual-cheese-hint {
+    border-color: rgba(232, 200, 115, 0.5);
+    animation: recipeDualGoldenPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes recipeDualGoldenPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 0 1px rgba(232, 200, 115, 0.22),
+            0 0 12px rgba(232, 200, 115, 0.18),
+            inset 0 0 14px rgba(232, 200, 115, 0.06);
+    }
+    50% {
+        box-shadow:
+            0 0 0 1px rgba(232, 200, 115, 0.42),
+            0 0 22px rgba(232, 200, 115, 0.32),
+            inset 0 0 18px rgba(232, 200, 115, 0.1);
+    }
+}
+
 .recipe-icon {
     font-size: 28px;
     flex-shrink: 0;
     line-height: 1;
     margin-top: 2px;
+}
+
+.recipe-icon.recipe-icon-svg {
+    font-size: 0;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recipe-icon-svg svg {
+    width: 100%;
+    height: 100%;
+}
+
+.recipe-item-svg {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.recipe-item-svg svg {
+    width: 100%;
+    height: 100%;
 }
 
 .recipe-detail {
@@ -1186,5 +1501,330 @@
     color: #C4B5A3;
     letter-spacing: 3px;
     font-style: italic;
+}
+
+/* ========== 通关评价：完美 / 殊途同归（mint，无背景，仅靠光影显眼）========== */
+.completion-badge-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    cursor: pointer;
+}
+
+.completion-badge-overlay.visible {
+    opacity: 1;
+}
+
+.completion-badge-panel {
+    max-width: min(340px, 92vw);
+    text-align: center;
+    pointer-events: none;
+}
+
+.completion-badge-title {
+    font-size: clamp(26px, 6vw, 34px);
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    color: #6ae8c9;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
+    text-shadow:
+        0 0 18px rgba(100, 220, 180, 0.95),
+        0 0 42px rgba(80, 200, 165, 0.65),
+        0 0 72px rgba(60, 180, 150, 0.35),
+        0 0 3px rgba(255, 255, 255, 0.85),
+        0 2px 14px rgba(15, 40, 35, 0.45);
+}
+
+.completion-badge-hint {
+    margin: 18px auto 0;
+    max-width: 300px;
+    font-size: 13px;
+    line-height: 1.65;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: rgba(196, 248, 232, 0.94);
+    text-shadow:
+        0 0 14px rgba(100, 220, 180, 0.55),
+        0 0 28px rgba(80, 190, 160, 0.35),
+        0 1px 10px rgba(10, 30, 28, 0.5);
+}
+
+.completion-badge-tap {
+    margin-top: 28px;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    color: rgba(130, 228, 200, 0.72);
+    text-shadow:
+        0 0 12px rgba(100, 220, 180, 0.45),
+        0 1px 8px rgba(10, 28, 24, 0.4);
+}
+
+/* ========== 写入配方按钮 ========== */
+.recipe-write-btn {
+    margin-top: 8px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: #8B6A50;
+    background: rgba(232, 200, 115, 0.15);
+    border: 1px solid rgba(232, 200, 115, 0.35);
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s, border-color 0.2s;
+}
+.recipe-write-btn:hover {
+    background: rgba(232, 200, 115, 0.3);
+    border-color: rgba(232, 200, 115, 0.55);
+}
+
+/* ========== 任务发光（mint） ========== */
+.recipe-entry.recipe-quest-glow {
+    position: relative;
+    border-color: rgba(100, 220, 180, 0.35);
+    box-shadow: 0 0 12px rgba(100, 220, 180, 0.15);
+    animation: recipeQuestPulse 2s ease-in-out infinite;
+}
+@keyframes recipeQuestPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(100, 220, 180, 0.12); }
+    50% { box-shadow: 0 0 18px rgba(100, 220, 180, 0.3), 0 0 35px rgba(100, 220, 180, 0.1); }
+}
+
+/* ========== 写入配方 UI ========== */
+.recipe-write-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.recipe-write-overlay.visible { opacity: 1; }
+
+.rw-panel {
+    width: min(92vw, 360px);
+    max-height: 80vh;
+    background: #FFFDF8;
+    border-radius: 16px;
+    padding: 20px 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transform: scale(0.9);
+    transition: transform 0.25s cubic-bezier(0,0,0.2,1.1);
+}
+.recipe-write-overlay.visible .rw-panel { transform: scale(1); }
+
+.rw-header {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6B5344;
+    letter-spacing: 2px;
+}
+
+/* Formula row */
+.rw-formula {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.rw-slot {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px dashed rgba(166, 124, 82, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: rgba(250, 245, 235, 0.8);
+    transition: border-color 0.2s, background 0.2s;
+}
+.rw-slot.filled {
+    border-style: solid;
+    border-color: rgba(232, 200, 115, 0.5);
+    background: rgba(255, 253, 247, 1);
+}
+
+.rw-slot-empty {
+    font-size: 20px;
+    color: rgba(166, 124, 82, 0.2);
+}
+.rw-slot-svg { width: 32px; height: 32px; display: flex; }
+.rw-slot-svg svg { width: 100%; height: 100%; }
+.rw-slot-emoji { font-size: 24px; line-height: 1; }
+.rw-slot-name {
+    font-size: 8px;
+    color: #8B6A50;
+    margin-top: 2px;
+    max-width: 56px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rw-slot-remove {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(200, 80, 80, 0.8);
+    color: #fff;
+    font-size: 10px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.rw-plus {
+    font-size: 18px;
+    color: rgba(166, 124, 82, 0.35);
+    font-weight: 300;
+}
+.rw-arrow {
+    font-size: 18px;
+    color: rgba(166, 124, 82, 0.35);
+    margin: 0 4px;
+}
+
+.rw-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+.rw-result-svg { width: 36px; height: 36px; display: flex; }
+.rw-result-svg svg { width: 100%; height: 100%; }
+.rw-result-emoji { font-size: 28px; line-height: 1; }
+.rw-result-name {
+    font-size: 10px;
+    color: #8B6A50;
+    letter-spacing: 0.5px;
+}
+
+/* Items grid */
+.rw-items-label {
+    font-size: 11px;
+    color: #B8A590;
+    letter-spacing: 1px;
+}
+.rw-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 35vh;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+.rw-item {
+    width: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    background: rgba(250, 245, 235, 0.8);
+    border: 1px solid rgba(166, 124, 82, 0.08);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.rw-item:hover {
+    background: rgba(232, 200, 115, 0.15);
+    border-color: rgba(232, 200, 115, 0.3);
+}
+.rw-item.rw-item-used {
+    opacity: 0.3;
+    pointer-events: none;
+}
+.rw-item-svg { width: 28px; height: 28px; display: flex; }
+.rw-item-svg svg { width: 100%; height: 100%; }
+.rw-item-emoji { font-size: 22px; line-height: 1; }
+.rw-item-name {
+    font-size: 8px;
+    color: #8B6A50;
+    text-align: center;
+    max-width: 56px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Actions */
+.rw-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+.rw-btn {
+    padding: 8px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.15s;
+}
+.rw-cancel {
+    background: rgba(166, 124, 82, 0.1);
+    color: #8B6A50;
+}
+.rw-cancel:hover { background: rgba(166, 124, 82, 0.2); }
+
+.rw-confirm {
+    background: rgba(232, 200, 115, 0.3);
+    color: #6B5344;
+    font-weight: 600;
+}
+.rw-confirm:hover { background: rgba(232, 200, 115, 0.5); }
+.rw-confirm.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+.rw-confirm.rw-shake {
+    animation: rwShake 0.4s ease;
+}
+@keyframes rwShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+/* Feedback */
+.rw-feedback {
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 1px;
+    min-height: 20px;
+    transition: opacity 0.3s;
+}
+.rw-feedback.rw-success {
+    color: rgba(100, 200, 150, 0.9);
+    text-shadow: 0 0 8px rgba(100, 200, 150, 0.4);
+}
+.rw-feedback.rw-fail {
+    color: rgba(200, 100, 80, 0.8);
 }
 

@@ -42,11 +42,39 @@ class FermentationWorld {
             sunriseOrange: { r: 232, g: 168, b: 124 }
         };
         
+        // 主题检测
+        this.theme = this._detectTheme();
+        this._themeObserver = new MutationObserver(() => {
+            const newTheme = this._detectTheme();
+            if (newTheme !== this.theme) {
+                this.theme = newTheme;
+                if (newTheme === 'dairy') this._generateValley();
+            }
+        });
+        this._themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        
+        // 山谷背景数据（dairy 主题专用，init 中生成）
+        this.valley = null;
+        
         this.resize();
-        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('resize', () => {
+            this.resize();
+            if (this.theme === 'dairy') this._generateValley();
+        });
         
         this.init();
         this.animate();
+    }
+    
+    _detectTheme() {
+        const cl = document.body.classList;
+        if (cl.contains('theme-dairy')) return 'dairy';
+        if (cl.contains('theme-floral')) return 'floral';
+        if (cl.contains('theme-fruit')) return 'fruit';
+        if (cl.contains('theme-grain')) return 'grain';
+        if (cl.contains('theme-temperature')) return 'temperature';
+        if (cl.contains('theme-ultimate')) return 'ultimate';
+        return 'dairy';
     }
     
     resize() {
@@ -54,7 +82,70 @@ class FermentationWorld {
         this.canvas.height = window.innerHeight;
     }
     
+    // ==================== 奶酪谷背景数据生成 ====================
+    
+    _generateValley() {
+        const W = this.canvas.width;
+        const H = this.canvas.height;
+        const v = {};
+        
+        // --- Layer 1: distant hills (relative y positions) ---
+        v.hills = [];
+        const hillConfigs = [
+            { baseY: 0.30, amp: 0.03, alpha: 0.10, color: 'rgba(220,200,160,' },
+            { baseY: 0.36, amp: 0.04, alpha: 0.15, color: 'rgba(210,185,140,' },
+            { baseY: 0.42, amp: 0.03, alpha: 0.20, color: 'rgba(200,170,120,' },
+        ];
+        for (const hc of hillConfigs) {
+            const pts = [];
+            const segments = 12;
+            for (let i = 0; i <= segments; i++) {
+                const x = (i / segments) * W;
+                const noise = (Math.sin(i * 1.7 + hc.baseY * 30) * 0.5 + Math.sin(i * 0.8 + hc.amp * 100) * 0.5);
+                const y = H * hc.baseY + noise * H * hc.amp;
+                pts.push({ x, y });
+            }
+            v.hills.push({ pts, alpha: hc.alpha, color: hc.color });
+        }
+        
+        // --- Layer 2: valley dust (small floating particles) ---
+        v.valleyDust = [];
+        for (let i = 0; i < 35; i++) {
+            const depthT = Math.random();
+            const yRange = H * 0.3 + depthT * H * 0.65;
+            v.valleyDust.push({
+                x: W * 0.15 + Math.random() * W * 0.7,
+                y: yRange,
+                size: 0.4 + Math.random() * 1.5,
+                alpha: 0.04 + depthT * 0.08,
+                vx: (Math.random() - 0.5) * 0.06,
+                vy: (Math.random() - 0.5) * 0.03 - 0.01,
+                breathPhase: Math.random() * Math.PI * 2,
+                breathSpeed: 0.002 + Math.random() * 0.005
+            });
+        }
+        
+        // --- Layer 3: mist bands ---
+        v.mists = [];
+        for (let i = 0; i < 4; i++) {
+            const depthT = i / 3;
+            v.mists.push({
+                x: Math.random() * W,
+                y: H * (0.6 + depthT * 0.35),
+                w: W * (0.6 + Math.random() * 0.5),
+                h: 30 + Math.random() * 50,
+                alpha: 0.03 + depthT * 0.05,
+                vx: 0.02 + Math.random() * 0.04
+            });
+        }
+        
+        this.valley = v;
+    }
+    
     init() {
+        // 生成山谷背景数据
+        this._generateValley();
+        
         // 初始化金色微尘
         for (let i = 0; i < this.config.maxDust; i++) {
             this.goldenDust.push(this.createGoldenDust());
@@ -302,6 +393,84 @@ class FermentationWorld {
         });
     }
     
+    // ==================== 奶酪谷背景渲染 ====================
+    
+    updateMist() {
+        if (!this.valley) return;
+        const W = this.canvas.width;
+        const H = this.canvas.height;
+        this.valley.mists.forEach(m => {
+            m.x += m.vx;
+            if (m.x > W + m.w / 2) m.x = -m.w / 2;
+        });
+        this.valley.valleyDust.forEach(d => {
+            d.x += d.vx;
+            d.y += d.vy;
+            d.breathPhase += d.breathSpeed;
+            if (d.x < W * 0.1) d.x = W * 0.9;
+            if (d.x > W * 0.9) d.x = W * 0.1;
+            if (d.y < H * 0.2) d.y = H * 0.9;
+            if (d.y > H * 1.05) d.y = H * 0.25;
+        });
+    }
+    
+    drawValleyBackground() {
+        if (this.theme !== 'dairy' || !this.valley) return;
+        
+        const ctx = this.ctx;
+        const W = this.canvas.width;
+        const H = this.canvas.height;
+        const v = this.valley;
+        
+        // --- Layer 0: sky gradient ---
+        const sky = ctx.createLinearGradient(0, 0, 0, H);
+        sky.addColorStop(0, '#FDF8E8');
+        sky.addColorStop(0.4, '#F8F0D8');
+        sky.addColorStop(0.7, '#F2E4C0');
+        sky.addColorStop(1, '#ECD8A8');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, W, H);
+        
+        // --- Layer 1: distant hills ---
+        v.hills.forEach(hill => {
+            ctx.beginPath();
+            ctx.moveTo(0, H);
+            ctx.lineTo(hill.pts[0].x, hill.pts[0].y);
+            for (let i = 1; i < hill.pts.length; i++) {
+                const prev = hill.pts[i - 1];
+                const cur = hill.pts[i];
+                const cpx = (prev.x + cur.x) / 2;
+                const cpy = (prev.y + cur.y) / 2;
+                ctx.quadraticCurveTo(prev.x, prev.y, cpx, cpy);
+            }
+            const last = hill.pts[hill.pts.length - 1];
+            ctx.lineTo(last.x, last.y);
+            ctx.lineTo(W, H);
+            ctx.closePath();
+            ctx.fillStyle = hill.color + hill.alpha + ')';
+            ctx.fill();
+        });
+        
+        // --- Layer 2: valley dust (移除悬崖，保留微尘) ---
+        v.valleyDust.forEach(d => {
+            const ba = d.alpha * (0.5 + Math.sin(d.breathPhase) * 0.5);
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(200,180,140,${ba})`;
+            ctx.fill();
+        });
+        
+        // --- Layer 3: foreground mist ---
+        v.mists.forEach(m => {
+            const grad = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.w / 2);
+            grad.addColorStop(0, `rgba(255,253,240,${m.alpha})`);
+            grad.addColorStop(0.6, `rgba(255,250,235,${m.alpha * 0.5})`);
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.fillRect(m.x - m.w / 2, m.y - m.h / 2, m.w, m.h);
+        });
+    }
+    
     // ==================== 光线条纹 ====================
     // 偶尔的斜光，像阳光从窗户斜照进来
     
@@ -348,7 +517,11 @@ class FermentationWorld {
         
         // 绘制顺序：从远到近
         
-        // 1. 温暖光斑（最底层）
+        // 0. 山谷背景（dairy 主题专用，含天空/远山/悬崖/细节/雾气）
+        this.updateMist();
+        this.drawValleyBackground();
+        
+        // 1. 温暖光斑
         this.updateWarmGlows(dt);
         this.drawWarmGlows();
         

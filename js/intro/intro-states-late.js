@@ -58,13 +58,12 @@ IntroSystem.prototype.initStoryNarration = function() {
     document.getElementById('intro-screen').appendChild(storyContainer);
     this.storyContainer = storyContainer;
     
-    // 故事文字序列（新增第一句）
     const storySequence = [
         { text: '亲爱的酿造师，\n你对这个世界好像全然不知。', delay: 800, duration: 5500 },
-        { text: '十三年前，一位酿造师在田子坊的小巷里\n点燃了第一盏灯，开始了酿造的旅程。', delay: 600, duration: 6500 },
-        { text: '十三年后，这些配方被时间打碎成了记忆碎片，\n散落在酿造宇宙的各个角落。', delay: 600, duration: 6500 },
-        { text: '你的任务：找回这些碎片，\n重建完整的"宝珠配方图谱"。', delay: 600, duration: 6500, isGoal: true },
-        { text: '当最后一块碎片归位，\n传说中的"天赐宝珠酪"将再次被唤醒。', delay: 600, duration: 7000, isGoal: true }
+        { text: '十三年前，\n一位酿造师在田子坊的小巷里\n点燃了第一盏灯，\n开始了酿造的旅程。', delay: 600, duration: 6500 },
+        { text: '十三年后，\n这些配方被时间打碎成了记忆碎片，\n散落在酿造宇宙的各个角落。', delay: 600, duration: 6500 },
+        { text: '你的任务：\n找回这些碎片，\n重建完整的"宝珠配方图谱"。', delay: 600, duration: 6500, isGoal: true },
+        { text: '当最后一块碎片归位，\n传说中的"天赐宝珠酪"\n将再次被唤醒。', delay: 600, duration: 7000, isGoal: true }
     ];
     
     let currentDelay = 500;
@@ -234,17 +233,23 @@ IntroSystem.prototype.initShowStartButton = function() {
         }
     });
     
-    // 播放主界面 BGM
     if (window.AudioManager) {
         window.AudioManager.playBGM('bgm-menu');
     }
-    
-    // 显示多层次环境效果
+
+    // 显示多层次环境效果（canvas 先隐藏，渐入在下面统一触发）
     if (typeof this.showAmbienceLayers === 'function') {
         this.showAmbienceLayers();
     } else if (window.AmbienceSystem) {
-        this.ambience = new window.AmbienceSystem('intro-screen');
+        this.ambience = new window.AmbienceSystem('intro-screen', { deferFadeIn: true });
         this.ambience.init();
+    }
+
+    // 稻穗、雾等与主界面衔接：缓慢渐入，避免转到主界面时背景「凭空出现」
+    if (this.ambience && typeof this.ambience.fadeInCanvas === 'function') {
+        requestAnimationFrame(() => {
+            this.ambience.fadeInCanvas(2200);
+        });
     }
     
     // 标记开场已播放
@@ -383,19 +388,18 @@ IntroSystem.prototype.showStoryText = function(container, text, duration, isGoal
     const fontSize = isSmallScreen ? '14px' : (isGoal ? '22px' : '24px');
     const letterSpacing = isSmallScreen ? '2px' : '4px';
     
-    // 故事叙述阶段背景仍是黑色，文字用金色系
     textEl.style.cssText = `
         font-size: ${fontSize};
         line-height: 1.8;
-        color: ${isGoal ? '#FFD700' : '#FFF5D6'};
+        color: ${isGoal ? '#fff' : 'rgba(255,255,255,0.92)'};
         font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
         letter-spacing: ${letterSpacing};
         opacity: 0;
         transform: scale(0.95);
         transition: opacity 1s ease, transform 1s ease;
         text-shadow: ${isGoal 
-            ? '0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3)' 
-            : '0 0 15px rgba(232, 200, 115, 0.6), 0 0 30px rgba(232, 200, 115, 0.3)'};
+            ? '0 0 12px rgba(255,255,255,0.7), 0 0 30px rgba(255,255,255,0.35)' 
+            : '0 0 10px rgba(255,255,255,0.6), 0 0 25px rgba(255,255,255,0.25)'};
         margin: 20px 0;
         max-width: 80vw;
     `;

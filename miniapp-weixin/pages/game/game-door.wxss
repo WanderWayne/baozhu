@@ -1,0 +1,421 @@
+/* 门区域 — 对齐 H5 game-door-base.css / game-door-states.css（精简） */
+
+.door-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--door-h, 260px);
+  min-height: var(--door-h, 260px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--door-pad-top, 55px) 32rpx 16rpx;
+  z-index: 5;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.level-info,
+.door-container {
+  pointer-events: auto;
+}
+
+.door-container {
+  position: relative;
+  width: 132px;
+  height: 198px;
+  margin: 5px auto 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s ease, opacity 0.4s ease;
+  flex-shrink: 0;
+}
+
+.door-aura {
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  right: -16px;
+  bottom: -16px;
+  border-radius: 83px 83px 0 0;
+  background: radial-gradient(ellipse at center 40%, rgba(232, 200, 115, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+  animation: auraBreath 4s ease-in-out infinite;
+}
+
+@keyframes auraBreath {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+}
+
+.door-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 66px 66px 0 0;
+  background: transparent;
+  border: 3px solid rgba(150, 150, 150, 0.55);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  z-index: 2;
+}
+
+.door-glow {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 0;
+  border-radius: 59px 59px 0 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.door-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center 40%,
+    rgba(232, 200, 115, 0.28) 0%,
+    rgba(200, 170, 80, 0.08) 50%,
+    transparent 80%
+  );
+  opacity: 0.35;
+  animation: doorBreathGlow 2s ease-in-out infinite;
+}
+
+@keyframes doorBreathGlow {
+  0%, 100% { opacity: 0.25; transform: scale(0.95); }
+  50% { opacity: 0.65; transform: scale(1.02); }
+}
+
+.door-fog {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: linear-gradient(to top, rgba(232, 200, 115, 0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.door-target-silhouette {
+  font-size: 57px;
+  line-height: 1;
+  opacity: 0.45;
+  filter: blur(2px);
+  transform: scale(0.88);
+  z-index: 3;
+  position: relative;
+}
+
+.door-container.stage-0 .door-frame {
+  border-color: rgba(150, 150, 150, 0.5);
+  box-shadow: 0 0 10px rgba(232, 200, 115, 0.05);
+}
+
+.door-container.stage-0 .door-glow::before {
+  opacity: 0;
+  animation: none;
+}
+
+.door-container.stage-0 .door-target-silhouette {
+  opacity: 0.4;
+  animation: targetBreath 3s ease-in-out infinite;
+}
+
+.door-container.stage-1 .door-frame {
+  border-color: rgba(150, 150, 150, 0.6);
+  box-shadow: 0 0 15px rgba(232, 200, 115, 0.12);
+  animation: doorFrameBreathS1 2s ease-in-out infinite;
+}
+
+@keyframes doorFrameBreathS1 {
+  0%, 100% {
+    border-color: rgba(150, 150, 150, 0.5);
+    box-shadow: 0 0 10px rgba(232, 200, 115, 0.08);
+  }
+  50% {
+    border-color: rgba(180, 170, 140, 0.65);
+    box-shadow: 0 0 20px rgba(232, 200, 115, 0.18);
+  }
+}
+
+.door-container.stage-1 .door-glow::before {
+  opacity: 0.35;
+  animation: doorBreathGlow 2s ease-in-out infinite;
+}
+
+.door-container.stage-2 .door-frame {
+  border-color: rgba(200, 185, 140, 0.7);
+  box-shadow: 0 0 20px rgba(232, 200, 115, 0.25);
+  animation: doorFrameShake 0.4s ease infinite, doorFrameBreathS2 1.8s ease-in-out infinite;
+}
+
+@keyframes doorFrameBreathS2 {
+  0%, 100% {
+    border-color: rgba(190, 175, 130, 0.6);
+    box-shadow: 0 0 15px rgba(232, 200, 115, 0.2);
+  }
+  50% {
+    border-color: rgba(220, 200, 150, 0.8);
+    box-shadow: 0 0 30px rgba(255, 220, 100, 0.35);
+  }
+}
+
+.door-container.stage-2 .door-glow::before {
+  opacity: 0.5;
+  animation: doorBreathGlow 1.6s ease-in-out infinite;
+}
+
+@keyframes doorFrameShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1deg); }
+  75% { transform: rotate(1deg); }
+}
+
+.door-container.stage-3 .door-frame {
+  border-color: rgba(228, 208, 165, 0.92);
+  box-shadow: 0 0 40px rgba(232, 200, 115, 0.45), inset 0 0 0 2px rgba(255, 248, 220, 0.16);
+  animation: doorFrameBreathS3 1.5s ease-in-out infinite;
+}
+
+@keyframes doorFrameBreathS3 {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 220, 100, 0.5); }
+  50% { box-shadow: 0 0 50px rgba(255, 220, 100, 0.8); }
+}
+
+.door-container.stage-3 .door-glow::before {
+  opacity: 0.75;
+  animation: doorBreathGlow 1.4s ease-in-out infinite;
+}
+
+.door-container.stage-3 .door-target-silhouette {
+  opacity: 0.85;
+  filter: blur(0);
+  transform: scale(1);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  animation: targetBreathStage3 1.5s ease-in-out infinite;
+}
+
+@keyframes targetBreathStage3 {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes targetBreath {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 0.55; transform: scale(0.92); }
+}
+
+.door-container.awaiting-offer .door-offer-hint { opacity: 1; }
+
+/* 等待献上时门框脉冲（对齐 H5 awaitingPulse） */
+.door-container.stage-3.awaiting-offer .door-frame {
+  animation: awaitingPulse 1.4s ease-in-out infinite !important;
+}
+
+@keyframes awaitingPulse {
+  0%, 100% {
+    border-color: rgba(232, 200, 115, 0.55);
+    box-shadow:
+      0 0 16rpx rgba(232, 200, 115, 0.35),
+      0 0 36rpx rgba(232, 200, 115, 0.18);
+  }
+  50% {
+    border-color: rgba(232, 200, 115, 0.95);
+    box-shadow:
+      0 0 32rpx rgba(232, 200, 115, 0.75),
+      0 0 64rpx rgba(232, 200, 115, 0.40);
+  }
+}
+
+.door-container.offering .door-frame {
+  animation: offeringFlash 0.7s ease-out forwards !important;
+}
+
+@keyframes offeringFlash {
+  0%   { transform: scale(1.05); box-shadow: 0 0 56rpx rgba(232,200,115,0.65); border-color: rgba(232,200,115,0.9); }
+  40%  { transform: scale(1.15); box-shadow: 0 0 100rpx rgba(255,220,100,0.9), 0 0 0 6rpx rgba(255,220,100,0.3); border-color: rgba(255,220,100,1); }
+  100% { transform: scale(1.05); box-shadow: 0 0 56rpx rgba(232,200,115,0.65); border-color: rgba(232,200,115,0.9); }
+}
+
+.door-container.star-entering .door-glow {
+  animation: doorStarFlash 0.5s ease-out;
+}
+
+@keyframes doorStarFlash {
+  0% { box-shadow: none; }
+  50% { box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.8); }
+  100% { box-shadow: none; }
+}
+
+.door-container.closing {
+  animation: doorClose 0.6s ease-in-out forwards;
+}
+
+.door-container.closing .door-glow {
+  animation: doorGlowClose 0.6s ease-in-out forwards;
+}
+
+.door-container.closing .door-target-silhouette {
+  animation: targetFadeOut 0.4s ease-out forwards;
+}
+
+@keyframes doorClose {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(0.95); }
+}
+
+@keyframes doorGlowClose {
+  0% { background: #000; }
+  100% { background: #000; }
+}
+
+@keyframes targetFadeOut {
+  0% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.door-container.closed .door-glow {
+  background: #000 !important;
+}
+
+.door-container.closed .door-glow::before {
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.door-container.closed .door-target-silhouette {
+  opacity: 0 !important;
+}
+
+.door-container.closed .door-frame {
+  border-color: rgba(100, 100, 100, 0.4);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  animation: none;
+}
+
+.door-container.closed .door-aura {
+  opacity: 0.2;
+}
+
+.door-container.closing {
+  transform: none;
+  opacity: 1;
+}
+
+.door-offer-hint {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(212, 165, 116, 0.95);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  z-index: 4;
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+.level-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.level-name { display: none; }
+
+/* 对齐 H5 game-door-states.css（覆盖 game-door-base 的 milk-foam 白底） */
+.level-target-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 14px;
+  background: rgba(212, 165, 116, 0.1);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  border-radius: 20px;
+  transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+}
+
+.level-target-display.multi-target-mode {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 14px 10px;
+}
+
+.multi-target-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.multi-target-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 1.35;
+}
+
+.multi-target-item .mt-num {
+  font-size: 12px;
+  color: #A67C52;
+  min-width: 18px;
+}
+
+.multi-target-item .mt-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E8C873;
+  letter-spacing: 0.5px;
+}
+
+.multi-target-item.mt-done .mt-num,
+.multi-target-item.mt-done .mt-name {
+  color: rgba(107, 83, 68, 0.38);
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.target-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #A67C52;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1.35;
+  padding-top: 1px;
+}
+
+.target-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #E8C873;
+  letter-spacing: 1px;
+}

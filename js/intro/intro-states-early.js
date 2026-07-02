@@ -39,9 +39,10 @@ IntroSystem.prototype.initDoorExpand = function() {
             window.AudioManager.playSFX('hum');
         }
         
-        // 显示门和粒子
+        // 显示门和粒子 —— 门一出现就开始呼吸，不与后面的对白同步（避免「卡住」感）
         if (this.doorEl) {
             this.doorEl.style.opacity = '1';
+            this.doorEl.classList.add('breathing');
         }
         this.createAllParticles();
         
@@ -88,18 +89,18 @@ IntroSystem.prototype.startParticleSpawning = function() {
 };
 
 IntroSystem.prototype.initDoorBreath = function() {
-    // 开始呼吸
-    if (this.doorEl) {
+    // 门通常在显现时已带 breathing；此处兜底防止状态跳转遗漏
+    if (this.doorEl && !this.doorEl.classList.contains('breathing')) {
         this.doorEl.classList.add('breathing');
     }
-    
-    // 呼吸3次后显示物品栏
+
+    // 呼吸3次后显示物品栏（计时仍从进入本状态算起）
     setTimeout(() => {
         this.hideNarrative();
         if (this.inventoryEl) {
             this.inventoryEl.classList.add('visible');
         }
-        
+
         // 物品栏出现后弹出糯米
         setTimeout(() => {
             this.setState('spawnRice');
@@ -108,8 +109,9 @@ IntroSystem.prototype.initDoorBreath = function() {
 };
 
 IntroSystem.prototype.initSpawnRice = function() {
-    // 创建糯米物品
-    this.createItem('糯米', '🍚', true);
+    // 创建糯米物品（使用 SVG 图标代替表情包）
+    const riceSvg = window.ITEM_SVGS && window.ITEM_SVGS['糯米'];
+    this.createItem('糯米', riceSvg || '糯', true, !!riceSvg);
     
     // 显示提示文字
     this.showNarrative('拖动它...');
@@ -146,8 +148,9 @@ IntroSystem.prototype.initRicePlacedPulse = function() {
 };
 
 IntroSystem.prototype.initSpawnBrewing = function() {
-    // 创建酿造物品（普通样式）
-    this.createItem('酿造', '🫗', false);
+    // 创建酿造物品（使用 SVG 图标代替表情包）
+    const brewSvg = window.ITEM_SVGS && window.ITEM_SVGS['酿造'];
+    this.createItem('酿造', brewSvg || '酿', true, !!brewSvg, false);
     
     setTimeout(() => {
         this.hideNarrative();
@@ -220,17 +223,24 @@ IntroSystem.prototype.initFirstSynthesis = function() {
                 if (rice.el) rice.el.remove();
                 if (brewing.el) brewing.el.remove();
                 
-                // 移除原物品，创建酒酿
+                // 移除原物品，创建酒酿（使用 SVG 图标代替表情包）
                 this.items = this.items.filter(i => i.name !== '糯米' && i.name !== '酿造');
-                this.synthesisResult = this.createSynthesisResult('酒酿', '🍶', centerX, centerY);
+                const wineSvg = window.ITEM_SVGS && window.ITEM_SVGS['酒酿'];
+                this.synthesisResult = this.createSynthesisResult('酒酿', wineSvg || '酿', centerX, centerY, !!wineSvg);
                 
+                // 合成后显示文字
+                setTimeout(() => {
+                    this.showNarrative('这，就是合成...');
+                }, 600);
+
                 // 门变活跃，自动献上
                 setTimeout(() => {
+                    this.hideNarrative();
                     if (this.doorEl) {
                         this.doorEl.classList.add('active');
                     }
                     this.setState('offerToDoor');
-                }, 500);
+                }, 3500);
             }, 200);
         }, 600);  // 改为600ms匹配旋转时间
     }, 250);  // 改为250ms
@@ -244,13 +254,22 @@ IntroSystem.prototype.initOfferToDoor = function() {
         window.AudioManager.playSFX('door-absorb');
     }
     
-    // 献上动画
+    // 献上动画：飞向门洞几何中心（与画布坐标对齐）
     if (this.synthesisResult) {
         this.synthesisResult.animPhase = 'offering';
-        this.synthesisResult.animTarget = {
-            x: this.centerX - 40,
-            y: this.centerY - 100
-        };
+        let tx = this.centerX - this.synthesisResult.width / 2;
+        let ty = this.centerY - 100;
+        const doorInner = this.doorEl && this.doorEl.querySelector('.door-inner');
+        const screenEl = document.getElementById('intro-screen');
+        if (doorInner && screenEl) {
+            const dr = doorInner.getBoundingClientRect();
+            const sr = screenEl.getBoundingClientRect();
+            const cx = dr.left + dr.width / 2 - sr.left;
+            const cy = dr.top + dr.height / 2 - sr.top;
+            tx = cx - this.synthesisResult.width / 2;
+            ty = cy - this.synthesisResult.height / 2;
+        }
+        this.synthesisResult.animTarget = { x: tx, y: ty };
     }
     
     // 门吸收能量效果
@@ -259,8 +278,8 @@ IntroSystem.prototype.initOfferToDoor = function() {
     }
     
     setTimeout(() => {
-        // 移除酒酿DOM
         if (this.synthesisResult && this.synthesisResult.el) {
+            this.synthesisResult.el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
             this.synthesisResult.el.style.opacity = '0';
             this.synthesisResult.el.style.transform = 'scale(0.3)';
         }
@@ -271,25 +290,22 @@ IntroSystem.prototype.initOfferToDoor = function() {
             }
             this.synthesisResult = null;
             
-            // 清空物品
             this.items.forEach(item => {
                 if (item.el) item.el.remove();
             });
             this.items = [];
             
-            // 门释放能量
             if (this.doorEl) {
                 this.doorEl.classList.remove('absorbing');
                 this.doorEl.classList.add('releasing');
             }
             
-            // 开始播放开场BGM
             if (window.AudioManager) {
                 window.AudioManager.playBGM('bgm-intro');
             }
             
             this.setState('blueWash');
-        }, 400);
-    }, 600);
+        }, 900);
+    }, 2000);
 };
 

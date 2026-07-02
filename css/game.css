@@ -10,3 +10,5 @@
 @import url('./game/game-tutorial.css');
 @import url('./game/game-level-intro.css');
 @import url('./game/game-completion.css');
+@import url('./game/game-task-toast.css');
+@import url('./game/game-chapter1-complete.css');

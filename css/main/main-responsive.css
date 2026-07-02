@@ -10,8 +10,12 @@
     }
     
     .main-btn.primary {
-        font-size: 14px;
-        letter-spacing: 3px;
+        font-size: 16px;
+        letter-spacing: 6px;
+    }
+
+    .main-btn.secondary {
+        letter-spacing: 4px;
     }
     
     .main-progress-row .progress-label {

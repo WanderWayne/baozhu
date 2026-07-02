@@ -30,6 +30,7 @@ const WORLDS = [
         theme: "dairy",
         color: "#FFF5E6",
         icon: "🥛",
+        svgItem: "奶酪",
         unlocked: true,
         levels: [101, 102, 103, 104, 105, 106]
     },
@@ -118,16 +119,14 @@ const LEVELS = [
         realProductNote: "现实中：这是宝珠许多饮品的基础。",
         isTutorial: true,
         tutorialFocus: "approach_and_offer",
-        // 教学的规律
         teachingRule: "液体 + 甜味 → 甜液体",
+        minSynthCount: 1,
         dialogs: [
-            { text: '又一个。' },
-            { text: '牛奶和糖，最简单的测试。' },
-            { text: '做不出来，就回去吧。' }
+            { text: '去，把他俩放一块' }
         ]
     },
-    
-    // 第2关：奶酿成酪 - 单门，奶酪，酸奶菌干扰
+
+    // 第2关：奶酿成酪 — 酸奶 + 滤布 → 奶酪
     {
         id: 102,
         worldId: 1,
@@ -136,11 +135,11 @@ const LEVELS = [
         name: "奶酿成酪",
         target: "奶酪",
         targetId: "cheese",
-        description: "酿造工艺，让液体凝固成酪。",
-        storyIntro: "牛奶遇见酿造，会发生什么？",
+        description: "发酵把奶收成酸奶，滤布凝成厚实奶酪。",
+        storyIntro: "时间与滤布，把奶收成你想要的模样。",
         icon: "🧀",
         duration: "30-45秒",
-        initialItems: ["牛奶", "酿造", "酸奶菌"],
+        initialItems: ["发酵", "牛奶", "滤布"],
         doorTriggers: {
             stage1: [],
             stage2: [],
@@ -151,22 +150,19 @@ const LEVELS = [
         realProductNote: "宝珠奶酪：牛奶+稀奶油+冰糖粉+酒酿原浆B，95-100°C烤制20-25分钟。",
         isTutorial: true,
         tutorialFocus: "craft_transform",
-        teachingRule: "液体 + 酿造工艺 → 凝固成酪（酸奶菌是陷阱）",
-        completionDialogs: [
-            { text: '四十天发酵，百度慢烤。' },
-            { text: '你倒是快。' }
+        teachingRule: "鲜奶 + 发酵 → 酸奶；酸奶 + 滤布 → 奶酪",
+        minSynthCount: 2,
+        dialogs: [
+            { text: '制奶酪可比制甜牛奶难' }
         ],
         triggerDialogs: {
             onSynthesize: {
-                "酸奶": [{ text: '酸奶？这里不做那种东西。' }]
-            },
-            onFailedSynthesis: [
-                { text: '别乱来。想清楚再动手。' }
-            ]
+                '奶酪': [{ text: '很好' }]
+            }
         }
     },
 
-    // 第3关：酿酒之道 - 单门，酒酿，多种米干扰
+    // 第3关：酿酒之道 - 单门多目标，4种米全部酿出
     {
         id: 103,
         worldId: 1,
@@ -175,32 +171,26 @@ const LEVELS = [
         name: "酿酒之道",
         target: "酒酿",
         targetId: "jiauniang",
-        description: "四种米，只有一种能酿出真正的酒酿。",
-        storyIntro: "酿造需要正确的原料。",
+        description: "四种米，四种酿，一扇门。",
+        storyIntro: "酿造不只有一条路。",
         icon: "🍶",
-        duration: "30-60秒",
+        duration: "1-2分钟",
         initialItems: ["糯米", "大米", "黑米", "小米", "酿造"],
+        multiTarget: true,
+        multiTargets: ["酒酿", "米酒", "黑米露", "小米黄酒"],
         doorTriggers: {
-            stage1: [],
+            stage1: ["酒酿", "米酒", "黑米露", "小米黄酒"],
             stage2: [],
-            stage3: ["酒酿"]
+            stage3: []
         },
-        completionText: "糯米发酵，甜香弥漫——这就是酒酿。",
-        cultureNote: "只有糯米才能酿出正宗的酒酿，这是千年的智慧。",
+        completionText: "四种米，四种酿，酿造的世界比你想的要广。",
+        cultureNote: "只有糯米才能酿出正宗的酒酿，但每一种米都有自己的命运。",
         realProductNote: "酒酿：糯米+酒曲，40天自然发酵。",
-        teachingRule: "糯米 + 酿造 → 酒酿（其他米酿出的不是目标）",
+        teachingRule: "每种米 + 酿造 → 不同的产物",
+        minSynthCount: 4,
         dialogs: [
-            { text: '四种米，一种答案。' },
-            { text: '选错了我可不会提醒你。' }
-        ],
-        completionDialogs: [
-            { text: '……嗯，你认得糯米。' }
-        ],
-        triggerDialogs: {
-            onFailedSynthesis: [
-                { text: '不是这个。' }
-            ]
-        }
+            { text: '再来' }
+        ]
     },
 
     // 第4关：双酪之约 - 配方书 + 多步合成
@@ -216,9 +206,8 @@ const LEVELS = [
         storyIntro: "奶酪与雪酪，两种质地，一个基底。",
         icon: "🍨",
         duration: "1-2分钟",
-        initialItems: ["牛奶", "酿造", "冰糖碎"],
+        initialItems: ["发酵", "牛奶", "冰糖碎", "滤布"],
         recipeBookPhase: true,
-        recipeBookTradeStation: { type: 'gem', cost: 50, output: "配方书", maxUses: 1 },
         doorTriggers: {
             stage1: ["甜牛奶", "奶酪"],
             stage2: ["雪酪"],
@@ -227,11 +216,15 @@ const LEVELS = [
         completionText: "双酪合璧，厚与轻，一体两面。",
         cultureNote: "奶酪醇厚，雪酪轻盈，合而为一是宝珠饮品的核心基底。",
         realProductNote: "双酪：奶酪与雪酪的完美融合。",
-        teachingRule: "甜液体 + 酿造 → 轻盈版酪；奶酪 + 雪酪 → 双酪",
+        teachingRule: "甜液体 + 发酵 → 甜酸奶；甜酸奶 + 滤布 → 轻盈雪酪；奶酪 + 雪酪 → 双酪",
+        minSynthCount: 6,
         dialogs: [
             { text: '前三关只是热身。' },
             { text: '后面的路，光靠直觉走不远。' },
-            { text: '给你一样东西。' }
+            { text: '这本书会帮你' }
+        ],
+        revisitDialogs: [
+            { text: '双酪，你应该记得怎么做。' }
         ],
         triggerDialogs: {
             onSynthesize: {
@@ -240,7 +233,7 @@ const LEVELS = [
         }
     },
 
-    // 第5关：酪饮之道 - 双酪交易花材
+    // 第5关：酪饮之道 - 珠宝交易花材
     {
         id: 105,
         worldId: 1,
@@ -254,9 +247,15 @@ const LEVELS = [
         icon: "🌹",
         duration: "2-3分钟",
         initialItems: ["雪酪", "奶酪", "酒酿原浆"],
+        /** 仅出现在合成台、不进物品栏；用后即无（无 infiniteItems 补货） */
+        workbenchInitialItems: ["珠宝"],
+        dialogs: [
+            { text: '注意点，你现在可没什么钱' }
+        ],
         tradeStations: [
-            { input: "双酪", output: "玫瑰" },
-            { input: "双酪", output: "菊花" },
+            { input: "珠宝", output: "玫瑰" },
+            { input: "珠宝", output: "菊花" },
+            { input: "珠宝", output: "茉莉花" },
         ],
         doorTriggers: {
             stage1: ["玫瑰酒酿"],
@@ -267,15 +266,7 @@ const LEVELS = [
         cultureNote: "平阴玫瑰，千年花都的馈赠。",
         realProductNote: "酒酿玫瑰酪：奶酪、雪酪、玫瑰原浆、燕麦爆爆珠、冰块、平阴玫瑰花干。",
         teachingRule: "花香 + 酒酿原浆 → 花香酒酿；双酪 + 花香酒酿 → 酪饮品",
-        dialogs: [
-            { text: '两种花。我只要一种。' }
-        ],
-        triggerDialogs: {
-            onSynthesize: {
-                "菊花酒酿": [{ text: '不是菊花。再想想。' }],
-                "玫瑰酒酿": [{ text: '……对了。' }]
-            }
-        }
+        minSynthCount: 3
     },
 
     // 第6关 Boss：冰酒酿桂花酪
@@ -284,14 +275,14 @@ const LEVELS = [
         worldId: 1,
         chapterId: 1,
         objectiveIndex: 5,
-        name: "冰酒酿桂花酪",
+        name: "初始测试",
         target: "冰酒酿桂花酪",
         targetId: "ice_osmanthus_cheese_drink",
         description: "第一次触碰经典的味道。",
         storyIntro: "当奶与酿相遇，经典的轮廓开始显现。",
         icon: "🧊",
         duration: "2-3分钟",
-        initialItems: ["牛奶", "冰糖碎", "酿造", "桂花", "酒酿原浆", "冰块"],
+        initialItems: ["发酵", "牛奶", "冰糖碎", "桂花", "酒酿原浆", "冰块", "滤布"],
         doorTriggers: {
             stage1: ["双酪"],
             stage2: ["酒酿桂花酪"],
@@ -303,13 +294,16 @@ const LEVELS = [
         isBoss: true,
         requiredRules: [
             "牛奶 + 冰糖碎 → 甜牛奶",
-            "牛奶 + 酿造 → 奶酪",
-            "甜牛奶 + 酿造 → 雪酪",
+            "牛奶 + 发酵 → 酸奶",
+            "酸奶 + 滤布 → 奶酪",
+            "甜牛奶 + 发酵 → 甜酸奶",
+            "甜酸奶 + 滤布 → 雪酪",
             "奶酪 + 雪酪 → 双酪",
             "桂花 + 酒酿原浆 → 桂花酒酿",
             "双酪 + 桂花酒酿 → 酒酿桂花酪",
             "酒酿桂花酪 + 冰块 → 冰酒酿桂花酪"
         ],
+        minSynthCount: 9,
         dialogs: [
             { text: '最后一关。' },
             { text: '宝珠十三年，都在这一杯里。' },
@@ -319,6 +313,9 @@ const LEVELS = [
             { text: '…………' },
             { text: '你通过了。' },
             { text: '门已经为你打开。去吧。' }
+        ],
+        revisitDialogs: [
+            { text: '又来一杯？步骤不少，别漏了。' }
         ]
     },
 

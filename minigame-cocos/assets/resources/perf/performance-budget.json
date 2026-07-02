@@ -1,0 +1,14 @@
+{
+  "targetFps": 60,
+  "minimumAcceptableFps": 45,
+  "maxActiveTweens": 120,
+  "maxParticlesMainScene": 180,
+  "maxAudioVoicesSfx": 6,
+  "mainPackageBudgetMB": 4,
+  "notes": [
+    "主资源包仅包含启动关键资源，章节内容与图鉴资源按需加载。",
+    "进入后台时暂停粒子与非关键动画。",
+    "弱机优先降低粒子数量与阴影特效。"
+  ]
+}
+

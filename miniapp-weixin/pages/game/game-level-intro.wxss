@@ -1,0 +1,152 @@
+/* 关卡开场介绍 + 过关文案 — 对齐 H5 game-level-intro.css */
+
+.level-intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 11000;   /* above .game-nav-back (10001) */
+  pointer-events: none;
+  transition: background 0.8s ease;
+}
+
+.level-intro-overlay.visible {
+  background: rgba(0, 0, 0, 0.75);
+  pointer-events: auto;
+}
+
+.level-intro-overlay.fade-out {
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+}
+
+.level-intro-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 82%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.intro-level-name {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 6px;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.7), 0 0 30px rgba(255, 255, 255, 0.3);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.level-intro-overlay.visible .intro-level-name {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-separator {
+  width: 50px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 16px 0;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.3s;
+}
+
+.level-intro-overlay.visible .intro-separator {
+  opacity: 1;
+}
+
+.intro-target {
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease 0.4s, transform 0.5s ease 0.4s;
+}
+
+.level-intro-overlay.visible .intro-target {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-desc {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1px;
+  line-height: 1.7;
+  margin-top: 12px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease 0.6s, transform 0.5s ease 0.6s;
+}
+
+.level-intro-overlay.visible .intro-desc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-tip {
+  margin-top: 14px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.58);
+  letter-spacing: 1px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease 0.8s, transform 0.5s ease 0.8s;
+}
+
+.level-intro-overlay.visible .intro-tip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.level-intro-overlay.fade-out .intro-level-name,
+.level-intro-overlay.fade-out .intro-separator,
+.level-intro-overlay.fade-out .intro-target,
+.level-intro-overlay.fade-out .intro-desc,
+.level-intro-overlay.fade-out .intro-tip {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.level-complete-pop {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  font-size: 48px;
+  font-weight: 800;
+  color: #1a1510;
+  z-index: 6000;
+  opacity: 0;
+  pointer-events: none;
+  letter-spacing: 12px;
+  white-space: nowrap;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.level-complete-pop.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.level-complete-pop text {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 20px rgba(232, 200, 115, 0.8), 0 0 40px rgba(232, 200, 115, 0.4);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 4px;
+}

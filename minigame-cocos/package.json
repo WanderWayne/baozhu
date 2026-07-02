@@ -1,0 +1,16 @@
+{
+  "name": "baozhu-minigame-cocos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export:data": "node tools/export-h5-data.mjs",
+    "validate:data": "node tools/validate-config.mjs",
+    "parity:report": "node tools/parity-report.mjs"
+  },
+  "creator": {
+    "version": "3.8.8"
+  },
+  "uuid": "c9533dbb-dfb9-48e2-9b6f-3bfacc5fc628",
+  "description": ""
+}

@@ -1,6 +1,14 @@
 /* 页面过渡动画系统 - 慢而有生命力 */
 /* ================================================ */
 
+/*
+ * 首帧隐藏整页，避免 DOMContentLoaded 之前浏览器画出默认样式的「半成品」界面。
+ * js/page-transitions.js 在入场结束时会把 body 设为 opacity:1。
+ */
+body {
+    opacity: 0;
+}
+
 /* 页面过渡遮罩 */
 .page-transition-overlay {
     position: fixed;

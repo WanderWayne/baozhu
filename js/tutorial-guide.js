@@ -60,7 +60,13 @@ window.TutorialGuide = {
             requestAnimationFrame(() => overlay.classList.add('visible'));
 
             const continueEl = overlay.querySelector('.tut-continue');
-            setTimeout(() => continueEl.classList.add('show'), 1000);
+            setTimeout(() => {
+                continueEl.classList.add('show');
+                // Only allow dismissing after "点击任意处继续" appears
+                overlay.addEventListener('touchstart', onTouchStart, { passive: true });
+                overlay.addEventListener('touchmove', onTouchMove, { passive: true });
+                overlay.addEventListener('click', onPointerUp);
+            }, 1000);
 
             let touchStartY = null;
             const SWIPE_THRESHOLD = 15;
@@ -84,6 +90,8 @@ window.TutorialGuide = {
                 const cx = e.clientX ?? e.changedTouches?.[0]?.clientX;
                 const cy = e.clientY ?? e.changedTouches?.[0]?.clientY;
 
+                if (window.AudioManager) window.AudioManager.playClickOpen();
+
                 cleanup();
                 this._close();
 
@@ -100,10 +108,6 @@ window.TutorialGuide = {
                 overlay.removeEventListener('touchmove', onTouchMove);
                 overlay.removeEventListener('click', onPointerUp);
             };
-
-            overlay.addEventListener('touchstart', onTouchStart, { passive: true });
-            overlay.addEventListener('touchmove', onTouchMove, { passive: true });
-            overlay.addEventListener('click', onPointerUp);
         });
     },
 

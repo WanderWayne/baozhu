@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "id": "recipe_001",
+      "title": "牛奶 + 冰糖碎 => 甜牛奶",
+      "ingredients": ["牛奶", "冰糖碎"],
+      "expected": "甜牛奶"
+    },
+    {
+      "id": "recipe_002",
+      "title": "发酵 + 牛奶 => 酸奶",
+      "ingredients": ["发酵", "牛奶"],
+      "expected": "酸奶"
+    },
+    {
+      "id": "level_101_target",
+      "title": "101关目标可达成",
+      "levelId": 101,
+      "target": "甜牛奶"
+    },
+    {
+      "id": "task_discover_10",
+      "title": "发现10种物品触发 discover_10",
+      "taskId": "discover_10"
+    },
+    {
+      "id": "atlas_ch1_unlock",
+      "title": "章节1完成后至少解锁 ch1_main + ch1_secret 逻辑位",
+      "slotIds": ["ch1_main", "ch1_secret"]
+    }
+  ]
+}
+

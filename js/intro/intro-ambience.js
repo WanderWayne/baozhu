@@ -2,12 +2,16 @@
 // ================================================
 
 class AmbienceSystem {
-    constructor(containerId) {
+    constructor(containerId, options = {}) {
         this.containerId = containerId;
         this.container = document.getElementById(containerId);
         this.canvas = null;
         this.ctx = null;
         this.isActive = false;
+        /** 初始化完成后自动渐入时长（ms），0 表示不自动渐入 */
+        this.fadeInMs = typeof options.fadeInMs === 'number' ? options.fadeInMs : 0;
+        /** 仅隐藏 canvas，等外部调用 fadeInCanvas（用于开场切主界面） */
+        this.deferFadeIn = !!options.deferFadeIn;
         
         // 元素集合
         this.warmGlows = [];
@@ -40,9 +44,29 @@ class AmbienceSystem {
         // 开始动画
         this.isActive = true;
         this.animate();
-        
+
+        if (this.deferFadeIn && this.canvas) {
+            this.canvas.style.opacity = '0';
+        } else if (this.fadeInMs > 0 && this.canvas) {
+            this.fadeInCanvas(this.fadeInMs);
+        }
+
         // 监听调整大小
         window.addEventListener('resize', this.onResize.bind(this));
+    }
+
+    /**
+     * Canvas 整体渐入（稻穗、雾等一并柔和出现）
+     */
+    fadeInCanvas(durationMs = 1400, easing = 'cubic-bezier(0.33, 1, 0.68, 1)') {
+        if (!this.canvas) return;
+        this.canvas.style.opacity = '0';
+        this.canvas.style.transition = `opacity ${durationMs}ms ${easing}`;
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this.canvas.style.opacity = '1';
+            });
+        });
     }
     
     createCanvas() {
@@ -492,7 +516,7 @@ function addAmbienceToIntroSystem() {
     if (window.IntroSystem && !window.IntroSystem.prototype.showAmbienceLayers) {
         window.IntroSystem.prototype.showAmbienceLayers = function() {
             if (!this.ambience) {
-                this.ambience = new AmbienceSystem('intro-screen');
+                this.ambience = new AmbienceSystem('intro-screen', { deferFadeIn: true });
                 this.ambience.init();
             }
         };
@@ -517,7 +541,7 @@ window.initMainScreenAmbience = function() {
     const existing = mainScreen.querySelector('.ambience-canvas');
     if (existing) return;
     
-    const ambience = new AmbienceSystem('main-screen');
+    const ambience = new AmbienceSystem('main-screen', { fadeInMs: 1400 });
     ambience.init();
     console.log('[AmbienceSystem] 主界面环境层已初始化');
 };

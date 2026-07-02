@@ -3,6 +3,9 @@ class LevelManager {
     constructor() {
         this.storageKey = 'bojoo_game_progress_v2';
         this.currentProgress = this.loadProgress();
+        if (!this.currentProgress.atlasPieces) this.currentProgress.atlasPieces = [];
+        this.migrateAtlasProgress();
+        if (this.refreshAtlasUnlocks()) this.saveProgress();
     }
 
     // 加载进度
@@ -13,7 +16,17 @@ class LevelManager {
             // 确保新字段存在（向后兼容）
             if (!progress.fragments) progress.fragments = [];
             if (progress.gems === undefined) progress.gems = 0;
-            // 向后兼容：为加入珠宝系统前已完成的关卡补发珠宝（只补一次）
+            if (!progress.discoveredRecipes) progress.discoveredRecipes = {};
+            if (!progress.bestSynthCounts) progress.bestSynthCounts = {};
+            if (!progress.completionPrimaryRoutes) progress.completionPrimaryRoutes = {};
+            if (!progress.seenCompletionBadgeHints) progress.seenCompletionBadgeHints = {};
+            if (!progress.atlasPieces) progress.atlasPieces = [];
+            if (progress.chapterPhaseSettlementSeen === undefined) progress.chapterPhaseSettlementSeen = false;
+            // 已通过第一章 Boss 的旧存档：不必再弹出「阶段完成」
+            if (!progress.chapterPhaseSettlementSeen && progress.completedLevels?.includes(106)) {
+                progress.chapterPhaseSettlementSeen = true;
+            }
+            // 向后兼容：为加入钻石系统前已完成的关卡补发钻石（只补一次）
             if (!progress.retroactiveGemsAwarded && progress.completedLevels && progress.completedLevels.length > 0) {
                 progress.gems += progress.completedLevels.length * 50;
                 progress.retroactiveGemsAwarded = true;
@@ -30,7 +43,13 @@ class LevelManager {
             fragments: [],
             achievements: [],
             gems: 0,
-            retroactiveGemsAwarded: true
+            retroactiveGemsAwarded: true,
+            discoveredRecipes: {},
+            bestSynthCounts: {},
+            completionPrimaryRoutes: {},
+            seenCompletionBadgeHints: {},
+            atlasPieces: [],
+            chapterPhaseSettlementSeen: false
         };
     }
 
@@ -109,6 +128,44 @@ class LevelManager {
         return this.currentProgress.completedLevels.includes(levelId);
     }
 
+    /** 是否已看过前五章「阶段完成」结算（只显示一次） */
+    hasSeenChapterPhaseSettlement() {
+        return !!this.currentProgress.chapterPhaseSettlementSeen;
+    }
+
+    markChapterPhaseSettlementSeen() {
+        if (this.currentProgress.chapterPhaseSettlementSeen) return;
+        this.currentProgress.chapterPhaseSettlementSeen = true;
+        this.saveProgress();
+    }
+
+    // 记录通关配方（用于完美通关判定）
+    recordCompletionRecipe(levelId, ingredients) {
+        const key = [...ingredients].sort().join('+');
+        const levelData = this.getLevelData(levelId);
+        if (!levelData || !levelData.perfectRecipes) return;
+        const isValid = levelData.perfectRecipes.some(pr =>
+            [...pr.ingredients].sort().join('+') === key
+        );
+        if (!isValid) return;
+        if (!this.currentProgress.discoveredRecipes[levelId]) {
+            this.currentProgress.discoveredRecipes[levelId] = [];
+        }
+        if (!this.currentProgress.discoveredRecipes[levelId].includes(key)) {
+            this.currentProgress.discoveredRecipes[levelId].push(key);
+            this.saveProgress();
+        }
+    }
+
+    // 获取关卡的完美通关状态
+    getPerfectStatus(levelId) {
+        const levelData = this.getLevelData(levelId);
+        if (!levelData || !levelData.perfectRecipes) return null;
+        const total = levelData.perfectRecipes.length;
+        const found = (this.currentProgress.discoveredRecipes[levelId] || []).length;
+        return { found, total, isPerfect: found >= total };
+    }
+
     // 获取世界完成度
     getWorldProgress(worldId) {
         const world = window.WORLDS.find(w => w.id === worldId);
@@ -129,13 +186,14 @@ class LevelManager {
         if (!alreadyDone) {
             this.currentProgress.completedLevels.push(levelId);
             this.addGems(50);
-            this.saveProgress();
+            if (this.refreshAtlasUnlocks()) this.saveProgress();
+            if (window.GameTaskToast) window.GameTaskToast.afterProgressMutation();
             return true;
         }
         return false;
     }
 
-    // 珠宝系统
+    // 钻石系统
     addGems(amount) {
         if (this.currentProgress.gems === undefined) this.currentProgress.gems = 0;
         this.currentProgress.gems += amount;
@@ -164,12 +222,14 @@ class LevelManager {
             }
             
             this.saveProgress();
+            if (this.refreshAtlasUnlocks()) this.saveProgress();
             
             // 检查收藏家成就
             if (this.currentProgress.discoveredItems.length >= 50) {
                 this.unlockAchievement('collector');
             }
             
+            if (window.GameTaskToast) window.GameTaskToast.afterProgressMutation();
             return { isNew: true, fragment }; // 新发现，可能有碎片
         }
         return { isNew: false, fragment: null }; // 已发现过
@@ -194,6 +254,51 @@ class LevelManager {
         return false;
     }
     
+    // 记录合成次数，返回 { count, prevBest, isNewRecord }
+    recordSynthCount(levelId, count) {
+        if (!this.currentProgress.bestSynthCounts) this.currentProgress.bestSynthCounts = {};
+        const key = String(levelId);
+        const prev = this.currentProgress.bestSynthCounts[key];
+        const isNewRecord = prev === undefined || count < prev;
+        if (isNewRecord) {
+            this.currentProgress.bestSynthCounts[key] = count;
+            this.saveProgress();
+        }
+        return { count, prevBest: prev ?? null, isNewRecord };
+    }
+
+    getBestSynthCount(levelId) {
+        if (!this.currentProgress.bestSynthCounts) return null;
+        return this.currentProgress.bestSynthCounts[String(levelId)] ?? null;
+    }
+
+    /** 首次通关时记录的合成路径指纹（sorted ingredients→result 串联） */
+    getPrimaryCompletionRoute(levelId) {
+        const routes = this.currentProgress.completionPrimaryRoutes;
+        if (!routes) return null;
+        return routes[String(levelId)] ?? null;
+    }
+
+    trySetPrimaryCompletionRoute(levelId, fingerprint) {
+        if (!this.currentProgress.completionPrimaryRoutes) this.currentProgress.completionPrimaryRoutes = {};
+        const key = String(levelId);
+        if (this.currentProgress.completionPrimaryRoutes[key]) return;
+        this.currentProgress.completionPrimaryRoutes[key] = fingerprint;
+        this.saveProgress();
+    }
+
+    shouldShowCompletionBadgeHint(kind) {
+        if (!this.currentProgress.seenCompletionBadgeHints) this.currentProgress.seenCompletionBadgeHints = {};
+        return !this.currentProgress.seenCompletionBadgeHints[kind];
+    }
+
+    markCompletionBadgeHintSeen(kind) {
+        if (!this.currentProgress.seenCompletionBadgeHints) this.currentProgress.seenCompletionBadgeHints = {};
+        if (this.currentProgress.seenCompletionBadgeHints[kind]) return;
+        this.currentProgress.seenCompletionBadgeHints[kind] = true;
+        this.saveProgress();
+    }
+
     // 检查碎片是否已收集
     hasFragment(fragmentId) {
         return this.currentProgress.fragments?.includes(fragmentId) || false;
@@ -216,6 +321,60 @@ class LevelManager {
             total,
             percentage: total > 0 ? Math.round((collected / total) * 100) : 0
         };
+    }
+
+    // ========== 宝珠图谱 ==========
+
+    migrateAtlasProgress() {
+        if (!this.currentProgress.atlasPieces) this.currentProgress.atlasPieces = [];
+    }
+
+    hasAtlasPiece(id) {
+        return !!(this.currentProgress.atlasPieces && this.currentProgress.atlasPieces.includes(id));
+    }
+
+    unlockAtlasPieceById(id) {
+        if (!window.getAtlasSlotById || !window.getAtlasSlotById(id)) return false;
+        if (!this.currentProgress.atlasPieces) this.currentProgress.atlasPieces = [];
+        if (this.currentProgress.atlasPieces.includes(id)) return false;
+        this.currentProgress.atlasPieces.push(id);
+        return true;
+    }
+
+    /** @returns {boolean} 是否有新碎片写入（需 saveProgress） */
+    refreshAtlasUnlocks() {
+        if (!window.CHAPTERS || !window.ATLAS_SLOTS) return false;
+        let changed = false;
+
+        Object.keys(window.CHAPTERS).forEach(k => {
+            const ch = window.CHAPTERS[k];
+            const cid = Number(k);
+            const slotId = `ch${cid}_main`;
+            const slot = window.ATLAS_SLOTS.find(s => s.id === slotId);
+            if (!slot || slot.kind !== 'main') return;
+            const done = ch.objectives.every(lid => this.isLevelCompleted(lid));
+            if (done && this.unlockAtlasPieceById(slotId)) changed = true;
+        });
+
+        if ((this.currentProgress.discoveredItems || []).includes('双酪')) {
+            if (this.unlockAtlasPieceById('ch1_secret')) changed = true;
+        }
+
+        const chapterIds = Object.keys(window.CHAPTERS).map(Number).sort((a, b) => a - b);
+        const allChaptersDone = chapterIds.length > 0 && chapterIds.every(cid => {
+            const ch = window.CHAPTERS[cid];
+            return ch && ch.objectives.every(lid => this.isLevelCompleted(lid));
+        });
+        const multiChapter = chapterIds.length > 1;
+        if (allChaptersDone && multiChapter && this.unlockAtlasPieceById('center')) changed = true;
+
+        return changed;
+    }
+
+    unlockAtlasPiece(id) {
+        if (!this.unlockAtlasPieceById(id)) return false;
+        this.saveProgress();
+        return true;
     }
 
     // 解锁成就
@@ -282,7 +441,12 @@ class LevelManager {
             achievements: [],
             gems: 0,
             titleLevel: 1,
-            chapterProgress: {}
+            chapterProgress: {},
+            discoveredRecipes: {},
+            bestSynthCounts: {},
+            completionPrimaryRoutes: {},
+            seenCompletionBadgeHints: {},
+            atlasPieces: []
         };
         this.saveProgress();
         

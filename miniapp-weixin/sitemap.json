@@ -1,0 +1,4 @@
+{
+  "desc": "宝珠酿造小程序 sitemap",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

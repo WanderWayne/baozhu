@@ -1,0 +1,85 @@
+{
+  "tasks": [
+    {
+      "id": "first_synthesis",
+      "name": "初次合成",
+      "description": "完成第一次物品合成",
+      "rewardLabel": "💎 30",
+      "gems": 30,
+      "rule": {
+        "kind": "discoveredItemsAtLeast",
+        "threshold": 1
+      }
+    },
+    {
+      "id": "complete_first5",
+      "name": "崭露头角",
+      "description": "完成前五关",
+      "rewardLabel": "💎 150",
+      "gems": 150,
+      "rule": {
+        "kind": "completeAllLevels",
+        "levelIds": [
+          101,
+          102,
+          103,
+          104,
+          105
+        ]
+      }
+    },
+    {
+      "id": "complete_boss",
+      "name": "经典之作",
+      "description": "酿出冰酒酿桂花酪",
+      "rewardLabel": "💎 300",
+      "gems": 300,
+      "rule": {
+        "kind": "completeAllLevels",
+        "levelIds": [
+          106
+        ]
+      }
+    },
+    {
+      "id": "complete_chapter1",
+      "name": "酪之初启",
+      "description": "完成奶酪谷全部 6 关",
+      "rewardLabel": "💎 200",
+      "gems": 200,
+      "rule": {
+        "kind": "completeAllLevels",
+        "levelIds": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106
+        ]
+      }
+    },
+    {
+      "id": "discover_10",
+      "name": "见多识广",
+      "description": "发现 10 种物品",
+      "rewardLabel": "💎 100",
+      "gems": 100,
+      "rule": {
+        "kind": "discoveredItemsAtLeast",
+        "threshold": 10
+      }
+    },
+    {
+      "id": "discover_20",
+      "name": "酿造百科",
+      "description": "发现 20 种物品",
+      "rewardLabel": "💎 250",
+      "gems": 250,
+      "rule": {
+        "kind": "discoveredItemsAtLeast",
+        "threshold": 20
+      }
+    }
+  ]
+}

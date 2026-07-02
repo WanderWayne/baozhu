@@ -1,0 +1,447 @@
+/* 物品样式 — 对齐 H5 game-synthesis.css + game-inventory.css */
+
+.game-item {
+  width: 85px;
+  height: 85px;
+  background: #FFFDF7;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(107, 83, 68, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  border: 2px solid rgba(166, 124, 82, 0.1);
+  z-index: 10;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  /* 位置移动平滑过渡（合成/移动到门）+ 视觉属性过渡 */
+  transition:
+    left   0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+    top    0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+    transform   0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow  0.25s ease,
+    border-color 0.25s ease,
+    opacity     0.25s ease;
+}
+
+.game-item.type-base { background: #FFFDF7; }
+.game-item.type-floral { background: linear-gradient(145deg, #FFF8F8 0%, #FFE8EB 100%); border-color: rgba(212, 160, 168, 0.2); }
+.game-item.type-fruit { background: linear-gradient(145deg, #F8FFF8 0%, #E8F5E8 100%); border-color: rgba(123, 163, 123, 0.2); }
+.game-item.type-grain { background: linear-gradient(145deg, #FFFCF5 0%, #FFF5E0 100%); border-color: rgba(212, 160, 58, 0.2); }
+.game-item.type-process { background: linear-gradient(145deg, #FFFDF7 0%, #FFF4D8 100%); border-color: rgba(212, 175, 95, 0.38); }
+.game-item.type-tool { background: linear-gradient(145deg, #FCF8FF 0%, #F0E8F5 100%); border-color: rgba(184, 165, 199, 0.2); }
+.game-item.type-mid.tone-cheese,
+.game-item.type-deadend.tone-cheese {
+  background: linear-gradient(145deg, #F5FBFF 0%, #E8F4FA 100%);
+  border-color: rgba(110, 175, 205, 0.32);
+}
+.game-item.type-mid.tone-wine,
+.game-item.type-deadend.tone-wine {
+  background: linear-gradient(145deg, #FFFBF5 0%, #FFF2E4 100%);
+  border-color: rgba(200, 145, 95, 0.32);
+}
+.game-item.type-final {
+  background: linear-gradient(145deg, #FFFBF5 0%, #FFF0E0 100%);
+  border-color: rgba(232, 168, 124, 0.3);
+  box-shadow: 0 6px 16px rgba(232, 168, 124, 0.2);
+}
+
+.game-item.has-effect {
+  border: 2.5px solid rgba(0, 200, 255, 0.55);
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.15), 0 4px 12px rgba(107, 83, 68, 0.1);
+}
+
+.game-item.recipe-book-spawn {
+  animation: recipeBookSpawn 0.5s cubic-bezier(0, 0, 0.2, 1.2) forwards;
+  z-index: 15;
+}
+
+@keyframes recipeBookSpawn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.game-item.selected {
+  /* 拖动中：去掉 left/top 过渡（否则跟手有延迟），只保留视觉属性过渡 */
+  transition:
+    transform    0.15s ease,
+    box-shadow   0.15s ease,
+    border-color 0.15s ease;
+  transform: scale(1.1);
+  border-color: rgba(232, 200, 115, 0.9);
+  box-shadow: 0 12px 24px rgba(107, 83, 68, 0.18);
+  z-index: 100;
+}
+
+.game-item.target-item {
+  border: 3px solid rgba(232, 200, 115, 0.9) !important;
+  box-shadow: 0 0 12px rgba(232, 200, 115, 0.5), 0 0 24px rgba(232, 200, 115, 0.25);
+  animation: targetBreathe 2.5s ease-in-out infinite;
+}
+
+@keyframes targetBreathe {
+  0%, 100% { transform: scale(1.08); box-shadow: 0 0 12px rgba(232,200,115,0.5), 0 0 24px rgba(232,200,115,0.25); }
+  50% { transform: scale(1.15); box-shadow: 0 0 22px rgba(232,200,115,0.8), 0 0 45px rgba(232,200,115,0.45); }
+}
+
+/* 目标物合成入场：先大力弹出（1.2s）再切入呼吸循环 */
+.game-item.target-entry {
+  animation: targetGlowAndGrow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes targetGlowAndGrow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(232,200,115,0.5), 0 0 24px rgba(232,200,115,0.25);
+  }
+  55% {
+    transform: scale(1.38);
+    box-shadow: 0 0 28px rgba(232,200,115,0.9), 0 0 56px rgba(232,200,115,0.55);
+  }
+  100% {
+    transform: scale(1.25);
+    box-shadow: 0 0 22px rgba(232,200,115,0.75), 0 0 44px rgba(232,200,115,0.4);
+  }
+}
+
+.game-item.offering-flight {
+  /* 飞向门：慢入快出的弧线感 */
+  transition:
+    left 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    top  0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  filter: brightness(1.15);
+  z-index: 200;
+}
+
+/* 合成成功弹出（对齐 H5 .synthesis-anim） */
+.game-item.synthesis-anim {
+  animation: synthesisSuccess 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes synthesisSuccess {
+  0%   { transform: scale(0.8) translateY(4px); opacity: 0.7; box-shadow: 0 0 0 0 rgba(255,250,240,0.3); }
+  30%  { transform: scale(1.1) translateY(-3px); opacity: 1; box-shadow: 0 8px 25px rgba(212,165,116,0.3); }
+  100% { transform: scale(1) translateY(0); opacity: 1; box-shadow: 0 6px 16px rgba(107,83,68,0.12); }
+}
+
+/* 合成失败 shake（对齐 H5 .shake-anim） */
+.game-item.shake-anim {
+  animation: shake 0.4s ease-in-out;
+  border-color: rgba(255, 138, 128, 0.8) !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* 物品缩小消失（放入门 / 消耗后） */
+.game-item.shrinking {
+  animation: shrinkOut 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes shrinkOut {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.3); opacity: 0; }
+}
+
+/* 揭晓（倒计时完成后出现） */
+.game-item.revealed-item {
+  animation: revealFlash 0.5s ease-out;
+}
+
+@keyframes revealFlash {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(212,165,116,0.8); }
+  50%  { transform: scale(1.18); box-shadow: 0 0 30px 10px rgba(212,165,116,0.55); }
+  100% { transform: scale(1); box-shadow: 0 6px 16px rgba(107,83,68,0.12); }
+}
+
+/* 章节延续物品金色闪光 */
+.game-item.carry-over-flash {
+  animation: carryOverFlash 0.8s ease-out forwards;
+}
+
+@keyframes carryOverFlash {
+  0%   { box-shadow: 0 4px 12px rgba(107,83,68,0.1); border-color: rgba(166,124,82,0.1); }
+  35%  { box-shadow: 0 0 22px rgba(232,200,115,0.7), 0 0 0 3px rgba(232,200,115,0.4); border-color: rgba(232,200,115,0.8); }
+  100% { box-shadow: 0 4px 12px rgba(107,83,68,0.1); border-color: rgba(166,124,82,0.1); }
+}
+
+/* 合成波纹（对齐 H5 .synthesis-ripple） */
+.synthesis-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255,252,245,0.45) 0%, rgba(255,250,240,0.1) 50%, transparent 70%);
+  animation: synthesisRipple 0.8s ease-out forwards;
+}
+
+@keyframes synthesisRipple {
+  0%   { width: 20px; height: 20px; opacity: 0.65; transform: translate(-50%,-50%) scale(0.5); }
+  100% { width: 120px; height: 120px; opacity: 0; transform: translate(-50%,-50%) scale(1); }
+}
+
+/* 粒子飞溅（对齐 H5 .particle） */
+.synth-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 30% 30%,
+    rgba(255,252,245,0.95) 0%,
+    rgba(255,248,230,0.8) 40%,
+    rgba(240,230,210,0.6) 100%);
+  box-shadow: 0 2px 4px rgba(139,115,85,0.15), inset 0 -2px 4px rgba(212,165,116,0.1);
+  animation: particleFloat 1.4s ease-out forwards;
+}
+
+@keyframes particleFloat {
+  0%   { transform: translate(0,0) scale(0.6); opacity: 0.85; }
+  40%  { transform: translate(var(--tx,20px), calc(var(--ty,-30px)*0.3)) scale(1); opacity: 0.9; }
+  100% { transform: translate(var(--tx,20px), var(--ty,-30px)) scale(0.35); opacity: 0; }
+}
+
+/* 献门轨迹粒子 */
+.trail-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 35% 35%,
+    rgba(255, 240, 180, 0.95) 0%,
+    rgba(232, 200, 115, 0.75) 50%,
+    rgba(200, 160, 60, 0.4) 100%);
+  box-shadow: 0 0 6px rgba(232, 200, 115, 0.6);
+  animation: trailFade 0.7s ease-out forwards;
+}
+
+@keyframes trailFade {
+  0%   { transform: scale(1); opacity: 1; }
+  60%  { transform: scale(0.6); opacity: 0.6; }
+  100% { transform: scale(0.1); opacity: 0; }
+}
+
+/* 图标区 — 圆的上半部分 */
+.item-icon-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.item-icon {
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+/* 名称区 — 圆的下缘独立底条（对齐 H5 .game-item .name） */
+.item-name {
+  display: block;
+  font-size: 10px;
+  color: #6B5344;
+  text-align: center;
+  width: 88%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 2px 4px;
+  background: rgba(255, 253, 247, 0.7);
+  border-radius: 6px;
+  margin-top: 2px;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.inventory-item-slot {
+  width: calc((100% - 24px) / 4);
+  max-width: 90px;
+  min-width: 70px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-item.in-inventory {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  min-width: 0;
+  aspect-ratio: 1;
+  margin: 0;
+}
+
+.game-item.in-inventory.placeholder {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.92);
+}
+
+.game-item.in-inventory.fading {
+  opacity: 0;
+  transform: scale(0.75) !important;
+}
+
+/* 物品栏出现（对齐 H5 item-pop-in） */
+.item-pop-body.item-pop-in {
+  animation: invItemPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes invItemPopIn {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 物品栏弹出消失（对齐 H5 bubble-pop） */
+.item-pop-body.bubble-pop {
+  animation: invItemBubblePop 0.38s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes invItemBubblePop {
+  0%   { transform: scale(1); opacity: 1; }
+  40%  { transform: scale(1.12); opacity: 0.9; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* 物品栏物品被拖走后占位 hold 状态 */
+.item-pop-body.pop-hold {
+  opacity: 0.3;
+  transform: scale(0.92);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* 背包物品出现动画 */
+.game-item.in-inventory.appearing {
+  animation: itemPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes itemPopIn {
+  0%   { opacity: 0; transform: scale(0.55); }
+  65%  { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.12);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+  /* 跟手必须即时，覆盖 .game-item 的 left/top 过渡 */
+  transition: none !important;
+}
+
+.brewing-item {
+  position: absolute;
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  background: rgba(232, 200, 115, 0.25);
+  border: 2px solid rgba(232, 200, 115, 0.55);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  /* 位置跟手：不做 left/top 过渡；出现弹跳 + 持续光晕分两阶段 */
+  transition: opacity 0.3s ease;
+  animation:
+    brewingAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    brewingPulse 2s ease-in-out 0.5s infinite;
+}
+
+/* 倒计时出现：合成弹跳的缩小版 */
+@keyframes brewingAppear {
+  0%   { transform: scale(0.9) translateY(2px); opacity: 0.85; box-shadow: 0 0 0 0 rgba(232,200,115,0.2); }
+  35%  { transform: scale(1.05) translateY(-2px); opacity: 1; box-shadow: 0 6px 18px rgba(232,200,115,0.25); }
+  100% { transform: scale(1) translateY(0); opacity: 1; box-shadow: 0 4px 12px rgba(107,83,68,0.1); }
+}
+
+@keyframes brewingPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(232,200,115,0.3), 0 0 0 0 rgba(232,200,115,0.15); }
+  50%       { box-shadow: 0 0 16px rgba(232,200,115,0.55), 0 0 24px rgba(232,200,115,0.2); }
+}
+
+.brewing-item.brew-dragging {
+  transition: none !important;
+  transform: scale(1.05);
+  z-index: 100;
+  /* 拖动时暂停光晕动画，避免与 transform 冲突 */
+  animation: none;
+}
+
+/* 倒计时内容层 */
+.brew-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.brew-name { font-size: 10px; color: #6B5344; }
+.brew-timer {
+  font-size: 18px;
+  color: #A67C52;
+  margin-top: 2px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+/* 旋转圆环底轨 */
+.brew-ring-track {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  border: 3px solid rgba(232, 200, 115, 0.2);
+  box-sizing: border-box;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 旋转圆弧（半圈高亮） */
+.brew-ring-spin {
+  position: absolute;
+  top: -3px; left: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: rgba(232, 200, 115, 0.9);
+  border-right-color: rgba(232, 200, 115, 0.5);
+  box-sizing: border-box;
+  z-index: 1;
+  pointer-events: none;
+  animation: timerRingOrbit 1.5s linear infinite;
+}
+
+@keyframes timerRingOrbit {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

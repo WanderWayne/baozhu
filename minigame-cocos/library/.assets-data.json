@@ -1,0 +1,229 @@
+{
+  "c30509a3-8323-4295-b6d6-baa0459850b3": {
+    "url": "db://assets/resources",
+    "value": {},
+    "versionCode": 1
+  },
+  "5b7da0a0-d50a-4bc1-af29-bdf000d3f89f": {
+    "url": "db://assets/scripts",
+    "value": {},
+    "versionCode": 1
+  },
+  "2493ee13-1493-4d4f-894c-76e5d27a354f": {
+    "url": "db://assets/resources/config",
+    "value": {},
+    "versionCode": 1
+  },
+  "0a4df293-5f7c-4249-99e2-9211fdc3166a": {
+    "url": "db://assets/resources/perf",
+    "value": {},
+    "versionCode": 1
+  },
+  "0e570276-d445-4f94-aed4-5a994606c54e": {
+    "url": "db://assets/scripts/core",
+    "value": {},
+    "versionCode": 1
+  },
+  "7ef72660-ef00-425b-86d9-f4c85214a50b": {
+    "url": "db://assets/scripts/data",
+    "value": {},
+    "versionCode": 1
+  },
+  "c74392a0-0b4f-4358-9298-e628eea395a8": {
+    "url": "db://assets/scripts/runtime",
+    "value": {},
+    "versionCode": 1
+  },
+  "12ba283d-dc7f-4701-b60d-3c0354fd50e5": {
+    "url": "db://assets/scripts/scenes",
+    "value": {},
+    "versionCode": 1
+  },
+  "62e23fe5-c520-4c80-ac55-f002a5d093a3": {
+    "url": "db://assets/scripts/tests",
+    "value": {},
+    "versionCode": 1
+  },
+  "2f7d26b1-ca55-4808-8c6f-c6a9c3becd29": {
+    "url": "db://assets/scripts/wechat",
+    "value": {},
+    "versionCode": 1
+  },
+  "07bd9f6d-824a-4c1a-a674-ca071a1fa4a5": {
+    "url": "db://assets/scripts/AppRoot.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "c5f443dc-f240-465e-8078-0c33b506fc47": {
+    "url": "db://assets/scripts/core/ProgressService.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "d0cef0a6-d94d-4747-84ff-c5e025fbbf18": {
+    "url": "db://assets/scripts/core/RecipeEngine.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "3e4d55e0-5352-47e0-a359-bc9d54919d4c": {
+    "url": "db://assets/scripts/core/TaskService.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "03e0f176-9758-4f0d-b1ce-9825429edff2": {
+    "url": "db://assets/scripts/core/types.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "a7f9d901-ab7f-4537-80bc-bec0af51ea9d": {
+    "url": "db://assets/scripts/data/ConfigLoader.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "98950df7-a64d-4cf9-b382-0a1ce727f324": {
+    "url": "db://assets/scripts/data/ConfigRepository.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "14817979-ae84-48c9-84fe-bb205a208dcd": {
+    "url": "db://assets/scripts/runtime/AudioService.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "e9627b29-4bc5-44b6-86c8-fe79f3e3f97d": {
+    "url": "db://assets/scripts/runtime/PerformanceProfiler.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "c8922159-c4a9-4633-9c2a-12b9661cbce8": {
+    "url": "db://assets/scripts/runtime/ResourcePolicy.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "1445234a-8f44-4785-a91b-a67d1fbdec6f": {
+    "url": "db://assets/scripts/runtime/SceneRouter.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "099204c6-9842-4cec-a73d-36629945ec07": {
+    "url": "db://assets/scripts/runtime/StorageAdapter.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "f5a103cf-639f-42a5-9950-838fac4bf059": {
+    "url": "db://assets/scripts/scenes/BootScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "2068cd4c-712f-4225-8e22-c341f48ab2cd": {
+    "url": "db://assets/scripts/scenes/ChapterSettlement.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "ea8391f6-e7ba-4785-b488-0fd086308cbb": {
+    "url": "db://assets/scripts/scenes/CodexScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "51224506-9ee6-4da4-af30-3ec2274fbccd": {
+    "url": "db://assets/scripts/scenes/GalleryScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "94aedd8b-681a-4ef8-9c74-13c8484ee093": {
+    "url": "db://assets/scripts/scenes/GameContext.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "7c7f8d9d-fa20-44ce-91e6-142f0f3bb180": {
+    "url": "db://assets/scripts/scenes/GameScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "842c3e8b-6d4a-4b20-8d45-f6b679fe37da": {
+    "url": "db://assets/scripts/scenes/IntroScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "abe8a732-ceac-40be-9a72-1a96da6e5ff9": {
+    "url": "db://assets/scripts/scenes/LevelsScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "f6988828-d458-4689-bbc0-9227b2ed487b": {
+    "url": "db://assets/scripts/scenes/MenuGrowthSystem.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "75eb3f54-0682-4167-a6ba-2ddf9f26c64d": {
+    "url": "db://assets/scripts/scenes/MenuScene.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "ff46d404-4215-4d84-8c74-0b2be8284696": {
+    "url": "db://assets/scripts/scenes/TaskToast.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "ac71d300-3d82-43a4-b18b-b72c0d0afc60": {
+    "url": "db://assets/scripts/scenes/TutorialOverlay.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "e6dd58cc-79c0-4694-9653-97db26dd9b2b": {
+    "url": "db://assets/scripts/tests/ProgressService.spec.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "b2dd6c02-844b-4945-947f-1ff20d897690": {
+    "url": "db://assets/scripts/tests/RecipeEngine.spec.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "2e2bff91-5dd7-4131-bb61-5404a663cf56": {
+    "url": "db://assets/scripts/wechat/WechatAdapter.ts",
+    "value": {},
+    "versionCode": 1
+  },
+  "38cf40bb-2edd-4bcf-a677-1d350122a1c7": {
+    "url": "db://assets/resources/config/atlas.json",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  },
+  "f605982e-68ef-4488-8e1c-27e9ff821b9e": {
+    "url": "db://assets/resources/config/game-config.json",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  },
+  "6fe12333-c2fe-4312-b405-9b3fe9f8df8d": {
+    "url": "db://assets/resources/config/items.json",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  },
+  "6c174516-bf17-4c14-8d88-92e8c4a7cb16": {
+    "url": "db://assets/resources/config/tasks.json",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  },
+  "bc171e2a-415b-4d02-97a4-dcd33a1ccf7f": {
+    "url": "db://assets/resources/config/worlds.json",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  },
+  "a75ba7ee-88df-4123-8316-65b72c3ecd02": {
+    "url": "db://assets/resources/perf/performance-budget.json",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  }
+}

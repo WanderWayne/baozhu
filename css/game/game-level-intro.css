@@ -98,11 +98,27 @@
     transform: translateY(0);
 }
 
+.intro-tip {
+    margin-top: 14px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.58);
+    letter-spacing: 1px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease 0.8s, transform 0.5s ease 0.8s;
+}
+
+.level-intro-overlay.visible .intro-tip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* fade-out 时所有文字也淡出 */
 .level-intro-overlay.fade-out .intro-level-name,
 .level-intro-overlay.fade-out .intro-separator,
 .level-intro-overlay.fade-out .intro-target,
-.level-intro-overlay.fade-out .intro-desc {
+.level-intro-overlay.fade-out .intro-desc,
+.level-intro-overlay.fade-out .intro-tip {
     opacity: 0;
     transform: translateY(-6px);
     transition: opacity 0.5s ease, transform 0.5s ease;

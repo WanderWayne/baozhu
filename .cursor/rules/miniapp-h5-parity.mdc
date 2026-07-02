@@ -1,0 +1,64 @@
+---
+description: 小程序移植完成后必须用 MCP 截图与 H5 比对，直到视觉一致
+globs: miniapp-weixin/**/*
+alwaysApply: false
+---
+
+# 小程序 ↔ H5 验收流程（必做）
+
+完成 `miniapp-weixin/` 内任一页面/波次改动后，**不得**仅凭代码审查宣告完成。
+
+## 1. 确保 MCP 可用
+
+```powershell
+powershell -ExecutionPolicy Bypass -File miniapp-weixin/tools/enable-auto.ps1
+node miniapp-weixin/tools/mcp-health.cjs
+```
+
+## 2. 截图 + 比对
+
+选关页：
+
+```powershell
+cd miniapp-weixin/tools
+node compare-parity.cjs levels
+```
+
+玩法页（101/102 等）：
+
+```powershell
+node compare-parity.cjs game 101
+```
+
+输出在 `miniapp-weixin/tools/screenshots/`：
+
+- `*-mini.png` / `*-h5.png` — 单端截图
+- `*-compare.png` — 左 H5、右小程序
+- `*-diff.png` — 像素差异（红区）
+
+**通过标准**：diff 占比 **< 12%**（emoji 与 SVG 差异可接受）；布局/门/圆形物品/三区结构须目视一致。
+
+## 3. 迭代
+
+若 diff 过高或目视不一致，或 **玩法与 H5 不一致**：
+
+1. 对照 H5 源码（`js/drag-drop.js`、`js/game/game-core.js` 等）确认行为，再改小程序 `utils/game-controller.js`
+2. 对照 H5 的 `css/game/` 修改小程序样式
+3. 重新编译微信开发者工具
+4. 再跑 `compare-parity.cjs` 直到通过
+
+### 布局（safe area / vh）
+
+- 禁止玩法页用 `100vh` / 裸 `vh` 划分三区；统一走 `utils/game-layout.js` 注入 CSS 变量（`--page-h`、`--door-h`、`--inv-h`、`--synthesis-bottom`）。
+- 合成区 `bottom` 须对齐 H5 `_syncSynthesisAreaBottom`：等于物品栏 **boundingClientRect 实测高度 px**（`game.js` `_measureGameRects`）。
+- 物品栏高度用 H5 同款 `rows-0/1/2/3-plus` 固定 px（`--inv-content-h`）；`safeBottom` 向下加长总高（`--inv-h = content + safe`，`padding-bottom = 12 + safe`），物品位置不上移。
+- 物品数量变化、转场、窗口 resize 后须调用 `syncGameLayout()` / `_measureGameRects()`。
+- 门气泡须对齐 H5 `showDoorBubble`：`position:fixed` 在门左/右侧（非门下方 flex），带尾巴、金色发光、`doorBubbleIn`/`doorBubbleFadeOut` 动画；逻辑在 `utils/door-dialog.js`。
+
+### 物品栏（无限供应）
+
+H5：`drag-drop.js` 从物品栏拖出时 **clone 到合成区**，原槽位仅 `placeholder` 隐藏，松手到合成区后 `removePlaceholder()` 恢复，**永不 `hidden` 消耗**。小程序须同样逻辑。
+
+## 4. 向用户汇报
+
+汇报时附上 `*-compare.png` 路径与 diff 百分比，并列出仍存在的已知差异（如 SVG vs emoji）。

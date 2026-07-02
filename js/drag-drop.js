@@ -13,7 +13,7 @@ class DragSystem {
         
         // 长按检测
         this.longPressTimer = null;
-        this.longPressDelay = 500; // 长按阈值（毫秒）
+        this.longPressDelay = 800; // 长按阈值（毫秒）
         this.isLongPress = false;
         this.longPressTarget = null;
         
@@ -80,6 +80,9 @@ class DragSystem {
     dragStart(e) {
         // 标记用户已交互（启用振动反馈）
         this.markUserInteracted();
+
+        // 关卡切换与自动献上期间禁止拖拽
+        if (this.game && (this.game.isTransitioning || this.game._offeringInProgress)) return;
         
         // 防止重复触发（触摸+鼠标事件同时触发的情况）
         if (this.isDragging || this.activeItem) return;
@@ -102,9 +105,9 @@ class DragSystem {
         const target = e.target.closest('.game-item');
         if (!target) return;
 
-        // 如果正在合成中，不可拖拽
-        if (target.querySelector('.timer-overlay')) return;
-        
+        if (target.classList.contains('offering-flight-lock')) return;
+        if (target.dataset.locked === '1' && !target.classList.contains('brewing-item')) return;
+
         // 如果物品还未揭晓，取消揭晓
         if (this.game && this.game.cancelRevealForItem) {
             this.game.cancelRevealForItem(target);
@@ -162,13 +165,24 @@ class DragSystem {
         this.activeItem.style.transform = 'scale(1.1)';
         this.activeItem.style.boxShadow = '0 12px 30px rgba(0,0,0,0.2)';
 
-        // 启动长按检测 + 金色进度弧线（放在 activeItem 上，确保可见）
+        // 启动长按检测（延迟显示进度弧线，避免拖拽时闪现）；酿造中仅允许拖动，不触发长按卡片
         this.longPressTarget = target;
-        this._startLongPressRing(this.activeItem);
-        this.longPressTimer = setTimeout(() => {
-            this._completeLongPressRing(this.activeItem);
-            this.handleLongPress(target);
-        }, this.longPressDelay);
+        this._longPressOrigin = { x: coords.x, y: coords.y };
+        this._longPressCancelled = false;
+        if (!target.classList.contains('brewing-item')) {
+            this._longPressRingDelay = setTimeout(() => {
+                if (!this._longPressCancelled) {
+                    this._startLongPressRing(this.activeItem);
+                }
+            }, 200);
+            this.longPressTimer = setTimeout(() => {
+                this._completeLongPressRing(this.activeItem);
+                this.handleLongPress(target);
+            }, this.longPressDelay);
+        } else {
+            this._longPressRingDelay = null;
+            this.longPressTimer = null;
+        }
     }
     
     // 处理长按
@@ -205,6 +219,10 @@ class DragSystem {
     }
     
     cancelLongPress() {
+        if (this._longPressRingDelay) {
+            clearTimeout(this._longPressRingDelay);
+            this._longPressRingDelay = null;
+        }
         if (this.longPressTimer) {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
@@ -287,18 +305,36 @@ class DragSystem {
 
     drag(e) {
         if (!this.activeItem || !this.isDragging) return;
-        
-        // 如果移动了，取消长按检测
-        this.cancelLongPress();
+        if (this.game && (this.game.isTransitioning || this.game._offeringInProgress)) return;
 
         e.preventDefault();
 
         const coords = this.getEventCoords(e);
+
+        // Allow small jitter without cancelling long press (12px threshold)
+        if (this.longPressTimer && !this._longPressCancelled && this._longPressOrigin) {
+            const dx = coords.x - this._longPressOrigin.x;
+            const dy = coords.y - this._longPressOrigin.y;
+            if (Math.abs(dx) <= 12 && Math.abs(dy) <= 12) {
+                return;
+            }
+            this._longPressCancelled = true;
+            this.cancelLongPress();
+        }
+
         const x = coords.x - this.offset.x;
         const y = coords.y - this.offset.y;
 
         this.activeItem.style.left = x + 'px';
         this.activeItem.style.top = y + 'px';
+
+        if (this.game && this.game._brewingDragPair && this.activeItem.classList.contains('brewing-item')) {
+            const synthRect = this.synthesisArea.getBoundingClientRect();
+            const ar = this.activeItem.getBoundingClientRect();
+            const relX = ar.left - synthRect.left;
+            const relY = ar.top - synthRect.top;
+            this.game._syncBrewingPartnerToSynthCoords(relX, relY, this.activeItem);
+        }
 
         // 碰撞检测高亮
         this.checkCollisionHighlight();
@@ -335,7 +371,7 @@ class DragSystem {
         }
     }
 
-    // 交易站靠近检测（遍历所有物品交易台，珠宝交易台不参与拖拽）
+    // 交易站靠近检测（遍历所有物品交易台，钻石交易台不参与拖拽）
     checkTradeProximity() {
         const stations = this.game.tradeStations;
         if (!stations || !this.activeItem) return;
@@ -369,6 +405,23 @@ class DragSystem {
     }
 
     dragEnd(e) {
+        if (this.game && (this.game.isTransitioning || this.game._offeringInProgress)) {
+            this.cancelLongPress();
+            this.isLongPress = false;
+            if (this.activeItem) {
+                if (this.fromInventory) this.returnToInventory();
+                else this.activeItem.remove();
+            }
+            this.clearAllHighlights();
+            this.activeItem = null;
+            this.isDragging = false;
+            this.fromInventory = false;
+            this.originRect = null;
+            this.originParent = null;
+            this.sourceElement = null;
+            return;
+        }
+
         // 取消长按检测
         this.cancelLongPress();
         this.isLongPress = false;
@@ -437,34 +490,66 @@ class DragSystem {
             itemCenter.x <= inventoryRect.right
         );
 
-        // 检查是否在合成区域内
+        // 检查是否在合成区域内（竖直方向在物品栏之上，且落点在合成区矩形内）
         const isInSynthesisArea = (
-            itemCenter.y >= synthesisRect.top &&
-            itemCenter.y <= synthesisRect.bottom &&
+            !isInInventory &&
             itemCenter.x >= synthesisRect.left &&
-            itemCenter.x <= synthesisRect.right
+            itemCenter.x <= synthesisRect.right &&
+            itemCenter.y >= synthesisRect.top &&
+            itemCenter.y < inventoryRect.top
         );
 
-        if (isInInventory && this.fromInventory) {
-            // 放回物品栏 - 回到原位置
-            this.returnToInventory();
-        } else if (isInSynthesisArea) {
-            // 播放放下音效
-            if (window.AudioManager) {
-                window.AudioManager.playSFX('drop');
-            }
-            
-            // 转换坐标到 synthesis-area 相对坐标
-            const relX = itemRect.left - synthesisRect.left;
-            const relY = itemRect.top - synthesisRect.top;
-            
-            // 重置样式并移动到 synthesis-area
+        /** 酿造叠放：按松手位置放进合成区并拉拢伴侣（勿用 originRect，否则会回到拖拽起点） */
+        const placeBrewingStackFromRelease = () => {
+            const synthRect = this.synthesisArea.getBoundingClientRect();
+            let relX = itemRect.left - synthRect.left;
+            let relY = itemRect.top - synthRect.top;
+            const iw = this.activeItem.offsetWidth || itemRect.width || 85;
+            const ih = this.activeItem.offsetHeight || itemRect.height || 85;
+            relX = Math.max(0, Math.min(relX, synthRect.width - iw));
+            relY = Math.max(0, Math.min(relY, synthRect.height - ih));
+            this.activeItem.style.transition = 'none';
             this.activeItem.style.position = 'absolute';
             this.activeItem.style.left = relX + 'px';
             this.activeItem.style.top = relY + 'px';
             this.activeItem.style.transform = '';
             this.activeItem.style.boxShadow = '';
             this.activeItem.style.zIndex = '';
+            this.activeItem.offsetHeight;
+            this.activeItem.style.transition = '';
+            if (this.activeItem.parentElement !== this.synthesisArea) {
+                this.synthesisArea.appendChild(this.activeItem);
+            }
+            if (this.game) this.game._syncBrewingPartnerToSynthCoords(relX, relY, this.activeItem);
+        };
+
+        if (isInInventory && this.fromInventory) {
+            // 放回物品栏 - 回到原位置
+            this.returnToInventory();
+        } else if (isInInventory && this.activeItem.classList.contains('brewing-item')) {
+            placeBrewingStackFromRelease();
+            if (window.AudioManager) window.AudioManager.playSFX('drop');
+        } else if (isInSynthesisArea) {
+            // 播放放下音效
+            if (window.AudioManager) {
+                window.AudioManager.playSFX('drop');
+            }
+            
+            // 转换坐标到 synthesis-area 相对坐标，并限制在可见范围内
+            const relX = itemRect.left - synthesisRect.left;
+            let relY = itemRect.top - synthesisRect.top;
+            const maxY = synthesisRect.height - itemRect.height;
+            if (relY > maxY) relY = maxY;
+            
+            // 重置样式并移动到 synthesis-area（先禁用过渡避免弹跳）
+            this.activeItem.style.transition = 'none';
+            this.activeItem.style.position = 'absolute';
+            this.activeItem.style.left = relX + 'px';
+            this.activeItem.style.top = relY + 'px';
+            this.activeItem.style.transform = '';
+            this.activeItem.style.boxShadow = '';
+            this.activeItem.style.zIndex = '';
+            this.activeItem.offsetHeight;
             this.activeItem.style.transition = '';
             
             if (this.activeItem.parentElement !== this.synthesisArea) {
@@ -478,6 +563,15 @@ class DragSystem {
 
             // 检查碰撞并执行合成
             this.checkCollisionAndSynthesize();
+
+            if (this.game && this.game._brewingDragPair && this.activeItem.classList.contains('brewing-item')) {
+                const ar = this.activeItem.getBoundingClientRect();
+                const relX2 = ar.left - synthesisRect.left;
+                let relY2 = ar.top - synthesisRect.top;
+                const maxY2 = synthesisRect.height - ar.height;
+                if (relY2 > maxY2) relY2 = maxY2;
+                this.game._syncBrewingPartnerToSynthCoords(relX2, relY2, this.activeItem);
+            }
 
             // 第二关首次放物品到合成区时，引导长按查看属性
             if (this.game && this.game.levelId === 102
@@ -499,6 +593,9 @@ class DragSystem {
         } else if (this.fromInventory) {
             // 不在任何有效区域，但是从物品栏拖出的 -> 回到物品栏
             this.returnToInventory();
+        } else if (this.activeItem.classList.contains('brewing-item')) {
+            placeBrewingStackFromRelease();
+            if (window.AudioManager) window.AudioManager.playSFX('drop');
         } else {
             // 从合成区拖出且不在有效区域，销毁
             this.activeItem.remove();
@@ -567,6 +664,7 @@ class DragSystem {
 
     checkCollisionHighlight() {
         const items = Array.from(this.synthesisArea.querySelectorAll('.game-item'));
+        if (!this.activeItem || this.activeItem.classList.contains('brewing-item') || this.activeItem.dataset.locked === '1') return;
         const draggedRect = this.activeItem.getBoundingClientRect();
         const draggedCenter = {
             x: draggedRect.left + draggedRect.width / 2,
@@ -581,6 +679,8 @@ class DragSystem {
         for (const item of items) {
             if (item === this.activeItem) continue;
             if (item.querySelector('.timer-overlay')) continue;
+            if (item.classList.contains('brewing-item')) continue;
+            if (item.dataset.locked === '1') continue;
 
             const rect = item.getBoundingClientRect();
             const center = {
@@ -600,6 +700,7 @@ class DragSystem {
 
     checkCollisionAndSynthesize() {
         const items = Array.from(this.synthesisArea.querySelectorAll('.game-item'));
+        if (!this.activeItem || this.activeItem.classList.contains('brewing-item') || this.activeItem.dataset.locked === '1') return;
         const draggedRect = this.activeItem.getBoundingClientRect();
         const draggedCenter = {
             x: draggedRect.left + draggedRect.width / 2,
@@ -609,6 +710,8 @@ class DragSystem {
         for (const item of items) {
             if (item === this.activeItem) continue;
             if (item.querySelector('.timer-overlay')) continue;
+            if (item.classList.contains('brewing-item')) continue;
+            if (item.dataset.locked === '1') continue;
 
             const rect = item.getBoundingClientRect();
             const center = {

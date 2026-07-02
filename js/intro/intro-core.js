@@ -67,10 +67,21 @@ class IntroSystem {
         
         // 其他 DOM 元素引用
         this.doorEl = document.getElementById('intro-door');
+        this.doorIconEl = document.getElementById('intro-door-icon');
         this.inventoryEl = document.getElementById('intro-inventory');
         this.narrativeEl = document.getElementById('intro-narrative');
         this.startBtnEl = document.getElementById('intro-start-btn');
         this.titleEl = document.getElementById('intro-title');
+        
+        // 教学门内留白，不显示剪影图案
+        this._setupDoorIcon();
+    }
+    
+    _setupDoorIcon() {
+        if (!this.doorIconEl) return;
+        this.doorIconEl.innerHTML = '';
+        this.doorIconEl.classList.remove('door-icon-svg');
+        this.doorIconEl.classList.add('door-icon-empty');
     }
     
     setupCanvas() {

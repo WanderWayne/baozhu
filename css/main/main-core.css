@@ -84,11 +84,33 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
+    gap: 0;
     width: 90%;
     max-width: 320px;
     margin-top: 21vh;
     animation: fadeInUp 1s ease-out;
+}
+
+/* 统一区域：上下两条长线圈住 4 个主项 */
+.main-menu-block {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(166, 124, 82, 0.38);
+    border-bottom: 1px solid rgba(166, 124, 82, 0.38);
+}
+
+/* 区域内每一行：等宽、一致竖直间距、行间发丝分隔线 */
+.main-menu-block > * {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 20px 4px;
+    border-bottom: 1px solid rgba(166, 124, 82, 0.12);
+}
+
+.main-menu-block > *:last-child {
+    border-bottom: none;
 }
 
 @keyframes fadeInUp {
@@ -102,66 +124,114 @@ body {
     }
 }
 
-/* ========== 主按钮样式 ========== */
+/* ========== 主菜单可点行（开始游戏 / 设置） ========== */
+/* 扁平整行、与进度条同层同宽，无白底/阴影/边框 */
 .main-btn {
+    display: block;
     width: 100%;
-    padding: 14px 24px;
-    font-size: 15px;
-    font-weight: 400;
-    letter-spacing: 4px;
     cursor: pointer;
-    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
-    transition: all 0.4s ease;
-    border-radius: 0;
-}
-
-/* 主按钮 - 开始游戏（米酒金风格） */
-.main-btn.primary {
-    background: transparent;
-    color: var(--old-wood);
-    border: none;
-    border-top: 1px solid var(--caramel-brown);
-    padding: 12px 4px;
     position: relative;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    text-align: center;
+    font-weight: 400;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.3s ease, background 0.3s ease;
 }
 
-/* 按钮上方的金色光晕（成长暗示） */
-.main-btn.primary::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 20px;
-    background: radial-gradient(ellipse at center bottom, var(--growth-glow) 0%, transparent 70%);
-    pointer-events: none;
+/* 主按钮 - 开始游戏（颜色 + 字重强调为主操作） */
+.main-btn.primary {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    color: var(--old-wood);
+    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
 }
 
 .main-btn.primary:hover {
     color: var(--rice-wine-gold);
-    border-top-color: var(--rice-wine-gold);
-    text-shadow: 0 0 20px var(--growth-glow-strong);
+    background: rgba(232, 200, 115, 0.06);
 }
 
-.main-btn.primary:active {
-    opacity: 0.7;
-}
-
-/* 次要按钮 - 设置 */
+/* 次要按钮 - 设置（更轻） */
 .main-btn.secondary {
-    background: transparent;
-    color: var(--caramel-brown);
-    border: none;
-    border-bottom: 1px solid rgba(166, 124, 82, 0.3);
-    padding: 8px 4px;
     font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--caramel-brown);
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .main-btn.secondary:hover {
     color: var(--old-wood);
-    border-bottom-color: var(--caramel-brown);
+    background: rgba(232, 200, 115, 0.06);
+}
+
+/* 按下瞬时反馈 */
+.main-btn:active {
+    background: rgba(232, 200, 115, 0.12);
+}
+
+/* 点击金光闪烁（由 JS 添加 .btn-flash，动画结束后移除） */
+.main-btn.btn-flash,
+.main-progress-row.btn-flash {
+    animation: mainRowFlash 0.5s ease-out;
+}
+
+.main-btn.btn-flash {
+    animation: mainRowFlash 0.5s ease-out;
+}
+
+@keyframes mainRowFlash {
+    0% {
+        background: rgba(232, 200, 115, 0);
+    }
+    35% {
+        background: rgba(232, 200, 115, 0.22);
+    }
+    100% {
+        background: rgba(232, 200, 115, 0);
+    }
+}
+
+.main-btn.primary.btn-flash {
+    color: var(--old-wood);
+    animation: mainRowFlashPrimary 0.5s ease-out;
+}
+
+@keyframes mainRowFlashPrimary {
+    0% {
+        background: rgba(232, 200, 115, 0);
+        color: var(--old-wood);
+    }
+    35% {
+        background: rgba(232, 200, 115, 0.22);
+        color: var(--rice-wine-gold);
+    }
+    100% {
+        background: rgba(232, 200, 115, 0);
+        color: var(--old-wood);
+    }
+}
+
+/* secondary 闪烁时回到自身基色 */
+.main-btn.secondary.btn-flash {
+    animation: mainBtnFlashSecondary 0.5s ease-out;
+}
+
+@keyframes mainBtnFlashSecondary {
+    0% {
+        background: rgba(232, 200, 115, 0);
+        color: var(--caramel-brown);
+    }
+    35% {
+        background: rgba(232, 200, 115, 0.22);
+        color: var(--rice-wine-gold);
+    }
+    100% {
+        background: rgba(232, 200, 115, 0);
+        color: var(--caramel-brown);
+    }
 }
 
 /* ========== 进度条样式 ========== */
@@ -170,18 +240,16 @@ body {
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 12px 0;
     cursor: pointer;
-    transition: opacity 0.3s ease;
-    border-bottom: 1px solid rgba(166, 124, 82, 0.1);
+    transition: background 0.3s ease;
 }
 
 .main-progress-row:hover {
-    opacity: 0.8;
+    background: rgba(232, 200, 115, 0.06);
 }
 
 .main-progress-row:active {
-    opacity: 0.6;
+    background: rgba(232, 200, 115, 0.12);
 }
 
 .main-progress-row .progress-label {
@@ -225,23 +293,53 @@ body {
     margin-top: 12px;
 }
 
+/* 重置进度 / 任务：仅文字 + 下方一条线 */
 .main-link-btn {
     position: relative;
     background: transparent;
     border: none;
+    border-bottom: 1px solid rgba(166, 124, 82, 0.35);
     color: var(--caramel-brown);
     font-size: 11px;
     letter-spacing: 2px;
     cursor: pointer;
     font-family: inherit;
-    padding: 4px 8px;
-    transition: color 0.3s ease;
-    opacity: 0.6;
+    padding: 2px 4px 4px;
+    transition: color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    opacity: 0.65;
 }
 
 .main-link-btn:hover {
     opacity: 1;
     color: var(--old-wood);
+    border-bottom-color: var(--rice-wine-gold);
+}
+
+.main-link-btn:active {
+    color: var(--rice-wine-gold);
+    border-bottom-color: var(--rice-wine-gold);
+}
+
+.main-link-btn.btn-flash {
+    animation: linkBtnFlash 0.45s ease-out;
+}
+
+@keyframes linkBtnFlash {
+    0% {
+        opacity: 0.65;
+        border-bottom-color: rgba(166, 124, 82, 0.35);
+        color: var(--caramel-brown);
+    }
+    35% {
+        opacity: 1;
+        border-bottom-color: var(--rice-wine-gold);
+        color: var(--rice-wine-gold);
+    }
+    100% {
+        opacity: 0.65;
+        border-bottom-color: rgba(166, 124, 82, 0.35);
+        color: var(--caramel-brown);
+    }
 }
 
 .main-footer-divider {
@@ -323,7 +421,8 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    z-index: 1;
+    z-index: 1000;
+    pointer-events: auto;
 }
 
 .panel-close:hover {
@@ -554,8 +653,8 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: radial-gradient(circle, #ffd96b 30%, #e8c873 100%);
-    box-shadow: 0 0 6px 2px rgba(232, 200, 115, 0.6);
+    background: radial-gradient(circle, #a8f0d0 30%, #5cc9a0 100%);
+    box-shadow: 0 0 6px 2px rgba(92, 201, 160, 0.6);
     animation: claimableDotBreathe 1.6s ease-in-out infinite;
     pointer-events: none;
     z-index: 5;
@@ -565,12 +664,12 @@ body {
     0%, 100% {
         transform: scale(0.8);
         opacity: 0.6;
-        box-shadow: 0 0 4px 1px rgba(232, 200, 115, 0.4);
+        box-shadow: 0 0 4px 1px rgba(92, 201, 160, 0.4);
     }
     50% {
         transform: scale(1.2);
         opacity: 1;
-        box-shadow: 0 0 8px 3px rgba(232, 200, 115, 0.8);
+        box-shadow: 0 0 8px 3px rgba(92, 201, 160, 0.8);
     }
 }
 

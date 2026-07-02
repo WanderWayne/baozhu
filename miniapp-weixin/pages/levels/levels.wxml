@@ -1,0 +1,106 @@
+<view class="levels-page theme-{{theme}}">
+  <!-- 背景层：dairy 用 SVG 山丘，其他主题用 CSS 渐变 -->
+  <view class="levels-bg" aria-hidden="true">
+    <image
+      wx:if="{{theme === 'dairy'}}"
+      class="levels-hills-img"
+      src="/assets/images/levels-hills-dairy.svg"
+      mode="scaleToFill"
+    />
+  </view>
+  <!-- 粒子 canvas（pointer-events:none，浮在最上层） -->
+  <view class="bubble-canvas-stack">
+    <canvas type="2d" id="bubble-canvas" class="bubble-canvas"></canvas>
+  </view>
+  <!-- UI 内容层 -->
+  <view class="container">
+    <view
+      class="header"
+      style="padding-top: {{navPaddingTop}}px; padding-left: {{navPaddingLeft}}px; padding-right: {{navPaddingRight}}px; height: {{headerHeight}}px;"
+    >
+      <view class="back-btn" style="width: {{headerHeight}}px; height: {{headerHeight}}px;" bindtap="onBack">
+        <text class="back-arrow">←</text>
+        <view class="claimable-dot" wx:if="{{showClaimableDot}}"></view>
+      </view>
+    </view>
+    <view class="page-title-bar" style="top: {{navPaddingTop}}px; height: {{headerHeight}}px;">
+      <text class="page-title">选择章节</text>
+    </view>
+
+    <view class="chapter-selector">
+      <view class="world-map">
+        <view
+          wx:for="{{worlds}}"
+          wx:key="id"
+          class="world-node {{item.unlocked ? 'unlocked' : 'locked'}} {{item.active ? 'active' : ''}} {{item.completed ? 'completed' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onWorldTap"
+        >
+          <text class="world-icon">{{item.displayIcon}}</text>
+          <view class="world-check" wx:if="{{item.completed}}">✓</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="chapter-header">
+      <text class="chapter-icon">{{worldIcon}}</text>
+      <view class="chapter-title-group">
+        <text class="chapter-name">{{worldName}}</text>
+        <text class="chapter-desc">{{storyText}}</text>
+      </view>
+    </view>
+
+    <view class="level-hint">
+      <view class="hint-line"></view>
+      <text class="hint-text">上下滑动选择关卡</text>
+      <view class="hint-line"></view>
+    </view>
+
+    <view class="level-carousel-container" id="carousel-container">
+      <scroll-view
+        class="level-carousel"
+        scroll-y
+        enhanced
+        show-scrollbar="{{false}}"
+        scroll-with-animation
+        scroll-into-view="{{scrollIntoView}}"
+        bindscroll="onCarouselScroll"
+        bindscrollend="onCarouselScrollEnd"
+      >
+        <view wx:if="{{levels.length >= 3}}" class="level-spacer"></view>
+        <view
+          wx:for="{{levels}}"
+          wx:key="id"
+          id="door-{{item.id}}"
+          class="level-door {{item.unlocked ? 'unlocked' : 'locked'}} {{item.completed ? 'completed' : ''}} {{item.selected ? 'selected' : ''}}"
+          style="{{item.doorStyle}}"
+          data-index="{{index}}"
+          data-id="{{item.id}}"
+          bindtap="onDoorTap"
+        >
+          <view class="completed-badge" wx:if="{{item.completed}}">✓</view>
+          <view class="door-frame">
+            <text class="door-icon">{{item.doorIcon}}</text>
+          </view>
+          <view class="door-info">
+            <text class="door-name">{{item.unlocked ? item.name : '· · ·'}}</text>
+            <text class="door-target">{{item.targetLabel}}</text>
+          </view>
+          <view
+            wx:if="{{item.unlocked && item.selected}}"
+            class="door-enter-btn {{item.latest ? 'pulse-effect' : ''}}"
+            data-id="{{item.id}}"
+            catchtap="onEnterLevel"
+          >
+            <view wx:if="{{item.latest}}" class="btn-pulse-wave btn-pulse-a"></view>
+            <view wx:if="{{item.latest}}" class="btn-pulse-wave btn-pulse-b"></view>
+            进 入
+          </view>
+        </view>
+        <view wx:if="{{levels.length >= 3}}" class="level-spacer"></view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <view class="global-top-hint {{topHintVisible ? 'visible' : ''}} {{topHintFading ? 'fade' : ''}}" wx:if="{{topHintText}}">{{topHintText}}</view>
+</view>

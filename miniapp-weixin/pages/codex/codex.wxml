@@ -1,0 +1,61 @@
+<view class="codex-page">
+  <header style="padding-top: {{statusBarHeight}}px;">
+    <button class="back-btn" bindtap="onBack">←</button>
+    <text class="page-title">宝珠图谱</text>
+    <text class="header-progress">{{atlasProgressText}}</text>
+  </header>
+
+  <text class="atlas-intro">中圈八瓣对应章节碎片，花心待诸章圆满后归位。</text>
+
+  <view class="atlas-grid">
+    <view
+      wx:for="{{atlasSlots}}"
+      wx:key="id"
+      class="atlas-slot kind-{{item.kind}} {{item.unlocked ? 'unlocked' : ''}}"
+    >
+      <text class="slot-label">{{item.label}}</text>
+      <text class="slot-state">{{item.unlocked ? '已点亮' : '未点亮'}}</text>
+    </view>
+    <view class="atlas-center {{centerUnlocked ? 'unlocked' : ''}}">
+      <text class="center-letter">谱</text>
+    </view>
+  </view>
+
+  <button class="drawer-toggle" bindtap="toggleRecipes">
+    配方一览 {{recipesOpen ? '▲' : '▼'}}
+  </button>
+
+  <view class="recipes-panel {{recipesOpen ? 'open' : ''}}">
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{recipePercent}}%;"></view>
+    </view>
+    <text class="recipe-stats">核心 {{coreDiscovered}}/{{coreTotal}} · 支线 {{branchDiscovered}}/{{branchTotal}} · 隐藏 {{hiddenDiscovered}}/{{hiddenTotal}}</text>
+
+    <view class="recipe-section" wx:for="{{recipeSections}}" wx:key="title">
+      <text class="section-title">{{item.title}} ({{item.discovered}}/{{item.total}})</text>
+      <view class="recipe-grid">
+        <view
+          wx:for="{{item.items}}"
+          wx:for-item="recipe"
+          wx:key="name"
+          class="recipe-item {{recipe.discovered ? 'discovered' : 'undiscovered'}}"
+          data-name="{{recipe.name}}"
+          bindtap="onRecipeTap"
+        >
+          <text class="recipe-icon">{{recipe.discovered ? recipe.icon : '❓'}}</text>
+          <text class="recipe-name">{{recipe.discovered ? recipe.name : '???'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal {{detailVisible ? 'visible' : ''}}" bindtap="hideDetail">
+    <view class="modal-panel" catchtap="noop">
+      <text class="detail-icon">{{detail.icon}}</text>
+      <text class="detail-name">{{detail.name}}</text>
+      <text class="detail-desc">{{detail.desc}}</text>
+      <text class="detail-formula">{{detail.formula}}</text>
+      <button class="modal-close" bindtap="hideDetail">关闭</button>
+    </view>
+  </view>
+</view>

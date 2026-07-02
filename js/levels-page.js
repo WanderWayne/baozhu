@@ -1,6 +1,40 @@
 // 章节选择页面逻辑
 // ================================================
 
+/** 屏幕中上方红字报错提示（最高图层）；出现后停留约 0.5s 再于 1s 内淡出 */
+function showTopHintError(message) {
+    const text = typeof message === 'string' ? message : '';
+    if (!text) return;
+
+    if (window.AudioManager) window.AudioManager.playSFX('error');
+
+    const existing = document.getElementById('global-top-hint');
+    if (existing) existing.remove();
+
+    const el = document.createElement('div');
+    el.id = 'global-top-hint';
+    el.className = 'global-top-hint';
+    el.setAttribute('role', 'alert');
+    el.textContent = text;
+    document.body.appendChild(el);
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            el.classList.add('global-top-hint--visible');
+        });
+    });
+
+    setTimeout(() => {
+        el.classList.add('global-top-hint--fade');
+    }, 500);
+
+    setTimeout(() => {
+        el.remove();
+    }, 1500);
+}
+
+window.showTopHintError = showTopHintError;
+
 let currentWorldId = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,6 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
         backBtn.addEventListener('click', () => {
             if (window.AudioManager) {
                 window.AudioManager.playClickBack();
+            }
+            // 如果是第一次从游戏退出并返回主界面，设置引导标记
+            if (localStorage.getItem('tut_first_exit_game') === '1' && 
+                !localStorage.getItem('tut_main_guide_done')) {
+                localStorage.setItem('tut_guide_tasks_on_main', '1');
             }
             window.navigateTo('index.html');
         });
@@ -63,11 +102,17 @@ function createWorldNode(world) {
     // 获取解锁需求
     const fragmentReq = window.LevelManager.getWorldUnlockRequirement(world.id);
     
+    const _wSvg = world.svgItem && window.ITEM_SVGS && window.ITEM_SVGS[world.svgItem];
+    const iconHTML = _wSvg
+        ? `<div class="icon world-icon-svg">${_wSvg}</div>`
+        : `<div class="icon">${world.icon}</div>`;
+    
     if (isUnlocked) {
-        node.innerHTML = `<div class="icon">${world.icon}</div>`;
+        node.innerHTML = iconHTML;
         node.title = world.name;
         node.addEventListener('click', () => {
             // 点击时添加微妙的动画反馈
+            if (window.AudioManager) window.AudioManager.playClickOpen();
             node.style.transform = 'scale(0.92)';
             setTimeout(() => {
                 node.style.transform = '';
@@ -75,8 +120,11 @@ function createWorldNode(world) {
             }, 150);
         });
     } else {
-        node.innerHTML = `<div class="icon">🔒</div>`;
+        node.innerHTML = iconHTML;
         node.title = `收集${fragmentReq}个碎片解锁 ${world.name}`;
+        node.addEventListener('click', () => {
+            showTopHintError('由于你未解锁此章节，所以无法进入。');
+        });
     }
     
     return node;
@@ -146,7 +194,16 @@ function updateWorldHeader(world) {
     const worldIcon = document.getElementById('world-icon');
     const worldName = document.getElementById('world-name');
     
-    if (worldIcon) worldIcon.textContent = world.icon;
+    if (worldIcon) {
+        const _whSvg = world.svgItem && window.ITEM_SVGS && window.ITEM_SVGS[world.svgItem];
+        if (_whSvg) {
+            worldIcon.innerHTML = _whSvg;
+            worldIcon.classList.add('world-header-svg');
+        } else {
+            worldIcon.textContent = world.icon;
+            worldIcon.classList.remove('world-header-svg');
+        }
+    }
     if (worldName) worldName.textContent = world.name;
 }
 
@@ -202,6 +259,7 @@ function initLevelDoors(worldId) {
     setTimeout(() => {
         updateSelectedLevel(selectedLevelIndex);
         scrollToLevel(selectedLevelIndex, false);
+        handleCarouselScroll();
     }, 100);
 }
 
@@ -217,9 +275,11 @@ function createLevelDoor(level, index) {
     door.dataset.index = index;
     door.dataset.levelId = level.id;
     
-    // 目标文字格式化（双门关卡显示所有目标）
+    // 目标文字格式化（双门/多目标关卡显示所有目标）
     let targetLabel = level.target;
-    if (level.doors && level.doors.length > 1) {
+    if (level.multiTarget && level.multiTargets) {
+        targetLabel = level.multiTargets.join('，');
+    } else if (level.doors && level.doors.length > 1) {
         targetLabel = level.doors.map(d => d.target).join(' + ');
     }
     const targetText = isUnlocked 
@@ -229,10 +289,18 @@ function createLevelDoor(level, index) {
     // 进入按钮，最新解锁的加光波特效
     const btnClass = isLatestUnlocked ? 'door-enter-btn pulse-effect' : 'door-enter-btn';
     
+    const ps = isCompleted && level.perfectRecipes ? window.LevelManager.getPerfectStatus(level.id) : null;
+
+    const badgeHtml = isCompleted && ps && !ps.isPerfect
+        ? `<div class="completed-badge no-check"><span class="perfect-progress">${ps.found}/${ps.total}</span></div>`
+        : isCompleted
+            ? '<div class="completed-badge">✓</div>'
+            : '';
+
     door.innerHTML = `
-        ${isCompleted ? '<div class="completed-badge">✓</div>' : ''}
-        <div class="door-frame">
-            <div class="door-icon">${isUnlocked ? level.icon : '🔒'}</div>
+        ${badgeHtml}
+        <div class="door-frame${ps && ps.isPerfect ? ' perfect-glow' : ''}">
+            <div class="door-icon${(isUnlocked && window.ITEM_SVGS && window.ITEM_SVGS[level.target]) ? ' door-icon-svg' : ''}">${isUnlocked ? ((window.ITEM_SVGS && window.ITEM_SVGS[level.target]) || level.icon) : '🔒'}</div>
         </div>
         <div class="door-info">
             <div class="door-name">${isUnlocked ? level.name : '· · ·'}</div>
@@ -249,10 +317,13 @@ function createLevelDoor(level, index) {
             return;
         }
         
-        // 否则选中这个关卡
+        // 否则选中这个关卡（未解锁则提示）
         if (isUnlocked) {
+            if (window.AudioManager) window.AudioManager.playClickOpen();
             updateSelectedLevel(index);
             scrollToLevel(index, true);
+        } else {
+            showTopHintError('由于你未解锁此关卡，所以无法进入。');
         }
     });
     
@@ -284,11 +355,12 @@ function handleCarouselScroll() {
     const doors = container.querySelectorAll('.level-door');
     const containerRect = container.getBoundingClientRect();
     const containerCenter = containerRect.top + containerRect.height / 2;
+    const halfH = containerRect.height / 2;
     
     let closestIndex = 0;
     let closestDistance = Infinity;
     
-    doors.forEach((door, i) => {
+    doors.forEach((door) => {
         const doorRect = door.getBoundingClientRect();
         const doorCenter = doorRect.top + doorRect.height / 2;
         const distance = Math.abs(doorCenter - containerCenter);
@@ -297,6 +369,34 @@ function handleCarouselScroll() {
             closestDistance = distance;
             closestIndex = parseInt(door.dataset.index);
         }
+    });
+
+    doors.forEach((door) => {
+        const doorRect = door.getBoundingClientRect();
+        const doorCenter = doorRect.top + doorRect.height / 2;
+        const distance = Math.abs(doorCenter - containerCenter);
+        const t = Math.min(distance / halfH, 1);
+        const idx = parseInt(door.dataset.index);
+        const idxDist = Math.abs(idx - closestIndex);
+
+        let opacity;
+        if (idxDist >= 2) {
+            opacity = 0;
+        } else if (idxDist === 1) {
+            // 紧邻选中：略透明，但比旧版几何衰减更清晰易辨
+            opacity = 0.78 + (1 - t) * 0.14;
+        } else {
+            opacity = 1;
+        }
+
+        // 未解锁：在同滚动位置下始终比已解锁更淡（避免 inline opacity 盖掉 .locked 样式）
+        if (door.classList.contains('locked') && opacity > 0) {
+            opacity *= 0.52;
+        }
+
+        door.style.opacity = String(opacity);
+        door.style.pointerEvents = opacity < 0.05 ? 'none' : '';
+        door.style.transform = `scale(${1 - t * 0.08})`;
     });
     
     if (closestIndex !== selectedLevelIndex) {

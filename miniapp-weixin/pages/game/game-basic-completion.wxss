@@ -1,0 +1,175 @@
+.basic-completion-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completion-content {
+  width: 90%;
+  max-width: 400px;
+  background: linear-gradient(180deg, #2a2520 0%, #1a1815 100%);
+  border-radius: 24px;
+  border: 2px solid rgba(212, 165, 116, 0.3);
+  padding: 30px 25px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.completion-section {
+  margin-bottom: 25px;
+}
+
+.completion-section:last-child {
+  margin-bottom: 0;
+}
+
+.completion-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #FFE4B5;
+  letter-spacing: 2px;
+  margin-bottom: 25px;
+  display: block;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.stats-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.stats-value {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stats-percent {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.speed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255, 215, 0, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+.speed-badge.tier-5 { color: #FFD700; }
+.speed-badge.tier-4 { color: #CE93D8; border-color: rgba(156, 39, 176, 0.5); }
+.speed-badge.tier-3 { color: #90CAF9; border-color: rgba(33, 150, 243, 0.5); }
+.speed-badge.tier-2 { color: #A5D6A7; border-color: rgba(76, 175, 80, 0.5); }
+.speed-badge.tier-1 { color: #BDBDBD; border-color: rgba(158, 158, 158, 0.5); }
+
+.claim-reward-btn {
+  position: relative;
+  display: inline-block;
+  padding: 15px 50px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1815;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 30px;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.reward-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.reward-content {
+  padding: 20px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.title-upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.old-title, .new-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.old-title {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: line-through;
+}
+
+.new-title {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 167, 38, 0.3) 100%);
+  color: #FFE4B5;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+.upgrade-arrow {
+  color: #FFD700;
+  font-size: 20px;
+}
+
+.continue-message {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  line-height: 1.8;
+  margin-bottom: 25px;
+}
+
+.continue-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.continue-btn {
+  padding: 12px 30px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 25px;
+}
+
+.continue-btn.primary {
+  background: linear-gradient(135deg, #D4A574 0%, #C49463 100%);
+  color: white;
+}
+
+.continue-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}

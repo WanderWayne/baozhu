@@ -1,0 +1,307 @@
+{
+  "version": "1.0.1",
+  "map": {
+    "resources": {
+      "time": 1778581447636.459,
+      "uuid": "c30509a3-8323-4295-b6d6-baa0459850b3"
+    },
+    "scripts": {
+      "time": 1778581447646.0046,
+      "uuid": "5b7da0a0-d50a-4bc1-af29-bdf000d3f89f"
+    },
+    "resources\\config": {
+      "time": 1778581453976.039,
+      "uuid": "2493ee13-1493-4d4f-894c-76e5d27a354f"
+    },
+    "resources\\perf": {
+      "time": 1778581453977.046,
+      "uuid": "0a4df293-5f7c-4249-99e2-9211fdc3166a"
+    },
+    "scripts\\core": {
+      "time": 1778581447652.4187,
+      "uuid": "0e570276-d445-4f94-aed4-5a994606c54e"
+    },
+    "scripts\\data": {
+      "time": 1778581447653.211,
+      "uuid": "7ef72660-ef00-425b-86d9-f4c85214a50b"
+    },
+    "scripts\\runtime": {
+      "time": 1778581447656.429,
+      "uuid": "c74392a0-0b4f-4358-9298-e628eea395a8"
+    },
+    "scripts\\scenes": {
+      "time": 1778581447670.8247,
+      "uuid": "12ba283d-dc7f-4701-b60d-3c0354fd50e5"
+    },
+    "scripts\\tests": {
+      "time": 1778581447671.8242,
+      "uuid": "62e23fe5-c520-4c80-ac55-f002a5d093a3"
+    },
+    "scripts\\wechat": {
+      "time": 1778581447672.8254,
+      "uuid": "2f7d26b1-ca55-4808-8c6f-c6a9c3becd29"
+    },
+    "scripts\\AppRoot.ts": {
+      "time": 1778403299790.2349,
+      "uuid": "07bd9f6d-824a-4c1a-a674-ca071a1fa4a5"
+    },
+    "scripts\\core\\ProgressService.ts": {
+      "time": 1778403351887.721,
+      "uuid": "c5f443dc-f240-465e-8078-0c33b506fc47"
+    },
+    "scripts\\core\\RecipeEngine.ts": {
+      "time": 1778403088907.3923,
+      "uuid": "d0cef0a6-d94d-4747-84ff-c5e025fbbf18"
+    },
+    "scripts\\core\\TaskService.ts": {
+      "time": 1778403107378.2744,
+      "uuid": "3e4d55e0-5352-47e0-a359-bc9d54919d4c"
+    },
+    "scripts\\core\\types.ts": {
+      "time": 1778403072308.9478,
+      "uuid": "03e0f176-9758-4f0d-b1ce-9825429edff2"
+    },
+    "scripts\\data\\ConfigLoader.ts": {
+      "time": 1778403083951.3572,
+      "uuid": "a7f9d901-ab7f-4537-80bc-bec0af51ea9d"
+    },
+    "scripts\\data\\ConfigRepository.ts": {
+      "time": 1778403079776.338,
+      "uuid": "98950df7-a64d-4cf9-b382-0a1ce727f324"
+    },
+    "scripts\\runtime\\AudioService.ts": {
+      "time": 1778403122470.4568,
+      "uuid": "14817979-ae84-48c9-84fe-bb205a208dcd"
+    },
+    "scripts\\runtime\\PerformanceProfiler.ts": {
+      "time": 1778403315428.392,
+      "uuid": "e9627b29-4bc5-44b6-86c8-fe79f3e3f97d"
+    },
+    "scripts\\runtime\\ResourcePolicy.ts": {
+      "time": 1778403128662.3723,
+      "uuid": "c8922159-c4a9-4633-9c2a-12b9661cbce8"
+    },
+    "scripts\\runtime\\SceneRouter.ts": {
+      "time": 1778403134324.969,
+      "uuid": "1445234a-8f44-4785-a91b-a67d1fbdec6f"
+    },
+    "scripts\\runtime\\StorageAdapter.ts": {
+      "time": 1778403115822.4106,
+      "uuid": "099204c6-9842-4cec-a73d-36629945ec07"
+    },
+    "scripts\\scenes\\BootScene.ts": {
+      "time": 1778403160549.0146,
+      "uuid": "f5a103cf-639f-42a5-9950-838fac4bf059"
+    },
+    "scripts\\scenes\\ChapterSettlement.ts": {
+      "time": 1778403221097.6226,
+      "uuid": "2068cd4c-712f-4225-8e22-c341f48ab2cd"
+    },
+    "scripts\\scenes\\CodexScene.ts": {
+      "time": 1778403197245.2834,
+      "uuid": "ea8391f6-e7ba-4785-b488-0fd086308cbb"
+    },
+    "scripts\\scenes\\GalleryScene.ts": {
+      "time": 1778403201763.729,
+      "uuid": "51224506-9ee6-4da4-af30-3ec2274fbccd"
+    },
+    "scripts\\scenes\\GameContext.ts": {
+      "time": 1778403147470.1135,
+      "uuid": "94aedd8b-681a-4ef8-9c74-13c8484ee093"
+    },
+    "scripts\\scenes\\GameScene.ts": {
+      "time": 1778403356167.4824,
+      "uuid": "7c7f8d9d-fa20-44ce-91e6-142f0f3bb180"
+    },
+    "scripts\\scenes\\IntroScene.ts": {
+      "time": 1778403165674.9856,
+      "uuid": "842c3e8b-6d4a-4b20-8d45-f6b679fe37da"
+    },
+    "scripts\\scenes\\LevelsScene.ts": {
+      "time": 1778403361691.5383,
+      "uuid": "abe8a732-ceac-40be-9a72-1a96da6e5ff9"
+    },
+    "scripts\\scenes\\MenuGrowthSystem.ts": {
+      "time": 1778403228009.3423,
+      "uuid": "f6988828-d458-4689-bbc0-9227b2ed487b"
+    },
+    "scripts\\scenes\\MenuScene.ts": {
+      "time": 1778403171474.7893,
+      "uuid": "75eb3f54-0682-4167-a6ba-2ddf9f26c64d"
+    },
+    "scripts\\scenes\\TaskToast.ts": {
+      "time": 1778403369380.9395,
+      "uuid": "ff46d404-4215-4d84-8c74-0b2be8284696"
+    },
+    "scripts\\scenes\\TutorialOverlay.ts": {
+      "time": 1778403206002.2224,
+      "uuid": "ac71d300-3d82-43a4-b18b-b72c0d0afc60"
+    },
+    "scripts\\tests\\ProgressService.spec.ts": {
+      "time": 1778403271414.3218,
+      "uuid": "e6dd58cc-79c0-4694-9653-97db26dd9b2b"
+    },
+    "scripts\\tests\\RecipeEngine.spec.ts": {
+      "time": 1778403265987.6194,
+      "uuid": "b2dd6c02-844b-4945-947f-1ff20d897690"
+    },
+    "scripts\\wechat\\WechatAdapter.ts": {
+      "time": 1778403139493.9856,
+      "uuid": "2e2bff91-5dd7-4131-bb61-5404a663cf56"
+    },
+    "resources.meta": {
+      "time": 1778581447677.337
+    },
+    "scripts.meta": {
+      "time": 1778581447678.3423
+    },
+    "resources\\config.meta": {
+      "time": 1778581447679.3408
+    },
+    "resources\\perf.meta": {
+      "time": 1778581447680.3408
+    },
+    "scripts\\core.meta": {
+      "time": 1778581447680.3408
+    },
+    "scripts\\data.meta": {
+      "time": 1778581447683.3445
+    },
+    "scripts\\runtime.meta": {
+      "time": 1778581447684.3435
+    },
+    "scripts\\scenes.meta": {
+      "time": 1778581447686.8528
+    },
+    "scripts\\tests.meta": {
+      "time": 1778581447687.8547
+    },
+    "scripts\\wechat.meta": {
+      "time": 1778581447689.8547
+    },
+    "scripts\\AppRoot.ts.meta": {
+      "time": 1778581447693.856
+    },
+    "scripts\\core\\ProgressService.ts.meta": {
+      "time": 1778581447694.858
+    },
+    "scripts\\core\\RecipeEngine.ts.meta": {
+      "time": 1778581447696.459
+    },
+    "scripts\\core\\TaskService.ts.meta": {
+      "time": 1778581447696.459
+    },
+    "scripts\\core\\types.ts.meta": {
+      "time": 1778581447696.459
+    },
+    "scripts\\data\\ConfigLoader.ts.meta": {
+      "time": 1778581447701.8076
+    },
+    "scripts\\data\\ConfigRepository.ts.meta": {
+      "time": 1778581447701.8076
+    },
+    "scripts\\runtime\\AudioService.ts.meta": {
+      "time": 1778581447706.004
+    },
+    "scripts\\runtime\\PerformanceProfiler.ts.meta": {
+      "time": 1778581447706.004
+    },
+    "scripts\\runtime\\ResourcePolicy.ts.meta": {
+      "time": 1778581447706.004
+    },
+    "scripts\\runtime\\SceneRouter.ts.meta": {
+      "time": 1778581447710.2937
+    },
+    "scripts\\runtime\\StorageAdapter.ts.meta": {
+      "time": 1778581447710.2937
+    },
+    "scripts\\scenes\\BootScene.ts.meta": {
+      "time": 1778581447716.3828
+    },
+    "scripts\\scenes\\ChapterSettlement.ts.meta": {
+      "time": 1778581447716.3828
+    },
+    "scripts\\scenes\\CodexScene.ts.meta": {
+      "time": 1778581447719.6028
+    },
+    "scripts\\scenes\\GalleryScene.ts.meta": {
+      "time": 1778581447723.5679
+    },
+    "scripts\\scenes\\GameContext.ts.meta": {
+      "time": 1778581447726.1787
+    },
+    "scripts\\scenes\\GameScene.ts.meta": {
+      "time": 1778581447726.1787
+    },
+    "scripts\\scenes\\IntroScene.ts.meta": {
+      "time": 1778581447729.8904
+    },
+    "scripts\\scenes\\LevelsScene.ts.meta": {
+      "time": 1778581447729.8904
+    },
+    "scripts\\scenes\\MenuGrowthSystem.ts.meta": {
+      "time": 1778581447733.9294
+    },
+    "scripts\\scenes\\MenuScene.ts.meta": {
+      "time": 1778581447735.5046
+    },
+    "scripts\\scenes\\TaskToast.ts.meta": {
+      "time": 1778581447736.4563
+    },
+    "scripts\\scenes\\TutorialOverlay.ts.meta": {
+      "time": 1778581447736.4563
+    },
+    "scripts\\tests\\ProgressService.spec.ts.meta": {
+      "time": 1778581447736.4563
+    },
+    "scripts\\tests\\RecipeEngine.spec.ts.meta": {
+      "time": 1778581447740.38
+    },
+    "scripts\\wechat\\WechatAdapter.ts.meta": {
+      "time": 1778581447740.38
+    },
+    "resources\\config\\atlas.json": {
+      "time": 1778403286011.8037,
+      "uuid": "38cf40bb-2edd-4bcf-a677-1d350122a1c7"
+    },
+    "resources\\config\\game-config.json": {
+      "time": 1778403286012.8052,
+      "uuid": "f605982e-68ef-4488-8e1c-27e9ff821b9e"
+    },
+    "resources\\config\\items.json": {
+      "time": 1778403286011.8037,
+      "uuid": "6fe12333-c2fe-4312-b405-9b3fe9f8df8d"
+    },
+    "resources\\config\\tasks.json": {
+      "time": 1778403286011.8037,
+      "uuid": "6c174516-bf17-4c14-8d88-92e8c4a7cb16"
+    },
+    "resources\\config\\worlds.json": {
+      "time": 1778403286011.8037,
+      "uuid": "bc171e2a-415b-4d02-97a4-dcd33a1ccf7f"
+    },
+    "resources\\perf\\performance-budget.json": {
+      "time": 1778403310479.6882,
+      "uuid": "a75ba7ee-88df-4123-8316-65b72c3ecd02"
+    },
+    "resources\\config\\tasks.json.meta": {
+      "time": 1778581454021.6926
+    },
+    "resources\\config\\worlds.json.meta": {
+      "time": 1778581454026.4788
+    },
+    "resources\\config\\game-config.json.meta": {
+      "time": 1778581454028.5044
+    },
+    "resources\\config\\atlas.json.meta": {
+      "time": 1778581454028.5044
+    },
+    "resources\\config\\items.json.meta": {
+      "time": 1778581454028.5044
+    },
+    "resources\\perf\\performance-budget.json.meta": {
+      "time": 1778581454028.5044
+    }
+  },
+  "missing": {}
+}

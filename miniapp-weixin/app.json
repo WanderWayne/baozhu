@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/intro/intro",
+    "pages/index/index",
+    "pages/levels/levels",
+    "pages/game/game",
+    "pages/codex/codex",
+    "pages/gallery/gallery"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "backgroundColor": "#F5E6E0",
+    "backgroundTextStyle": "light"
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

@@ -62,6 +62,7 @@
             
             setTimeout(() => {
                 document.body.classList.remove('page-entering');
+                document.body.style.opacity = '1';
             }, config.fadeInDuration);
         } else {
             // 首次加载也添加淡入效果

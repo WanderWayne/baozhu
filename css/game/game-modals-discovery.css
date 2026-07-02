@@ -206,6 +206,21 @@
 
 .extract-item-icon {
     font-size: 48px;
+    line-height: 1;
+}
+
+.extract-item-icon-svg {
+    display: inline-flex;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.extract-item-icon-svg svg {
+    width: 100%;
+    height: 100%;
 }
 
 .extract-item-name {
@@ -214,11 +229,23 @@
     color: var(--text-color);
 }
 
+.extract-basic-block {
+    margin-bottom: 16px;
+}
+
+.extract-basic-block .extract-section-title {
+    text-align: center;
+}
+
 .extract-desc {
     font-size: 13px;
     color: var(--text-light);
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+}
+
+.extract-basic-block + .extract-section {
+    margin-top: 4px;
 }
 
 .extract-section {

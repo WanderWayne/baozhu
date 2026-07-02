@@ -3,82 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>配方图鉴 - 宝珠酿造</title>
+    <title>宝珠图谱 - 宝珠酿造</title>
     <link rel="stylesheet" href="css/codex.css">
+    <link rel="stylesheet" href="css/atlas.css">
     <link rel="stylesheet" href="css/transitions.css">
 </head>
 <body>
     <div class="container">
         <header>
             <button class="back-btn" id="back-btn">←</button>
-            <h1>配方图鉴</h1>
+            <h1>宝珠图谱</h1>
             <div class="header-progress">
-                <span id="total-progress">0/50</span>
+                <span id="atlas-progress-count">0/3</span>
             </div>
         </header>
 
-        <!-- 总进度条 -->
-        <div class="main-progress">
-            <div class="progress-bar-large">
-                <div class="progress-fill-large" id="main-progress-fill"></div>
-            </div>
-            <div class="progress-stats">
-                <div class="stat">
-                    <span class="stat-value" id="core-count">0</span>
-                    <span class="stat-label">核心配方</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="branch-count">0</span>
-                    <span class="stat-label">支线配方</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="hidden-count">0</span>
-                    <span class="stat-label">隐藏配方</span>
-                </div>
+        <p class="atlas-intro">三圈叠瓣：外圈舆图轮廓，中圈为可点亮的疆域碎片，内圈拢住花心。远看像地图分域，近看莲花次第。</p>
+
+        <div class="atlas-board-wrap">
+            <div class="atlas-board-square" id="atlas-board">
+                <!-- SVG 由 JS 注入 -->
             </div>
         </div>
 
-        <!-- 配方列表 -->
-        <div class="codex-sections">
-            <!-- 核心配方 -->
-            <div class="codex-section">
-                <div class="section-header">
-                    <span class="section-icon">📖</span>
-                    <span class="section-title">核心配方</span>
-                    <span class="section-count" id="core-section-count">0/14</span>
+        <p class="atlas-progress-meta" id="atlas-progress-meta"></p>
+
+        <button type="button" class="recipes-drawer-toggle" id="recipes-drawer-toggle" aria-expanded="false">
+            <span>配方一览</span>
+            <span class="drawer-chevron">▼</span>
+        </button>
+        <div class="recipes-drawer-panel" id="recipes-drawer-panel">
+            <div class="main-progress">
+                <div class="progress-bar-large">
+                    <div class="progress-fill-large" id="recipe-progress-fill"></div>
                 </div>
-                <div class="recipe-grid" id="core-recipes">
-                    <!-- 由JS动态生成 -->
+                <div class="progress-stats">
+                    <div class="stat">
+                        <span class="stat-value" id="core-count">0</span>
+                        <span class="stat-label">核心配方</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="branch-count">0</span>
+                        <span class="stat-label">支线配方</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="hidden-count">0</span>
+                        <span class="stat-label">隐藏配方</span>
+                    </div>
                 </div>
             </div>
-
-            <!-- 支线配方 -->
-            <div class="codex-section">
-                <div class="section-header">
-                    <span class="section-icon">🌿</span>
-                    <span class="section-title">支线配方</span>
-                    <span class="section-count" id="branch-section-count">0/20</span>
+            <div class="codex-sections">
+                <div class="codex-section">
+                    <div class="section-header">
+                        <span class="section-icon">📖</span>
+                        <span class="section-title">核心配方</span>
+                        <span class="section-count" id="core-section-count">0/14</span>
+                    </div>
+                    <div class="recipe-grid" id="core-recipes"></div>
                 </div>
-                <div class="recipe-grid" id="branch-recipes">
-                    <!-- 由JS动态生成 -->
+                <div class="codex-section">
+                    <div class="section-header">
+                        <span class="section-icon">🌿</span>
+                        <span class="section-title">支线配方</span>
+                        <span class="section-count" id="branch-section-count">0/20</span>
+                    </div>
+                    <div class="recipe-grid" id="branch-recipes"></div>
                 </div>
-            </div>
-
-            <!-- 隐藏配方 -->
-            <div class="codex-section">
-                <div class="section-header">
-                    <span class="section-icon">✨</span>
-                    <span class="section-title">隐藏配方</span>
-                    <span class="section-count" id="hidden-section-count">0/16</span>
-                </div>
-                <div class="recipe-grid" id="hidden-recipes">
-                    <!-- 由JS动态生成 -->
+                <div class="codex-section">
+                    <div class="section-header">
+                        <span class="section-icon">✨</span>
+                        <span class="section-title">隐藏配方</span>
+                        <span class="section-count" id="hidden-section-count">0/16</span>
+                    </div>
+                    <div class="recipe-grid" id="hidden-recipes"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 配方详情弹窗 -->
     <div class="modal-overlay" id="recipe-modal">
         <div class="recipe-detail">
             <button class="close-btn" id="close-modal">×</button>
@@ -87,29 +89,19 @@
             <div class="recipe-desc" id="detail-desc">宝珠的第一碗</div>
             <div class="recipe-formula">
                 <div class="formula-title">合成配方</div>
-                <div class="formula-content" id="detail-formula">
-                    <!-- 由JS填充 -->
-                </div>
+                <div class="formula-content" id="detail-formula"></div>
             </div>
-            <div class="recipe-story" id="detail-story">
-                <!-- 故事碎片（如果有） -->
-            </div>
+            <div class="recipe-story" id="detail-story"></div>
         </div>
     </div>
 
-    <!-- 音频管理器 -->
     <script src="js/audio-manager.js"></script>
-    
-    <!-- 数据模块 -->
     <script src="js/data/data-worlds.js"></script>
     <script src="js/data/data-items.js"></script>
+    <script src="js/data/data-atlas.js"></script>
     <script src="js/data.js"></script>
-    
     <script src="js/level.js"></script>
     <script src="js/codex.js"></script>
-    
-    <!-- 页面过渡系统 -->
     <script src="js/page-transitions.js"></script>
 </body>
 </html>
-

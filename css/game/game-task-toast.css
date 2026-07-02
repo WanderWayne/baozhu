@@ -1,0 +1,76 @@
+/* 关卡内「任务达成」飘条 — 最高图层 */
+/* ============================================= */
+
+#game-task-toast-root {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2147483000;
+}
+
+.game-task-toast {
+    position: fixed;
+    left: 0;
+    top: max(14px, calc(env(safe-area-inset-top, 0px) + 10px));
+    max-width: min(94vw, 420px);
+    padding: 20px 26px;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #ffffff;
+    color: var(--old-wood, #6b5344);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+    border-radius: 0;
+    box-shadow:
+        0 0 0 2px rgba(120, 220, 190, 0.55),
+        0 0 22px rgba(92, 201, 160, 0.45),
+        0 6px 24px rgba(74, 52, 40, 0.12);
+    transform: translateX(calc(-100% - 24px));
+    opacity: 0;
+    transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.35s ease;
+    will-change: transform, opacity;
+}
+
+.game-task-toast__badge {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #5cc9a0;
+    box-shadow:
+        0 0 12px 3px rgba(92, 201, 160, 0.55),
+        0 0 28px 6px rgba(140, 228, 200, 0.28);
+}
+
+.game-task-toast__badge-mark {
+    color: #ffffff;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    margin-top: -1px;
+}
+
+.game-task-toast__text {
+    flex: 1;
+    min-width: 0;
+}
+
+.game-task-toast.game-task-toast--slide-in {
+    transform: translateX(calc(24px + env(safe-area-inset-left, 0px)));
+    opacity: 1;
+}
+
+.game-task-toast.game-task-toast--fly-out {
+    transition: none;
+}

@@ -25,7 +25,7 @@
             <div class="door-frame"></div>
             <div class="door-inner">
                 <div class="door-glow"></div>
-                <div class="door-target-silhouette" id="intro-door-icon">🍶</div>
+                <div class="door-target-silhouette" id="intro-door-icon"></div>
             </div>
         </div>
         
@@ -49,31 +49,34 @@
         
         <!-- 主菜单 -->
         <div class="main-menu-container">
-            <!-- 开始游戏按钮 -->
-            <button class="main-btn primary" id="continue-btn">开始游戏</button>
-            
-            <!-- 配方图谱进度条 -->
-            <div class="main-progress-row" id="codex-row">
-                <span class="progress-label">配方图谱</span>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="codex-progress-fill"></div>
+            <!-- 统一区域：上下两条长线圈住 4 个主项 -->
+            <div class="main-menu-block">
+                <!-- 开始游戏按钮 -->
+                <button class="main-btn primary" id="continue-btn">开始游戏</button>
+
+                <!-- 宝珠图谱进度 -->
+                <div class="main-progress-row" id="codex-row">
+                    <span class="progress-label">宝珠图谱</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="codex-progress-fill"></div>
+                    </div>
+                    <span class="progress-text" id="codex-progress-text">0/50</span>
                 </div>
-                <span class="progress-text" id="codex-progress-text">0/50</span>
-            </div>
-            
-            <!-- 记忆碎片进度条 -->
-            <div class="main-progress-row" id="fragment-row">
-                <span class="progress-label">记忆碎片</span>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="fragment-progress-fill"></div>
+
+                <!-- 记忆碎片进度条 -->
+                <div class="main-progress-row" id="fragment-row">
+                    <span class="progress-label">记忆碎片</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="fragment-progress-fill"></div>
+                    </div>
+                    <span class="progress-text" id="fragment-progress-text">0/30</span>
                 </div>
-                <span class="progress-text" id="fragment-progress-text">0/30</span>
+
+                <!-- 设置按钮 -->
+                <button class="main-btn secondary" id="settings-btn">设置</button>
             </div>
-            
-            <!-- 设置按钮 -->
-            <button class="main-btn secondary" id="settings-btn">设置</button>
-            
-            <!-- 底部小字行 -->
+
+            <!-- 底部小字行（区域下线之外） -->
             <div class="main-footer-row">
                 <button class="main-link-btn" id="reset-btn">重置进度</button>
                 <span class="main-footer-divider">·</span>
@@ -101,15 +104,15 @@
                 <!-- BGM 音量控制 -->
                 <div class="settings-row">
                     <span class="settings-label">🎵 背景音乐</span>
-                    <input type="range" id="bgm-volume-slider" class="volume-slider" min="0" max="100" value="80">
-                    <span class="volume-value" id="bgm-volume-value">80%</span>
+                    <input type="range" id="bgm-volume-slider" class="volume-slider" min="0" max="100" value="0">
+                    <span class="volume-value" id="bgm-volume-value">0%</span>
                 </div>
                 
                 <!-- SFX 音量控制 -->
                 <div class="settings-row">
                     <span class="settings-label">🔊 音效</span>
-                    <input type="range" id="sfx-volume-slider" class="volume-slider" min="0" max="100" value="80">
-                    <span class="volume-value" id="sfx-volume-value">80%</span>
+                    <input type="range" id="sfx-volume-slider" class="volume-slider" min="0" max="100" value="0">
+                    <span class="volume-value" id="sfx-volume-value">0%</span>
                 </div>
                 
                 <div class="settings-divider"></div>
@@ -130,9 +133,11 @@
     <!-- 数据模块 -->
     <script src="js/data/data-worlds.js"></script>
     <script src="js/data/data-items.js"></script>
+    <script src="js/data/data-atlas.js"></script>
     <script src="js/data.js"></script>
     
     <script src="js/level.js"></script>
+    <script src="js/data/data-tasks.js"></script>
     
     <!-- 主界面模块（main-particles.js 须先于开场模块加载，因为它定义了 BAOZHU_TITLE_CONFIG 共用配置）-->
     <script src="js/main-particles.js"></script>

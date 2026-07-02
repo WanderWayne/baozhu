@@ -197,6 +197,11 @@
     overflow: hidden;
 }
 
+/* 门内已不再显示目标剪影（开场教学） */
+#intro-door .door-target-silhouette.door-icon-empty {
+    display: none !important;
+}
+
 /* 门内目标物品剪影 — 开场动画门内的酒酿图案 */
 #intro-door .door-target-silhouette {
     position: absolute;
@@ -209,6 +214,23 @@
     pointer-events: none;
     z-index: 1;
     animation: introTargetBreath 3s ease-in-out infinite;
+}
+
+/* SVG 图标样式 */
+#intro-door .door-target-silhouette.door-icon-svg {
+    font-size: 0;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#intro-door .door-target-silhouette.door-icon-svg svg {
+    width: 100%;
+    height: 100%;
+    filter: grayscale(70%) blur(2px);
+    opacity: 0.8;
 }
 
 @keyframes introTargetBreath {
@@ -363,11 +385,9 @@
     width: 100%;
     height: 180px; /* 统一高度 180px */
     background: rgba(30, 30, 35, 0.85);
-    border: 1px solid rgba(100, 100, 110, 0.5);
-    border-bottom: none;
-    border-left: none;
-    border-right: none;
-    border-radius: 20px 20px 0 0;
+    /* 移除圆角和边缘线 */
+    border: none;
+    border-radius: 0;
     z-index: 20;
     display: flex;
     align-items: flex-start; /* 靠顶部 */
@@ -423,6 +443,21 @@
     line-height: 1;
 }
 
+/* SVG 图标样式 */
+.intro-item .item-icon.item-icon-svg {
+    font-size: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.intro-item .item-icon.item-icon-svg svg {
+    width: 100%;
+    height: 100%;
+}
+
 .intro-item .item-name {
     font-size: 11px;
     color: rgba(255, 255, 255, 0.7);
@@ -453,6 +488,13 @@
             0 0 25px rgba(255, 200, 50, 0.6),
             0 0 50px rgba(255, 180, 30, 0.3);
     }
+}
+
+/* 仅金边：无光波动画、无外发光脉冲（开场第二件物品） */
+.intro-item.golden.golden-border-only {
+    animation: none;
+    box-shadow: none;
+    border-color: rgba(255, 210, 80, 0.95);
 }
 
 /* 合成结果物品 */

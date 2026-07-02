@@ -1,7 +1,7 @@
 // 开场序列系统 - 物品系统模块
 // ================================================
 
-IntroSystem.prototype.createItem = function(name, icon, isGolden = false) {
+IntroSystem.prototype.createItem = function(name, icon, isGolden = false, isSvg = false, emitGoldenPulse = true) {
     // 根据屏幕尺寸调整物品大小（iPad Air: 1180x820）
     const isLargeScreen = window.innerWidth >= 800 && window.innerHeight >= 700;
     const itemWidth = isLargeScreen ? 70 : 75;
@@ -46,14 +46,24 @@ IntroSystem.prototype.createItem = function(name, icon, isGolden = false) {
         spinAngle: 0,
         spinStart: 0,
         el: null,
-        pulseInterval: null
+        pulseInterval: null,
+        goldenBorderOnly: !!(isGolden && !emitGoldenPulse)
     };
     
     // 创建 DOM 元素
     const el = document.createElement('div');
-    el.className = `intro-item ${isGolden ? 'golden' : ''}`;
+    const classes = ['intro-item'];
+    if (isGolden) {
+        classes.push('golden');
+        if (!emitGoldenPulse) classes.push('golden-border-only');
+    }
+    el.className = classes.join(' ');
+    // 如果是 SVG 图标，使用特殊容器
+    const iconHtml = isSvg
+        ? `<span class="item-icon item-icon-svg">${icon}</span>`
+        : `<span class="item-icon">${icon}</span>`;
     el.innerHTML = `
-        <span class="item-icon">${icon}</span>
+        ${iconHtml}
         <span class="item-name">${name}</span>
     `;
     el.style.left = item.x + 'px';
@@ -74,8 +84,7 @@ IntroSystem.prototype.createItem = function(name, icon, isGolden = false) {
         el.classList.add('visible');
     }, 50);
     
-    // 如果是金色，发射光波
-    if (isGolden) {
+    if (isGolden && emitGoldenPulse) {
         this.startGoldenPulse(item);
     }
     
@@ -110,6 +119,7 @@ IntroSystem.prototype.startGoldenPulse = function(item) {
 IntroSystem.prototype.updateItemVisual = function(item) {
     if (item.el) {
         item.el.classList.toggle('golden', item.isGolden);
+        item.el.classList.toggle('golden-border-only', !!(item.isGolden && item.goldenBorderOnly));
     }
     // 停止光波
     if (!item.isGolden && item.pulseInterval) {
@@ -117,7 +127,7 @@ IntroSystem.prototype.updateItemVisual = function(item) {
     }
 };
 
-IntroSystem.prototype.createSynthesisResult = function(name, icon, x, y) {
+IntroSystem.prototype.createSynthesisResult = function(name, icon, x, y, isSvg = false) {
     // 根据屏幕尺寸调整
     const isLargeScreen = window.innerWidth >= 800 && window.innerHeight >= 700;
     const size = isLargeScreen ? 75 : 80;
@@ -137,8 +147,12 @@ IntroSystem.prototype.createSynthesisResult = function(name, icon, x, y) {
     
     const el = document.createElement('div');
     el.className = 'intro-item synthesis-result';
+    // 如果是 SVG 图标，使用特殊容器
+    const iconHtml = isSvg
+        ? `<span class="item-icon item-icon-svg">${icon}</span>`
+        : `<span class="item-icon">${icon}</span>`;
     el.innerHTML = `
-        <span class="item-icon">${icon}</span>
+        ${iconHtml}
         <span class="item-name">${name}</span>
     `;
     el.style.left = item.x + 'px';
@@ -212,7 +226,7 @@ IntroSystem.prototype.onPointerDown = function(e) {
         
         // 如果是金色物品，拖出时去掉金边和光波
         if (clickedItem.isGolden) {
-            clickedItem.el.classList.remove('golden');
+            clickedItem.el.classList.remove('golden', 'golden-border-only');
             if (clickedItem.pulseInterval) {
                 clearInterval(clickedItem.pulseInterval);
                 clickedItem.pulseInterval = null;

@@ -128,12 +128,12 @@
     };
 
     const originalCheckLevelCompletion = window.Game.prototype.checkLevelCompletion;
-    window.Game.prototype.checkLevelCompletion = function (newItemName) {
+    window.Game.prototype.checkLevelCompletion = function (newItemName, synthAreaEl) {
         if (this.abyss) {
             this.abyssOnSynthesis(newItemName);
             return;
         }
-        return originalCheckLevelCompletion.call(this, newItemName);
+        return originalCheckLevelCompletion.call(this, newItemName, synthAreaEl);
     };
 
     const originalCreateMilkFog = window.Game.prototype.createMilkFogParticles;
@@ -289,7 +289,7 @@
 
     window.Game.prototype.abyssCreateChest = function () {
         const world = this.abyss.world;
-        const config = this.levelData.abyssConfig || { chestPosition: { x: 0.5, y: 1.4 }, chestItems: ['牛奶', '酿造'] };
+        const config = this.levelData.abyssConfig || { chestPosition: { x: 0.5, y: 1.4 }, chestItems: ['牛奶', '酿造', '发酵'] };
         const cx = ABYSS_CONFIG.worldWidth * config.chestPosition.x;
         const cy = ABYSS_CONFIG.roomCenter.y + 300;
 
@@ -463,7 +463,7 @@
         chest.innerHTML = SVG_CHEST_OPEN;
         if (window.AudioManager) window.AudioManager.playSFX('craft-normal');
         this.abyssHideHint();
-        const items = this.abyss.chestItems || ['牛奶', '酿造'];
+        const items = this.abyss.chestItems || ['牛奶', '酿造', '发酵'];
         this.abyssShowChestRewards(items);
     };
 

@@ -31,7 +31,34 @@ document.addEventListener('DOMContentLoaded', () => {
             window.AudioManager.playBGM('bgm-menu');
         }
     }
+    
+    // 检查是否需要继续新手引导（第一次从游戏返回主界面时）
+    if (localStorage.getItem('tut_guide_tasks_on_main') === '1' && window.TutorialGuide) {
+        localStorage.removeItem('tut_guide_tasks_on_main');
+        setTimeout(() => _showTasksTutorial(), 800);
+    }
 });
+
+// 主界面任务按钮新手引导
+async function _showTasksTutorial() {
+    const tasksBtn = document.getElementById('free-mode-btn');
+    
+    // 引导点击任务按钮
+    if (tasksBtn) {
+        await window.TutorialGuide.show({
+            target: tasksBtn,
+            text: '点击查看任务进度与奖励',
+            position: 'bottom',
+            padding: 10,
+            borderRadius: 16
+        });
+        
+        // 标记引导已完成，避免重复显示
+        localStorage.setItem('tut_main_guide_done', '1');
+        // 标记进入任务面板后引导领取奖励
+        localStorage.setItem('tut_guide_claim_reward', '1');
+    }
+}
 
 // ==================== 成长系统初始化 ====================
 
@@ -48,14 +75,26 @@ function initGrowthSystem() {
 
 // ==================== 主菜单按钮绑定 ====================
 
+// 点击金光闪烁反馈（框选按钮）
+function flashMenuBtn(btn) {
+    if (!btn) return;
+    btn.classList.remove('btn-flash');
+    // 强制回流以便重复触发动画
+    void btn.offsetWidth;
+    btn.classList.add('btn-flash');
+    btn.addEventListener('animationend', () => {
+        btn.classList.remove('btn-flash');
+    }, { once: true });
+}
+
 function bindMenuButtons() {
     // 开始游戏按钮
     const continueBtn = document.getElementById('continue-btn');
     if (continueBtn) {
         continueBtn.addEventListener('click', () => {
-            if (window.AudioManager) window.AudioManager.playClickEnter();
-            
-            window.navigateTo('levels.html');
+            if (window.AudioManager) window.AudioManager.playClickOpen();
+            flashMenuBtn(continueBtn);
+            setTimeout(() => window.navigateTo('levels.html'), 200);
         });
     }
 
@@ -63,8 +102,9 @@ function bindMenuButtons() {
     const codexRow = document.getElementById('codex-row');
     if (codexRow) {
         codexRow.addEventListener('click', () => {
-            if (window.AudioManager) window.AudioManager.playClickEnter();
-            window.navigateTo('codex.html');
+            if (window.AudioManager) window.AudioManager.playClickOpen();
+            flashMenuBtn(codexRow);
+            setTimeout(() => window.navigateTo('codex.html'), 200);
         });
     }
 
@@ -72,8 +112,9 @@ function bindMenuButtons() {
     const fragmentRow = document.getElementById('fragment-row');
     if (fragmentRow) {
         fragmentRow.addEventListener('click', () => {
-            if (window.AudioManager) window.AudioManager.playClickEnter();
-            window.navigateTo('gallery.html');
+            if (window.AudioManager) window.AudioManager.playClickOpen();
+            flashMenuBtn(fragmentRow);
+            setTimeout(() => window.navigateTo('gallery.html'), 200);
         });
     }
 
@@ -81,7 +122,8 @@ function bindMenuButtons() {
     const tasksBtn = document.getElementById('free-mode-btn');
     if (tasksBtn) {
         tasksBtn.addEventListener('click', () => {
-            if (window.AudioManager) window.AudioManager.playClickEnter();
+            if (window.AudioManager) window.AudioManager.playClickOpen();
+            flashMenuBtn(tasksBtn);
             renderTasks();
             openPanel('tasks-overlay');
         });
@@ -91,7 +133,8 @@ function bindMenuButtons() {
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) {
         settingsBtn.addEventListener('click', () => {
-            if (window.AudioManager) window.AudioManager.playClickEnter();
+            if (window.AudioManager) window.AudioManager.playClickOpen();
+            flashMenuBtn(settingsBtn);
             openPanel('settings-overlay');
         });
     }
@@ -100,6 +143,7 @@ function bindMenuButtons() {
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
+            flashMenuBtn(resetBtn);
             if (confirm('确定要重置所有游戏进度吗？\n\n将清除：\n• 关卡进度\n• 成就徽章\n• 开场动画记录\n• 教学动画记录\n\n此操作不可撤销。')) {
                 // 清除关卡进度
                 window.LevelManager.resetProgress();
@@ -110,6 +154,23 @@ function bindMenuButtons() {
                 sessionStorage.removeItem('hasPlayedIntro_v5');
                 // 清除教学动画记录
                 localStorage.removeItem('baozhu_tutorial_seen');
+                localStorage.removeItem('tut_tradeStation');
+                localStorage.removeItem('tut_recipeBook');
+                localStorage.removeItem('tut_longPress');
+                localStorage.removeItem('tut_recipeBookBtn');
+                // 清除旧的新手引导标记
+                localStorage.removeItem('tut_level2_complete');
+                localStorage.removeItem('tut_guide_to_tasks');
+                localStorage.removeItem('tut_guide_to_tasks_main');
+                localStorage.removeItem('tut_guide_to_tasks_on_main');
+                // 清除新的新手引导标记
+                localStorage.removeItem('tut_first_exit_game');
+                localStorage.removeItem('tut_main_guide_done');
+                localStorage.removeItem('tut_guide_tasks_on_main');
+                localStorage.removeItem('tut_guide_claim_reward');
+                // 清除任务领取记录
+                localStorage.removeItem('baozhu_claimed_tasks');
+                localStorage.removeItem('baozhu_basic_completed');
                 
                 alert('进度已重置！即将重新开始...');
                 window.location.reload();
@@ -125,6 +186,7 @@ function bindPanelEvents() {
     const settingsClose = document.getElementById('settings-close');
     if (settingsClose) {
         settingsClose.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickExit();
             closePanel('settings-overlay');
         });
     }
@@ -133,6 +195,7 @@ function bindPanelEvents() {
     const tasksClose = document.getElementById('tasks-close');
     if (tasksClose) {
         tasksClose.addEventListener('click', () => {
+            if (window.AudioManager) window.AudioManager.playClickExit();
             closePanel('tasks-overlay');
         });
     }
@@ -141,6 +204,7 @@ function bindPanelEvents() {
     document.querySelectorAll('.panel-overlay').forEach(overlay => {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
+                if (window.AudioManager) window.AudioManager.playClickExit();
                 closePanel(overlay.id);
             }
         });
@@ -230,79 +294,7 @@ function updateClaimableDots() {
 
 // ==================== 任务系统 ====================
 
-const TASKS = [
-    {
-        id: 'first_synthesis',
-        name: '初次合成',
-        description: '完成第一次物品合成',
-        check: () => {
-            const items = window.LevelManager.currentProgress.discoveredItems || [];
-            return { current: Math.min(items.length, 1), total: 1 };
-        },
-        reward: '💎 30',
-        gems: 30
-    },
-    {
-        id: 'complete_first5',
-        name: '崭露头角',
-        description: '完成前五关',
-        check: () => {
-            const completed = window.LevelManager.currentProgress.completedLevels || [];
-            const first5 = [101, 102, 103, 104, 105];
-            const done = first5.filter(id => completed.includes(id)).length;
-            return { current: done, total: 5 };
-        },
-        reward: '💎 150',
-        gems: 150
-    },
-    {
-        id: 'complete_boss',
-        name: '经典之作',
-        description: '酿出冰酒酿桂花酪',
-        check: () => {
-            const completed = window.LevelManager.currentProgress.completedLevels || [];
-            const done = completed.includes(106) ? 1 : 0;
-            return { current: done, total: 1 };
-        },
-        reward: '💎 300',
-        gems: 300
-    },
-    {
-        id: 'complete_chapter1',
-        name: '酪之初启',
-        description: '完成奶酪谷全部 6 关',
-        check: () => {
-            const completed = window.LevelManager.currentProgress.completedLevels || [];
-            const chapter1 = [101, 102, 103, 104, 105, 106];
-            const done = chapter1.filter(id => completed.includes(id)).length;
-            return { current: done, total: 6 };
-        },
-        reward: '💎 200',
-        gems: 200
-    },
-    {
-        id: 'discover_10',
-        name: '见多识广',
-        description: '发现 10 种物品',
-        check: () => {
-            const items = window.LevelManager.currentProgress.discoveredItems || [];
-            return { current: Math.min(items.length, 10), total: 10 };
-        },
-        reward: '💎 100',
-        gems: 100
-    },
-    {
-        id: 'discover_20',
-        name: '酿造百科',
-        description: '发现 20 种物品',
-        check: () => {
-            const items = window.LevelManager.currentProgress.discoveredItems || [];
-            return { current: Math.min(items.length, 20), total: 20 };
-        },
-        reward: '💎 250',
-        gems: 250
-    }
-];
+const TASKS = window.BAOZHU_TASKS || [];
 
 function renderTasks() {
     const list = document.getElementById('tasks-list');
@@ -353,6 +345,11 @@ function renderTasks() {
             const task = TASKS.find(t => t.id === taskId);
             if (!task || !task.gems) return;
 
+            if (window.AudioManager) {
+                if (task.gems > 0) window.AudioManager.playSFX('task-reward-gem');
+                else window.AudioManager.playClickOpen();
+            }
+
             claimed.push(taskId);
             localStorage.setItem('baozhu_claimed_tasks', JSON.stringify(claimed));
             window.LevelManager.addGems(task.gems);
@@ -368,6 +365,23 @@ function renderTasks() {
             updateClaimableDots();
         });
     });
+    
+    // 4. 新手引导：指导玩家领取奖励
+    if (localStorage.getItem('tut_guide_claim_reward') === '1' && window.TutorialGuide) {
+        localStorage.removeItem('tut_guide_claim_reward');
+        const firstClaimable = list.querySelector('.task-claimable');
+        if (firstClaimable) {
+            setTimeout(() => {
+                window.TutorialGuide.show({
+                    target: firstClaimable,
+                    text: '点击这里领取奖励',
+                    position: 'left',
+                    padding: 10,
+                    borderRadius: 12
+                });
+            }, 400);
+        }
+    }
 }
 
 // ==================== 进度面板 ====================
@@ -379,14 +393,19 @@ function updateProgressPanel() {
     const fragmentText = document.getElementById('fragment-progress-text');
     
     if (!codexFill || !fragmentFill) return;
-    
-    // 获取配方发现进度（使用实际的ITEMS数量）
-    const discoveredItems = window.LevelManager.currentProgress.discoveredItems || [];
-    const totalRecipes = Object.keys(window.ITEMS).length;
-    const codexPercent = Math.min((discoveredItems.length / totalRecipes) * 100, 100);
-    
-    codexFill.style.width = codexPercent + '%';
-    codexText.textContent = `${discoveredItems.length}/${totalRecipes}`;
+
+    if (window.LevelManager.refreshAtlasUnlocks()) window.LevelManager.saveProgress();
+
+    const atlasPieces = window.LevelManager.currentProgress.atlasPieces || [];
+    const { unlocked: atlasUnlocked, total: atlasTotal } =
+        typeof window.getAtlasProgressCounts === 'function'
+            ? window.getAtlasProgressCounts(atlasPieces)
+            : { unlocked: 0, total: 1 };
+    const atlasPercent =
+        atlasTotal > 0 ? Math.min((atlasUnlocked / atlasTotal) * 100, 100) : 0;
+
+    codexFill.style.width = atlasPercent + '%';
+    codexText.textContent = `${atlasUnlocked}/${atlasTotal}`;
     
     // 获取碎片收集进度（使用实际的FRAGMENTS数量）
     const fragments = window.LevelManager.currentProgress.fragments || [];

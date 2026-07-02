@@ -48,6 +48,7 @@
     opacity: 0.4;
     cursor: not-allowed;
     filter: grayscale(100%);
+    pointer-events: none; /* 禁用所有交互，包括点击和hover效果 */
 }
 
 .world-node.completed::after {
