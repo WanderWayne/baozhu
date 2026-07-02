@@ -1,0 +1,33 @@
+# ========== 依赖（每台电脑 npm install 即可） ==========
+node_modules/
+
+# ========== Cursor / 编辑器（本机配置） ==========
+.cursor/debug-*.log
+.cursor/mcp.json
+.cursor/plans/
+.vscode/
+
+# ========== 微信开发者工具（私有本地配置） ==========
+project.private.config.json
+
+# ========== Cocos Creator 生成目录 ==========
+minigame-cocos/library/
+minigame-cocos/temp/
+minigame-cocos/local/
+minigame-cocos/build/
+minigame-cocos/native/
+minigame-cocos/profiles/
+
+# ========== 临时打包 / 展示素材 ==========
+*.zip
+展示材料文件夹/
+
+# ========== 日志 / 环境变量 / 密钥 ==========
+*.log
+.env
+.env.*
+
+# ========== 系统文件 ==========
+.DS_Store
+Thumbs.db
+desktop.ini
