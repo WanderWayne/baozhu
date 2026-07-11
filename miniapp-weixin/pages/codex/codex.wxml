@@ -42,7 +42,10 @@
           data-name="{{recipe.name}}"
           bindtap="onRecipeTap"
         >
-          <text class="recipe-icon">{{recipe.discovered ? recipe.icon : '❓'}}</text>
+          <view class="recipe-icon">
+            <item-icon wx:if="{{recipe.discovered}}" name="{{recipe.name}}" emoji="{{recipe.icon}}" size="28" class-name="codex-recipe-icon" />
+            <text wx:else>❓</text>
+          </view>
           <text class="recipe-name">{{recipe.discovered ? recipe.name : '???'}}</text>
         </view>
       </view>
@@ -51,7 +54,9 @@
 
   <view class="modal {{detailVisible ? 'visible' : ''}}" bindtap="hideDetail">
     <view class="modal-panel" catchtap="noop">
-      <text class="detail-icon">{{detail.icon}}</text>
+      <view class="detail-icon">
+        <item-icon name="{{detail.name}}" emoji="{{detail.icon}}" size="48" class-name="codex-detail-icon" />
+      </view>
       <text class="detail-name">{{detail.name}}</text>
       <text class="detail-desc">{{detail.desc}}</text>
       <text class="detail-formula">{{detail.formula}}</text>

@@ -1,3 +1,4 @@
+/** @feature codex @see docs/features/codex.md */
 // 宝珠图谱页：SVG 图谱 + 折叠「配方一览」
 
 class AtlasCodexPage {

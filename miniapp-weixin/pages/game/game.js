@@ -4,6 +4,7 @@ const GameTaskToast = require('../../utils/game-task-toast');
 const gameLayout = require('../../utils/game-layout');
 const gameAmbience = require('../../utils/game-ambience');
 const { navigateBackWithFade } = require('../../utils/page-transitions');
+const tutorialGuide = require('../../utils/tutorial-guide');
 
 Page({
   data: {
@@ -61,6 +62,10 @@ Page({
     endingVisible: false,
     brewings: [],
     tradeStations: [],
+    tradeStationViews: [],
+    tradeStationMode: false,
+    tradeConfirmVisible: false,
+    tradeConfirm: null,
     themeClass: 'theme-dairy',
     taskToastVisible: false,
     taskToastText: '',
@@ -85,6 +90,14 @@ Page({
     basicOldTitleName: '酿造学徒',
     basicNewTitleIcon: '',
     basicNewTitleName: '',
+    settlementVisible: false,
+    settlementFading: false,
+    settlementTime: '',
+    settlementRatingIcon: '⚡',
+    settlementRatingName: '',
+    settlementRatingColor: '#FFD700',
+    settlementGems: 0,
+    tutOverlay: tutorialGuide.emptyOverlay(),
   },
 
   controller: null,
@@ -209,6 +222,9 @@ Page({
         q2.exec((res2) => {
           if (res2[0] && res2[1]) {
             this.controller.measureRects(res2[0], res2[1], res2[2]);
+            if (this.controller.tradeStation) {
+              this.controller.tradeStation.relayout(this.controller.levelId);
+            }
           }
           if (res2[2] && res2[2].height) {
             this.syncGameLayout(res2[2].height);
@@ -273,8 +289,50 @@ Page({
     if (this.controller) this.controller.onWorkshopTouchEnd(e);
   },
 
+  onWorkshopTouchCancel(e) {
+    if (this.controller) this.controller.onWorkshopTouchCancel(e);
+  },
+
+  onTradeStationTouchMove(e) {
+    if (this.controller) this.controller.onWorkshopTouchMove(e);
+  },
+
+  onTradeStationTouchEnd(e) {
+    if (this.controller) this.controller.onWorkshopTouchEnd(e);
+  },
+
   onTradeTap(e) {
     if (this.controller) this.controller.onTradeTap(e);
+  },
+
+  onTradeStationTap(e) {
+    if (this.controller?.tradeStation) {
+      this.controller.tradeStation.onStationTap(e.currentTarget.dataset.id);
+    }
+  },
+
+  onTradeConfirmCancel() {
+    if (this.controller?.tradeStation) {
+      this.controller.tradeStation.dismissConfirm(true);
+    }
+  },
+
+  onTradeConfirmOk() {
+    if (this.controller?.tradeStation) {
+      this.controller.tradeStation.confirmTrade();
+    }
+  },
+
+  onSettlementContinue() {
+    if (this.controller) this.controller.onSettlementContinue();
+  },
+
+  onSettlementRest() {
+    if (this.controller) this.controller.onSettlementRest();
+  },
+
+  onTutorialDismiss() {
+    tutorialGuide.dismiss(this);
   },
 
   onWorkshopLongPress(e) {
@@ -330,6 +388,9 @@ Page({
   },
 
   onBack() {
+    if (!tutorialGuide.hasSeen('tut_first_exit_game')) {
+      tutorialGuide.markSeen('tut_first_exit_game');
+    }
     try { this.audioManager.playClickBack(); } catch (err) { /* noop */ }
     try { this.audioManager.stopBGM(); } catch (err) { /* noop */ }
     const worldId = this.controller?.levelData?.worldId || 1;

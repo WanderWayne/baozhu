@@ -1,3 +1,4 @@
+/** @feature progress @see docs/features/progress.md */
 // 关卡与世界管理系统（V2）
 class LevelManager {
     constructor() {

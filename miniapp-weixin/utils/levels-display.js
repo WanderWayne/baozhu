@@ -1,19 +1,29 @@
 const { ITEMS } = require('../data/items.js');
 
 function getWorldDisplayIcon(world) {
-  if (!world) return '🍨';
-  if (world.svgItem && ITEMS[world.svgItem]?.icon) {
-    return ITEMS[world.svgItem].icon;
+  if (!world) {
+    return { emoji: '🍨', iconName: '' };
   }
-  return world.icon || '🍨';
+  if (world.svgItem) {
+    return {
+      emoji: (ITEMS[world.svgItem] && ITEMS[world.svgItem].icon) || world.icon || '🍨',
+      iconName: world.svgItem,
+    };
+  }
+  return { emoji: world.icon || '🍨', iconName: '' };
 }
 
 function getLevelDoorIcon(level, unlocked) {
-  if (!unlocked) return '🔒';
-  if (level.target && ITEMS[level.target]?.icon) {
-    return ITEMS[level.target].icon;
+  if (!unlocked) {
+    return { emoji: '🔒', iconName: '' };
   }
-  return level.icon || '🍨';
+  if (level.target) {
+    return {
+      emoji: (ITEMS[level.target] && ITEMS[level.target].icon) || level.icon || '🍨',
+      iconName: level.target,
+    };
+  }
+  return { emoji: level.icon || '🍨', iconName: '' };
 }
 
 module.exports = {

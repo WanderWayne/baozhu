@@ -1,3 +1,4 @@
+/** @feature audio-nav @see docs/features/audio-nav.md */
 // 音频管理器 - 统一管理BGM和音效
 // ================================================
 

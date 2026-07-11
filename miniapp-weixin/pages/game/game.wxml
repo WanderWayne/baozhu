@@ -20,7 +20,8 @@
       <view class="door-frame">
         <view class="door-glow">
           <view class="door-fog"></view>
-          <text class="door-target-silhouette">{{levelIcon}}</text>
+          <text class="door-target-silhouette" wx:if="{{!levelTarget}}">{{levelIcon}}</text>
+          <item-icon wx:else name="{{levelTarget}}" emoji="{{levelIcon}}" size="36" class-name="door-target-svg" />
         </view>
       </view>
       <text class="door-offer-hint" wx:if="{{targetReady && !doorOffering}}">献上</text>
@@ -82,16 +83,38 @@
     <view
       wx:for="{{workshopItems}}"
       wx:key="id"
-      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.hasEffect ? 'has-effect' : ''}} {{item.selected ? 'selected' : ''}} {{item.isTarget ? 'target-item' : ''}} {{item.targetEntry ? 'target-entry' : ''}} {{item.offeringFlight ? 'offering-flight' : ''}} {{item.shrinking ? 'shrinking' : ''}} {{item.synthesisAnim ? 'synthesis-anim' : ''}} {{item.shakeAnim ? 'shake-anim' : ''}} {{item.revealedItem ? 'revealed-item' : ''}} {{item.recipeBookSpawn ? 'recipe-book-spawn' : ''}}"
+      wx:if="{{item.hasEffect}}"
+      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} has-effect {{item.selected ? 'selected' : ''}} {{item.recipeBookSpawn ? 'recipe-book-spawn' : ''}} {{item.lpBurst ? 'lp-gold-burst' : ''}}"
       style="left: {{item.x}}px; top: {{item.y}}px;"
       data-id="{{item.id}}"
       catchtouchstart="onWorkshopTouchStart"
       catchtouchmove="onWorkshopTouchMove"
       catchtouchend="onWorkshopTouchEnd"
-      bindlongpress="onWorkshopLongPress"
+      catchtouchcancel="onWorkshopTouchCancel"
     >
+      <view wx:if="{{item.lpRing}}" class="lp-ring-track"></view>
+      <view wx:if="{{item.lpRing}}" class="lp-ring-charge"></view>
       <view class="item-icon-wrap">
-        <text class="item-icon">{{item.icon}}</text>
+        <item-icon name="{{item.name}}" size="48" class-name="game-item-icon" />
+      </view>
+      <text class="item-name">{{item.name}}</text>
+    </view>
+    <view
+      wx:for="{{workshopItems}}"
+      wx:key="id"
+      wx:if="{{!item.hasEffect}}"
+      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.selected ? 'selected' : ''}} {{item.isTarget ? 'target-item' : ''}} {{item.targetEntry ? 'target-entry' : ''}} {{item.offeringFlight ? 'offering-flight' : ''}} {{item.shrinking ? 'shrinking' : ''}} {{item.synthesisAnim ? 'synthesis-anim' : ''}} {{item.shakeAnim ? 'shake-anim' : ''}} {{item.revealedItem ? 'revealed-item' : ''}} {{item.workbenchPopIn ? 'workbench-pop-in' : ''}} {{item.lpBurst ? 'lp-gold-burst' : ''}}"
+      style="left: {{item.x}}px; top: {{item.y}}px;"
+      data-id="{{item.id}}"
+      catchtouchstart="onWorkshopTouchStart"
+      catchtouchmove="onWorkshopTouchMove"
+      catchtouchend="onWorkshopTouchEnd"
+      catchtouchcancel="onWorkshopTouchCancel"
+    >
+      <view wx:if="{{item.lpRing}}" class="lp-ring-track"></view>
+      <view wx:if="{{item.lpRing}}" class="lp-ring-charge"></view>
+      <view class="item-icon-wrap">
+        <item-icon name="{{item.name}}" size="48" class-name="game-item-icon" />
       </view>
       <text class="item-name">{{item.name}}</text>
     </view>
@@ -128,9 +151,47 @@
       class="trail-particle"
       style="left:{{item.x}}px;top:{{item.y}}px;width:{{item.size}}px;height:{{item.size}}px;animation-delay:{{item.delay}}s;"
     ></view>
+
+    <view
+      wx:for="{{tradeStationViews}}"
+      wx:key="id"
+      class="trade-station {{item.centered ? 'centered' : ''}} {{item.entering ? 'entering' : ''}} {{item.soldOut ? 'sold-out' : ''}}"
+      style="{{item.stationStyle}}"
+      data-id="{{item.id}}"
+      catchtap="onTradeStationTap"
+      catchtouchmove="onTradeStationTouchMove"
+      catchtouchend="onTradeStationTouchEnd"
+    >
+      <view class="ts-body">
+        <view class="ts-slot ts-slot-input">
+          <view class="ts-ghost-icon">
+            <item-icon name="{{item.type === 'gem' ? '_diamond' : item.input}}" emoji="{{item.inputIcon}}" size="15" class-name="ts-slot-icon" />
+          </view>
+          <text class="ts-slot-name">{{item.inputName}}</text>
+        </view>
+        <view class="ts-middle">
+          <text class="ts-arrow">→</text>
+          <text class="ts-label">交易</text>
+        </view>
+        <view class="ts-slot ts-slot-output">
+          <view class="ts-ghost-icon">
+            <item-icon name="{{item.output}}" emoji="{{item.outputIcon}}" size="15" class-name="ts-slot-icon" />
+          </view>
+          <text class="ts-slot-name">{{item.outputName}}</text>
+        </view>
+      </view>
+      <view class="trade-station-hitbox {{item.hover ? 'trade-hover' : ''}} {{item.wrong ? 'trade-wrong' : ''}}"></view>
+      <view class="trade-restock-overlay {{item.restocking || item.soldOut ? 'active' : ''}}">
+        <text class="trade-restock-title">{{item.overlayTitle}}</text>
+        <block wx:if="{{item.restocking && !item.soldOut}}">
+          <text class="trade-restock-countdown">{{item.countdown}}</text>
+          <text class="trade-restock-unit">秒</text>
+        </block>
+      </view>
+    </view>
   </view>
 
-  <view class="trade-row {{tradeRowHidden ? 'trade-hidden' : ''}}" wx:if="{{tradeStations.length}}">
+  <view class="trade-row {{tradeRowHidden ? 'trade-hidden' : ''}}" wx:if="{{tradeStations.length && !tradeStationMode}}">
     <view
       wx:for="{{tradeStations}}"
       wx:key="output"
@@ -149,7 +210,7 @@
       class="inventory-item-slot {{item.popDone ? 'pop-done' : ''}}"
     >
       <view
-        class="item-pop-body {{item.popPhase === 'hold' ? 'pop-hold' : ''}} {{item.popPhase === 'out' ? 'bubble-pop' : ''}} {{item.popPhase === 'in' ? 'item-pop-in' : ''}} {{item.goldenOutline && item.popPhase !== 'in' && item.popPhase !== 'hold' ? 'golden-outline' : ''}}"
+        class="item-pop-body {{item.popPhase === 'hold' ? 'pop-hold' : ''}} {{item.popPhase === 'out' ? 'bubble-pop' : ''}} {{item.popPhase === 'in' ? 'item-pop-in' : ''}} {{item.popPhase === 'in-quick' ? 'item-pop-in-quick' : ''}} {{item.goldenOutline && item.popPhase !== 'in' && item.popPhase !== 'in-quick' && item.popPhase !== 'hold' ? 'golden-outline' : ''}}"
       >
         <view
           class="game-item in-inventory type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.hasEffect ? 'has-effect' : ''}} {{item.placeholder ? 'placeholder' : ''}} {{item.appearing ? 'appearing' : ''}}"
@@ -159,9 +220,9 @@
           catchtouchend="onInventoryTouchEnd"
           catchtouchcancel="onInventoryTouchEnd"
         >
-          <view class="item-pop-glow" wx:if="{{item.popPhase === 'in'}}"></view>
+          <view class="item-pop-glow {{item.popPhase === 'in-quick' ? 'item-pop-glow-quick' : ''}}" wx:if="{{item.popPhase === 'in' || item.popPhase === 'in-quick'}}"></view>
           <view class="item-icon-wrap">
-            <text class="item-icon">{{item.icon}}</text>
+            <item-icon name="{{item.name}}" size="48" class-name="game-item-icon" />
           </view>
           <text class="item-name">{{item.name}}</text>
         </view>
@@ -185,7 +246,7 @@
     style="left: {{dragGhost.x}}px; top: {{dragGhost.y}}px;"
   >
     <view class="item-icon-wrap">
-      <text class="item-icon">{{dragGhost.icon}}</text>
+      <item-icon name="{{dragGhost.name}}" emoji="{{dragGhost.icon}}" size="48" class-name="game-item-icon" />
     </view>
     <text class="item-name">{{dragGhost.name}}</text>
   </view>
@@ -242,7 +303,7 @@
     style="left: {{recipeBookFlyer.x}}px; top: {{recipeBookFlyer.y}}px; opacity: {{recipeBookFlyer.opacity != null ? recipeBookFlyer.opacity : 1}}; transform: scale({{recipeBookFlyer.scale != null ? recipeBookFlyer.scale : 1}});"
   >
     <view class="item-icon-wrap">
-      <text class="item-icon">{{recipeBookFlyer.icon}}</text>
+      <item-icon name="{{recipeBookFlyer.name}}" emoji="{{recipeBookFlyer.icon}}" size="48" class-name="game-item-icon" />
     </view>
     <text class="item-name">{{recipeBookFlyer.name}}</text>
   </view>
@@ -292,7 +353,9 @@
             wx:key="name"
             class="recipe-entry {{entry.dualCheeseHint ? 'recipe-dual-cheese-hint' : ''}}"
           >
-            <text class="recipe-icon">{{entry.icon}}</text>
+            <view class="recipe-icon">
+              <item-icon name="{{entry.name}}" emoji="{{entry.icon}}" size="28" class-name="recipe-entry-icon" />
+            </view>
             <view class="recipe-detail">
               <text class="recipe-name">{{entry.name}}</text>
               <text class="recipe-formula">{{entry.formula}}</text>
@@ -354,6 +417,77 @@
         </view>
       </view>
     </view>
+  </view>
+
+  <view class="trade-confirm-overlay" wx:if="{{tradeConfirmVisible && tradeConfirm}}" catchtouchmove="noop">
+    <view class="trade-confirm-backdrop" catchtap="onTradeConfirmCancel"></view>
+    <view class="trade-confirm-box">
+      <view class="trade-confirm-text">
+        确认用
+        <view class="trade-confirm-input-name">
+          <item-icon name="{{tradeConfirm.isGem ? '_diamond' : tradeConfirm.input}}" emoji="{{tradeConfirm.inputIcon}}" size="18" class-name="confirm-item-icon" />
+          <text>{{tradeConfirm.inputLabel}}</text>
+        </view>
+        交易
+        <view class="trade-confirm-output-name">
+          <item-icon name="{{tradeConfirm.outputName}}" emoji="{{tradeConfirm.outputIcon}}" size="18" class-name="confirm-item-icon" />
+          <text>{{tradeConfirm.outputLabel}}</text>
+        </view>
+        吗？
+      </view>
+      <view class="trade-confirm-btns">
+        <view class="trade-confirm-cancel" catchtap="onTradeConfirmCancel">取消</view>
+        <view class="trade-confirm-ok {{tradeConfirm.canTrade ? '' : 'disabled'}}" catchtap="onTradeConfirmOk">确认</view>
+      </view>
+      <view class="trade-confirm-note" wx:if="{{tradeConfirm.noteText}}">{{tradeConfirm.noteText}}</view>
+    </view>
+  </view>
+
+  <view class="settlement-overlay {{settlementVisible ? 'visible' : ''}}" wx:if="{{settlementVisible || settlementFading}}">
+    <view class="settlement-content">
+      <text class="settlement-title">阶段完成</text>
+      <view class="settlement-sep"></view>
+      <view class="settlement-stats">
+        <view class="settlement-stat">
+          <text class="settlement-stat-icon">⏱</text>
+          <text>用时</text>
+          <text class="settlement-stat-value">{{settlementTime}}</text>
+        </view>
+        <view class="settlement-stat">
+          <text class="settlement-stat-icon">{{settlementRatingIcon}}</text>
+          <text>评价</text>
+          <text class="settlement-stat-value" style="color: {{settlementRatingColor}};">{{settlementRatingName}}</text>
+        </view>
+        <view class="settlement-stat">
+          <text class="settlement-stat-icon">💎</text>
+          <text>获得钻石</text>
+          <text class="settlement-stat-value">{{settlementGems}}</text>
+        </view>
+      </view>
+      <view class="settlement-message">
+        <text>你已经掌握了酿造的基础语言</text>
+        <text>接下来将是一个挑战</text>
+        <text>可以先休息一下</text>
+      </view>
+      <view class="settlement-buttons">
+        <view class="settlement-btn settlement-btn-exit" catchtap="onSettlementRest">休息一下</view>
+        <view class="settlement-btn settlement-btn-continue" catchtap="onSettlementContinue">继续挑战</view>
+      </view>
+    </view>
+  </view>
+
+  <view
+    class="tut-overlay {{tutOverlay.visible ? 'visible' : ''}} {{tutOverlay.fadeOut ? 'fade-out' : ''}}"
+    wx:if="{{tutOverlay.active}}"
+    catchtap="onTutorialDismiss"
+  >
+    <canvas
+      type="2d"
+      id="tut-spotlight-canvas"
+      class="tut-canvas"
+      style="width: {{tutOverlay.screenW}}px; height: {{tutOverlay.screenH}}px;"
+      catchtap="onTutorialDismiss"
+    ></canvas>
   </view>
 
   <!-- 固定顶层，避免被 intro / 合成区遮挡 -->

@@ -37,7 +37,6 @@ node mcp-health.cjs
 
 ## 已知可接受差异
 
-- 物品图标：小程序 emoji vs H5 SVG（后续波次再换）
 - 微信模拟器顶栏 vs 浏览器顶栏（compare 前可 crop，当前 cover 390×844）
 
 ## Cursor 规则

@@ -2,5 +2,7 @@
   "navigationStyle": "custom",
   "backgroundColor": "#FDF8E8",
   "backgroundColorTop": "#FDF8E8",
-  "usingComponents": {}
+  "usingComponents": {
+    "item-icon": "/components/item-icon/item-icon"
+  }
 }

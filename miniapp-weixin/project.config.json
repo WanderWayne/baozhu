@@ -2,8 +2,14 @@
   "description": "宝珠酿造微信小程序 — 原生主界面",
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "tools" },
-      { "type": "folder", "value": "assets/images" }
+      {
+        "value": "tools",
+        "type": "folder"
+      },
+      {
+        "value": "assets/images",
+        "type": "folder"
+      }
     ],
     "include": []
   },

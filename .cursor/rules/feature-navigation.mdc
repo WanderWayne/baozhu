@@ -1,0 +1,42 @@
+---
+description: 按功能 ID 定位 H5 与小程序全部相关代码
+globs: "**/*"
+alwaysApply: true
+---
+
+# 功能导向导航
+
+用户提到 gameplay 功能（交易台、拖拽、合成、门、配方书、选关等）时：
+
+1. **先读** [`docs/FEATURE_INDEX.md`](docs/FEATURE_INDEX.md) 找到 feature ID
+2. **再读** [`docs/features/<id>.md`](docs/features/) 中的 H5 / 小程序文件表
+3. **同时检查双端**，不要只改 `miniapp-weixin/` 或只改 `js/`
+4. 改完后按 feature 文档跑 parity（见 INDEX 矩阵）并更新文档文件表
+
+## Feature ID 速查
+
+| 用户可能说 | ID |
+|-----------|-----|
+| 交易台、trade | `trade-station` |
+| 拖拽、长按 | `drag-drop` |
+| 合成、配方 | `synthesis` |
+| 门、献上 | `door-offering` |
+| 布局、物品栏高度 | `game-layout` |
+| 配方书 | `recipe-book` |
+| 转场、过关 | `chapter-flow` |
+| 进度、解锁、宝石 | `progress` |
+| 选关 | `level-select` |
+| 主菜单、任务 | `main-menu` |
+| 开场 | `intro` |
+
+## 代码标注
+
+文件顶部的 `/** @feature <id> */` 与文档 ID 一致。移动文件时同步更新 `@feature` 与 `docs/features/<id>.md`。
+
+## 数据
+
+关卡/物品/配方：先改 H5 `js/data/*`，再 `node miniapp-weixin/tools/export-data.mjs`。
+
+## 验收
+
+见 [`docs/PR_CHECKLIST.md`](docs/PR_CHECKLIST.md) 与 [miniapp-h5-parity.mdc](miniapp-h5-parity.mdc)。

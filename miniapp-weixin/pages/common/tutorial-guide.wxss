@@ -1,0 +1,111 @@
+/* 新手引导 — Canvas 聚光灯 + cover-view 文字层 */
+
+.tut-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.tut-overlay.visible {
+  opacity: 1;
+}
+
+.tut-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tut-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.tut-cover-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  overflow: visible;
+}
+
+/* 投影边缘 — 柔暗、向外扩散的金光 */
+.tut-glow-ring {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 1.5px solid rgba(160, 130, 80, 0.38);
+  animation: tutGoldenGlow 3.2s ease-in-out infinite;
+}
+
+@keyframes tutGoldenGlow {
+  0%, 100% {
+    border-color: rgba(150, 120, 70, 0.32);
+    box-shadow:
+      0 0 18px 10px rgba(120, 95, 55, 0.12),
+      0 0 36px 20px rgba(100, 80, 45, 0.07),
+      0 0 56px 32px rgba(80, 65, 35, 0.04);
+  }
+  50% {
+    border-color: rgba(190, 155, 90, 0.48);
+    box-shadow:
+      0 0 24px 14px rgba(140, 110, 60, 0.18),
+      0 0 48px 28px rgba(120, 95, 50, 0.1),
+      0 0 72px 42px rgba(100, 80, 40, 0.05);
+  }
+}
+
+.tut-text-wrap {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.tut-text {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 24px;
+  letter-spacing: 1.5px;
+  white-space: pre-wrap;
+  padding: 0 4px;
+}
+
+.tut-continue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  opacity: 0;
+}
+
+.tut-continue.show {
+  opacity: 1;
+}
+
+.tut-continue-arrow {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 12px;
+  text-align: center;
+  line-height: 16px;
+}
+
+.tut-continue-hint {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  text-align: center;
+  line-height: 18px;
+  margin-top: 2px;
+}

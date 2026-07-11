@@ -150,3 +150,144 @@
   font-weight: 500;
   letter-spacing: 4px;
 }
+
+/* 105 阶段结算 — 对齐 H5 game-level-intro.css .settlement-* */
+.settlement-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 5500;
+  pointer-events: none;
+  transition: background 1s ease;
+}
+
+.settlement-overlay.visible {
+  background: rgba(0, 0, 0, 0.82);
+  pointer-events: auto;
+}
+
+.settlement-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 85%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.settlement-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 6px;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
+}
+
+.settlement-overlay.visible .settlement-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.settlement-sep {
+  width: 60px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 20px 0;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.6s;
+}
+
+.settlement-overlay.visible .settlement-sep {
+  opacity: 1;
+}
+
+.settlement-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
+}
+
+.settlement-overlay.visible .settlement-stats {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.settlement-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.settlement-stat-icon {
+  font-size: 16px;
+}
+
+.settlement-stat-value {
+  font-weight: 600;
+  color: #fff;
+  margin-left: 4px;
+}
+
+.settlement-message {
+  margin-top: 24px;
+  font-size: 14px;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.6s ease 1.1s;
+}
+
+.settlement-overlay.visible .settlement-message {
+  opacity: 1;
+}
+
+.settlement-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 28px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease 1.3s, transform 0.6s ease 1.3s;
+}
+
+.settlement-overlay.visible .settlement-buttons {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.settlement-btn {
+  padding: 10px 22px;
+  border-radius: 22px;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.settlement-btn-exit {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.settlement-btn-continue {
+  background: rgba(232, 200, 115, 0.9);
+  border: 1px solid rgba(232, 200, 115, 0.5);
+  color: #4a3828;
+  font-weight: 600;
+}

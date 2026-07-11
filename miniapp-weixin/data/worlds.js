@@ -316,10 +316,6 @@ module.exports = {
         {
           "input": "珠宝",
           "output": "菊花"
-        },
-        {
-          "input": "珠宝",
-          "output": "茉莉花"
         }
       ],
       "doorTriggers": {

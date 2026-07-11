@@ -11,11 +11,51 @@ function readIdePort() {
   try {
     const fs = require('fs');
     const path = require('path');
-    const local = process.env.LOCALAPPDATA;
-    if (!local) return 44825;
-    const ideFile = path.join(local, '微信开发者工具', 'User Data', 'Default', '.ide');
-    if (fs.existsSync(ideFile)) {
-      return Number(fs.readFileSync(ideFile, 'utf8').trim()) || 44825;
+    const os = require('os');
+
+    function readIfExists(file) {
+      if (fs.existsSync(file)) {
+        return Number(fs.readFileSync(file, 'utf8').trim()) || null;
+      }
+      return null;
+    }
+
+    function findIdePortUnder(root) {
+      if (!fs.existsSync(root)) return null;
+      const stack = [root];
+      while (stack.length) {
+        const dir = stack.pop();
+        let entries;
+        try {
+          entries = fs.readdirSync(dir, { withFileTypes: true });
+        } catch (_) {
+          continue;
+        }
+        for (const entry of entries) {
+          const full = path.join(dir, entry.name);
+          if (entry.isFile() && entry.name === '.ide') {
+            const port = readIfExists(full);
+            if (port) return port;
+          } else if (entry.isDirectory() && entry.name !== 'node_modules') {
+            stack.push(full);
+          }
+        }
+      }
+      return null;
+    }
+
+    const candidates = [];
+    if (process.env.LOCALAPPDATA) {
+      candidates.push(path.join(process.env.LOCALAPPDATA, '微信开发者工具', 'User Data', 'Default', '.ide'));
+    }
+    if (process.platform === 'darwin') {
+      candidates.push(path.join(os.homedir(), 'Library/Application Support/微信开发者工具/User Data/Default/.ide'));
+      const found = findIdePortUnder(path.join(os.homedir(), 'Library/Application Support/微信开发者工具'));
+      if (found) return found;
+    }
+    for (const ideFile of candidates) {
+      const port = readIfExists(ideFile);
+      if (port) return port;
     }
   } catch (_) {
     // ignore
@@ -82,7 +122,7 @@ function httpJson(url) {
   console.error('  1. Open WeChat DevTools with this project (repo root, miniprogramRoot=miniapp-weixin/)');
   console.error('  2. Re-login if prompted (需要重新登录)');
   console.error('  3. Settings -> Security -> enable Service Port');
-  console.error('  4. Run: powershell -ExecutionPolicy Bypass -File enable-auto.ps1');
+  console.error('  4. Run: bash enable-auto.sh (macOS) or powershell -ExecutionPolicy Bypass -File enable-auto.ps1 (Windows)');
   console.error('  5. Reload Cursor window (MCP reconnects to ws://127.0.0.1:9423)');
   process.exit(1);
 });

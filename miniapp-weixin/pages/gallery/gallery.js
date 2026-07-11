@@ -1,3 +1,4 @@
+/** @feature gallery @see docs/features/gallery.md */
 const levelManager = require('../../utils/level-manager');
 const { FRAGMENTS } = require('../../data/items.js');
 const { navigateBackWithFade } = require('../../utils/page-transitions');

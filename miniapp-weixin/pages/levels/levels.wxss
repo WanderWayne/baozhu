@@ -252,6 +252,16 @@ page {
   transform: translate(-50%, -50%);
   font-size: 36rpx;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.world-node-icon {
+  width: 32px;
+  height: 32px;
 }
 
 .world-node.active {
@@ -323,6 +333,14 @@ page {
   font-size: 100rpx;
   line-height: 1;
   margin-bottom: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chapter-header-icon {
+  width: 40px;
+  height: 40px;
 }
 
 .chapter-name {
@@ -446,6 +464,18 @@ page {
 
 .door-icon {
   font-size: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.door-icon-svg {
+  font-size: 0;
+}
+
+.level-door-icon {
+  width: 36px;
+  height: 36px;
 }
 
 .door-info {

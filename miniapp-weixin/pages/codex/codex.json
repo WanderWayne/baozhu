@@ -1,4 +1,6 @@
 {
   "navigationStyle": "custom",
-  "usingComponents": {}
+  "usingComponents": {
+    "item-icon": "/components/item-icon/item-icon"
+  }
 }

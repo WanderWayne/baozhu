@@ -1,0 +1,14 @@
+<wxs module="ic" src="./item-icon.wxs" />
+<view
+  class="item-icon-root {{className}} {{ic.hasPng(name) ? 'item-icon-png' : 'item-icon-emoji'}}"
+  style="width:{{size}}px;height:{{size}}px;"
+>
+  <image
+    wx:if="{{ic.hasPng(name)}}"
+    class="item-icon-image"
+    src="{{ic.src(name)}}"
+    mode="aspectFit"
+    lazy-load="{{true}}"
+  />
+  <text wx:else class="item-icon-text">{{ic.emoji(name, emoji)}}</text>
+</view>

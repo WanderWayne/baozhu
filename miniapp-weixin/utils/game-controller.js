@@ -1,25 +1,56 @@
-// 游戏核心控制器（小程序 touch 版，对齐 H5 101–104）
+/** @feature synthesis @see docs/features/synthesis.md */
+// GameController 编排层 — 玩法细节见 utils/game/*
+// 游戏核心控制器（小程序 touch 版，对齐 H5 101–106）
 const synthesisEngine = require('./synthesis-engine');
 const levelManager = require('./level-manager');
 const { getItemMeta } = require('./game-item-style');
 const { getRecipeBookPageData } = require('./game-recipe-book');
-const { showDialog, showDoorBubble, showTriggerDialog, playLevelDialogs } = require('./door-dialog');
+const { showDialog, showTriggerDialog, playLevelDialogs } = require('./door-dialog');
 const { runChapterTransition } = require('./game-chapter-transition');
 const { navigateBackWithFade } = require('./page-transitions');
 const { frameDelay } = require('./inventory-pop-animation');
+const { createFoamBurst, appendFoam } = require('./game-foam');
+const TradeStationManager = require('./trade-station');
+const tutorialGuide = require('./tutorial-guide');
+const devPlaytest = require('./dev-playtest');
 
-const ITEM_SIZE_PX = 85;
-const COLLISION_PX = 65;
-const DRAG_THRESHOLD_PX = 10;
-const OFFER_ANIM_MS = 550;
-const APPEAR_INTERVAL = 300;
-const APPEAR_DURATION = 1900;
+const { ITEM_SIZE_PX, nextId, APPEAR_INTERVAL, APPEAR_DURATION } = require('./game/constants');
 
-let uid = 0;
-function nextId() {
-  uid += 1;
-  return `item_${uid}_${Date.now()}`;
-}
+const dragMixin = require('./game/drag');
+const doorMixin = require('./game/door');
+const synthesisFlowMixin = require('./game/synthesis-flow');
+const brewingMixin = require('./game/brewing');
+const inventoryMixin = require('./game/inventory');
+const completionMixin = require('./game/completion');
+const recipeBookMixin = require('./game/recipe-book');
+
+const DOOR_CLICK_LINES = {
+  101: { hints: [], chat: [] },
+  102: {
+    hints: ['鲜奶发酵成酸奶，滤布收成酪。'],
+    chat: ['...', '别乱碰。', '老老实实做出奶酪。'],
+  },
+  103: {
+    hints: ['四种，我全都要。'],
+    chat: ['...', '还没齐呢。', '别偷懒。'],
+  },
+  104: {
+    hints: ['也许跟它的名字有关。'],
+    chat: ['...', '自己想。', '别看我。'],
+  },
+  105: {
+    hints: ['翻翻配方书。'],
+    chat: ['...', '花挑错了可不行。', '别浪费珠宝。'],
+  },
+  106: {
+    hints: ['在考试呢，想什么呢。'],
+    chat: ['...', '这是最后一关了。', '步骤不少。', '冷静。'],
+  },
+  _default: {
+    hints: [],
+    chat: ['...', '嗯？', '别戳了。', '有事？', '去合成。'],
+  },
+};
 
 class GameController {
   constructor(page, levelId) {
@@ -40,6 +71,11 @@ class GameController {
     this.brewDragState = null;
     this._offerQueue = [];
     this.dragState = null;
+    this._workshopDragFinishing = false;
+    this._lpState = null;
+    this._lpRingTimer = null;
+    this._lpCompleteTimer = null;
+    this._workbenchInitialSpawned = false;
     this._introOuterTimer = null;
     this._recipeBookPhaseActive = false;
     this._firedTriggers = new Set();
@@ -52,6 +88,8 @@ class GameController {
     this.synthesisRect = null;
     this.doorRect = null;
     this.inventoryRect = null;
+    this.tradeStation = new TradeStationManager(this);
+    this._doorClickLines = DOOR_CLICK_LINES;
   }
 
   init() {
@@ -91,6 +129,17 @@ class GameController {
     };
   }
 
+  _levelTargetIcon(levelData) {
+    const target = levelData?.target || '';
+    const levelIcon = target
+      ? getItemMeta(target).icon
+      : (levelData?.icon || '🍨');
+    return {
+      levelIcon,
+      levelTarget: target,
+    };
+  }
+
   _applyLevelState(levelData, opts = {}) {
     this.levelData = levelData;
     this.chapterData = levelManager.getChapterData(levelData.chapterId);
@@ -104,12 +153,14 @@ class GameController {
     this.offeringInProgress = false;
     this.multiCompleted = [];
     this._offerQueue = [];
+    this._workbenchInitialSpawned = false;
 
     const discovered = levelManager.currentProgress.discoveredItems || [];
     const alreadyHasBook = discovered.includes('配方书');
+    const forceRecipePhase = devPlaytest.forceRecipeBookPhase(levelData.id);
     this._recipeBookPhaseActive = !!(
       levelData.recipeBookPhase
-      && !alreadyHasBook
+      && (!alreadyHasBook || forceRecipePhase)
       && !opts.skipRecipePhase
     );
 
@@ -133,14 +184,12 @@ class GameController {
       });
     }
 
-    if (!this._recipeBookPhaseActive) {
-      (levelData.workbenchInitialItems || []).forEach((name, i) => {
-        workshop.push(this._makeItem(name, 40 + i * 90, 80, false));
-      });
+    if (!this._recipeBookPhaseActive && !opts.keepInventory) {
+      // workbench 物品（如 105 珠宝）在关卡初始化时 pop-in
     }
 
     const multiTargets = levelData.multiTarget ? (levelData.multiTargets || []) : [];
-    const showRecipeBtn = !!levelData.recipeBookPhase && alreadyHasBook && !this._recipeBookPhaseActive;
+    const showRecipeBtn = !!levelData.recipeBookPhase && alreadyHasBook && !this._recipeBookPhaseActive && !forceRecipePhase;
     const recipeBookData = getRecipeBookPageData(
       'recorded',
       '',
@@ -151,7 +200,7 @@ class GameController {
       levelId: levelData.id,
       levelName: levelData.name,
       levelTarget: levelData.target,
-      levelIcon: levelData.icon || '🍨',
+      ...this._levelTargetIcon(levelData),
       doorStage: 0,
       targetReady: false,
       showTransitionText: false,
@@ -190,7 +239,107 @@ class GameController {
       basicCompletionPhase: 'stats',
       ...recipeBookData,
       ...this._transitionResetData(opts),
-    }, () => this._syncLayout());
+    }, () => {
+      this._syncLayout();
+      this._initTradeStations();
+      this._spawnWorkbenchInitialItemsIfNeeded(220);
+    });
+  }
+
+  _spawnWorkbenchInitialItemsIfNeeded(startDelay = 220) {
+    if (this._workbenchInitialSpawned || this._recipeBookPhaseActive) return;
+    const list = this.levelData.workbenchInitialItems;
+    if (!list?.length) return;
+    this._workbenchInitialSpawned = true;
+    const spawnAll = () => {
+      list.forEach((itemName, i) => {
+        setTimeout(() => this.spawnWorkbenchItemPopIn(itemName), i * APPEAR_INTERVAL);
+      });
+    };
+    if (!this.synthesisRect && typeof this.page._measureGameRects === 'function') {
+      this.page._measureGameRects();
+      setTimeout(spawnAll, startDelay);
+      return;
+    }
+    setTimeout(spawnAll, startDelay);
+  }
+
+  /** intro 收起后触发交易台引导（不等待门边对白） */
+  _scheduleTradeStationTutorialAfterIntro() {
+    if (this._recipeBookPhaseActive || this.levelData.isSpecialArea) return;
+    setTimeout(() => {
+      this._maybeShowTradeStationTutorial();
+    }, 800);
+  }
+
+  spawnWorkbenchItemPopIn(itemName) {
+    const workshop = this.page.data.workshopItems || [];
+    if (workshop.some((i) => i.name === itemName)) return;
+
+    const synth = this.synthesisRect;
+    const cx = synth ? synth.width * 0.25 : 90;
+    const cy = synth ? synth.height * 0.5 : 140;
+    const half = ITEM_SIZE_PX / 2;
+
+    const newItem = this._makeItem(itemName, Math.max(6, cx - half), Math.max(6, cy - half), false);
+    newItem.workbenchPopIn = true;
+
+    this.page.setData({ workshopItems: [...workshop, newItem] });
+
+    try {
+      this.page.audioManager.playInventoryTransitionSlot(false);
+    } catch (err) { /* noop */ }
+
+    if (synth) {
+      appendFoam(this.page, createFoamBurst(
+        synth.left + cx,
+        synth.top + cy,
+        8,
+      ));
+    }
+
+    setTimeout(() => {
+      const ws = (this.page.data.workshopItems || []).map((i) => (
+        i.id === newItem.id ? { ...i, workbenchPopIn: false } : i
+      ));
+      this.page.setData({ workshopItems: ws });
+    }, 1900);
+  }
+
+
+
+
+  _initTradeStations() {
+    if (this._recipeBookPhaseActive) {
+      this.tradeStation.destroy();
+      this.page.setData({ tradeStationViews: [], tradeStationMode: false });
+      return;
+    }
+    const configs = TradeStationManager.getConfigs(this.levelData);
+    if (!configs.length) {
+      this.tradeStation.destroy();
+      this.page.setData({ tradeStationViews: [], tradeStationMode: false });
+      return;
+    }
+    wx.nextTick(() => {
+      setTimeout(() => {
+        this.tradeStation.init(configs, this.levelId);
+      }, 100);
+    });
+  }
+
+  _maybeShowTradeStationTutorial() {
+    if (tutorialGuide.hasSeen('tut_tradeStation')) return;
+    if (!this.tradeStation?.stations?.length) return;
+    tutorialGuide.markSeen('tut_tradeStation');
+    tutorialGuide.show(this.page, {
+      targetSelector: '.trade-station',
+      text: '将物品放入/点击交易台以交易',
+      position: 'bottom',
+      padding: 8,
+      borderRadius: 14,
+      shape: 'roundRect',
+    });
   }
 
   _introTitle() {
@@ -241,7 +390,8 @@ class GameController {
       }
       this._introResolve = resolve;
       this._introDismissed = false;
-    this._introFromTransition = false;
+      this._introSkipOpeningDialogs = this._introFromTransition;
+      this._introFromTransition = false;
       this.page.setData({
         showIntro: true,
         introFadeOut: false,
@@ -287,11 +437,13 @@ class GameController {
         this._introResolve();
         this._introResolve = null;
       }
-      if (!this._introFromTransition) {
+      if (!this._introSkipOpeningDialogs) {
         this._playLevelDialogs();
       } else if (!this._recipeBookPhaseActive && !this.levelData.isSpecialArea) {
         setTimeout(() => this.flashTargetDisplay(), 400);
       }
+      this._scheduleTradeStationTutorialAfterIntro();
+      this._introSkipOpeningDialogs = false;
     }, 600);
   }
 
@@ -323,17 +475,6 @@ class GameController {
     });
   }
 
-  _spawnRecipeBookDirectly() {
-    const rect = this.synthesisRect;
-    const cx = rect ? Math.max(20, rect.width / 2 - ITEM_SIZE_PX / 2) : 120;
-    const cy = rect ? Math.max(40, rect.height * 0.42 - ITEM_SIZE_PX / 2) : 100;
-    const item = this._makeItem('配方书', cx, cy, false);
-    item.recipeBookSpawn = true;
-    this.page.setData({
-      workshopItems: [...(this.page.data.workshopItems || []), item],
-    });
-    levelManager.discoverItem('配方书');
-  }
 
   flashTargetDisplay() {
     this.page.setData({ targetFlash: true, targetPopIn: true });
@@ -342,20 +483,6 @@ class GameController {
     }, 550);
   }
 
-  _revealRecipeBookPhase2() {
-    this._recipeBookPhaseActive = false;
-    this.page.setData({
-      targetHidden: false,
-      targetPopIn: true,
-      targetFlash: false,
-      tradeStations: this.levelData.tradeStations || [],
-    });
-    setTimeout(() => {
-      this.page.setData({ targetPopIn: false });
-      this.flashTargetDisplay();
-    }, 500);
-    this._fillInitialInventory();
-  }
 
   async _fillInitialInventory() {
     const names = this.levelData.initialItems || [];
@@ -381,277 +508,39 @@ class GameController {
     }
     await new Promise((r) => setTimeout(r, APPEAR_DURATION));
     this._syncLayout();
+    this._initTradeStations();
   }
 
-  showRecipeBookButton() {
-    if (this.page.data.recipeBookBtnVisible) return;
-    this.page.setData({
-      recipeBookBtnVisible: true,
-      recipeBookBtnPulse: true,
-    });
-  }
 
-  openRecipeBook() {
-    if (this.page.data.recipeBookOverlayVisible) return;
-    try { this.page.audioManager.playSFX('recipe-book'); } catch (err) { /* noop */ }
-    const discovered = levelManager.currentProgress.discoveredItems || [];
-    this.page.setData({
-      recipeBookOverlayVisible: true,
-      recipeBookBtnPulse: false,
-      ...getRecipeBookPageData(
-        this.page.data.recipeBookTab || 'recorded',
-        this.page.data.recipeBookSearch || '',
-        discovered,
-      ),
-    });
-  }
 
-  closeRecipeBook() {
-    try { this.page.audioManager.playSFX('recipe-book'); } catch (err) { /* noop */ }
-    this.page.setData({ recipeBookOverlayVisible: false });
-  }
 
-  onRecipeBookTabChange(tab) {
-    try { this.page.audioManager.playSFX('recipe-tab'); } catch (err) { /* noop */ }
-    const discovered = levelManager.currentProgress.discoveredItems || [];
-    this.page.setData(getRecipeBookPageData(
-      tab,
-      this.page.data.recipeBookSearch || '',
-      discovered,
-    ));
-  }
 
-  onRecipeBookSearch(query) {
-    const discovered = levelManager.currentProgress.discoveredItems || [];
-    this.page.setData(getRecipeBookPageData(
-      this.page.data.recipeBookTab || 'recorded',
-      query,
-      discovered,
-    ));
-  }
 
-  onWorkshopLongPress(e) {
-    if (this._dragBlocked() || this.isTransitioning) return;
-    const { id } = e.currentTarget.dataset;
-    const item = (this.page.data.workshopItems || []).find((i) => i.id === id);
-    if (!item || item.name !== '配方书') return;
-    this.activateRecipeBook(id);
-  }
 
-  activateRecipeBook(itemId) {
-    this.showRecipeBookButton();
-    const items = (this.page.data.workshopItems || []).filter((i) => i.id !== itemId);
-    const item = (this.page.data.workshopItems || []).find((i) => i.id === itemId);
-    if (!item) return;
 
-    const startX = this.synthesisRect
-      ? this.synthesisRect.left + item.x + ITEM_SIZE_PX / 2
-      : item.x + ITEM_SIZE_PX / 2;
-    const startY = this.synthesisRect
-      ? this.synthesisRect.top + item.y + ITEM_SIZE_PX / 2
-      : item.y + ITEM_SIZE_PX / 2;
 
-    this.page.setData({
-      workshopItems: items,
-      recipeBookFlyer: {
-        visible: true,
-        animating: false,
-        x: startX - ITEM_SIZE_PX / 2,
-        y: startY - ITEM_SIZE_PX / 2,
-        scale: 1,
-        opacity: 1,
-        icon: item.icon,
-        name: item.name,
-        itemType: item.itemType,
-        tone: item.tone || '',
-      },
-    });
 
-    setTimeout(() => {
-      const query = wx.createSelectorQuery().in(this.page);
-      query.select('#recipe-book-btn').boundingClientRect();
-      query.exec((res) => {
-        const btnRect = res[0];
-        const targetX = btnRect
-          ? btnRect.left + btnRect.width / 2 - ITEM_SIZE_PX / 2
-          : startX;
-        const targetY = btnRect
-          ? btnRect.top + btnRect.height / 2 - ITEM_SIZE_PX / 2
-          : startY - 120;
 
-        wx.nextTick(() => {
-          this.page.setData({
-            recipeBookFlyer: {
-              ...this.page.data.recipeBookFlyer,
-              animating: true,
-              x: targetX,
-              y: targetY,
-              scale: 0.2,
-              opacity: 0,
-            },
-            recipeBookBtnFlash: true,
-          });
-        });
 
-        setTimeout(() => {
-          this.page.setData({
-            recipeBookFlyer: { visible: false },
-            recipeBookBtnFlash: false,
-          });
-          showDoorBubble(this.page, '点开配方书看看吧');
-          if (this._recipeBookPhaseActive) {
-            setTimeout(() => this._revealRecipeBookPhase2(), 400);
-          }
-        }, 850);
-      });
-    }, 500);
-  }
 
-  onDoorTap() {
-    if (this.isTransitioning || this.page.data.showIntro) return;
-    const now = Date.now();
-    if (now - this._doorClickCooldown < 4000) return;
-    this._doorClickCooldown = now;
-    this._showDoorClickLine();
-  }
 
-  _doorClickLines = {
-    101: { hints: [], chat: [] },
-    102: {
-      hints: ['鲜奶发酵成酸奶，滤布收成酪。'],
-      chat: ['...', '别乱碰。', '老老实实做出奶酪。'],
-    },
-    103: {
-      hints: ['四种，我全都要。'],
-      chat: ['...', '还没齐呢。', '别偷懒。'],
-    },
-    104: {
-      hints: ['也许跟它的名字有关。'],
-      chat: ['...', '自己想。', '别看我。'],
-    },
-    105: {
-      hints: ['翻翻配方书。'],
-      chat: ['...', '花挑错了可不行。', '别浪费珠宝。'],
-    },
-    106: {
-      hints: ['在考试呢，想什么呢。'],
-      chat: ['...', '这是最后一关了。', '步骤不少。', '冷静。'],
-    },
-    _default: {
-      hints: [],
-      chat: ['...', '嗯？', '别戳了。', '有事？', '去合成。'],
-    },
-  };
 
-  _showDoorClickLine() {
-    const lines = this._doorClickLines[this.levelId] || this._doorClickLines._default;
-    const pool = [...lines.hints, ...lines.chat];
-    if (!pool.length) return;
-    const idx = this._doorClickChatIdx % pool.length;
-    this._doorClickChatIdx += 1;
-    showDoorBubble(this.page, pool[idx]);
-  }
 
-  _clearLvl104DualHints() {
-    if (this._lvl104DualHintTimer) {
-      clearTimeout(this._lvl104DualHintTimer);
-      this._lvl104DualHintTimer = null;
-    }
-    this._lvl104AwaitDual = false;
-  }
 
-  _scheduleLvl104DualCheeseHints() {
-    if (this.levelId !== 104 || !this._lvl104AwaitDual) return;
-    if (this.synthesizedItems.has('双酪')) {
-      this._clearLvl104DualHints();
-      return;
-    }
-    if (this._lvl104DualHintTimer) clearTimeout(this._lvl104DualHintTimer);
-    this._lvl104DualHintTimer = setTimeout(() => {
-      this._lvl104DualHintTimer = null;
-      if (this.levelId !== 104 || !this._lvl104AwaitDual) return;
-      if (this.synthesizedItems.has('双酪')) {
-        this._clearLvl104DualHints();
-        return;
-      }
-      showTriggerDialog(this.page, '双酪到底是什么呢...');
-      this._scheduleLvl104DualCheeseHints();
-    }, 10000);
-  }
 
-  _chapterSynthHooksAfterSuccess(resultName) {
-    if (this.levelId === 104) {
-      if (resultName === '雪酪') {
-        this._lvl104AwaitDual = true;
-      }
-      if (resultName === '双酪') {
-        this._clearLvl104DualHints();
-      } else if (this._lvl104AwaitDual) {
-        this._scheduleLvl104DualCheeseHints();
-      }
-    }
-  }
 
-  _chapterSynthHooksAfterFailedAttempt() {
-    if (this.levelId === 104 && this._lvl104AwaitDual) {
-      this._scheduleLvl104DualCheeseHints();
-    }
-  }
 
-  _showBasicCompletionScreen() {
-    const elapsed = levelManager.getBasicLevelElapsedTime();
-    const speedRating = levelManager.getSpeedRating(elapsed);
-    const currentTitle = levelManager.getCurrentTitle();
-    this.page.setData({
-      basicCompletionVisible: true,
-      basicCompletionPhase: 'stats',
-      basicCompletionTime: levelManager.formatElapsedTime(elapsed),
-      basicCompletionProgress: levelManager.getExplorationProgress(),
-      basicSpeedIcon: speedRating.icon,
-      basicSpeedName: speedRating.name,
-      basicSpeedTier: speedRating.tier,
-      basicOldTitleIcon: currentTitle.icon,
-      basicOldTitleName: currentTitle.name,
-      basicNewTitleIcon: '',
-      basicNewTitleName: '',
-    });
-  }
 
-  claimBasicReward() {
-    try { this.page.audioManager.playClickOpen(); } catch (err) { /* noop */ }
-    const newTitle = levelManager.upgradeTitle();
-    this.page.setData({
-      basicCompletionPhase: 'reward',
-      basicNewTitleIcon: newTitle.icon,
-      basicNewTitleName: newTitle.name,
-    });
-    setTimeout(() => {
-      this.page.setData({ basicCompletionPhase: 'continue' });
-    }, 800);
-  }
 
-  finishBasicCompletionRest() {
-    try { this.page.audioManager.playClickExit(); } catch (err) { /* noop */ }
-    levelManager.claimBasicReward();
-    this.isTransitioning = false;
-    this.page.setData({ basicCompletionVisible: false });
-    const worldId = this.levelData?.worldId || 1;
-    navigateBackWithFade(`/pages/levels/levels?world=${worldId}`);
-  }
 
-  finishBasicCompletionExplore() {
-    try { this.page.audioManager.playClickOpen(); } catch (err) { /* noop */ }
-    levelManager.claimBasicReward();
-    this.isTransitioning = false;
-    this.page.setData({ basicCompletionVisible: false });
-    const worldId = this.levelData?.worldId || 1;
-    navigateBackWithFade(`/pages/levels/levels?world=${worldId}`);
-  }
 
   measureRects(synthesisRect, doorRect, inventoryRect) {
     this.synthesisRect = synthesisRect;
     this.doorRect = doorRect;
     this.inventoryRect = inventoryRect;
+    if (this.tradeStation?.stations?.length) {
+      this.tradeStation.relayout(this.levelId);
+    }
   }
 
   _syncLayout() {
@@ -664,718 +553,50 @@ class GameController {
     });
   }
 
-  _dragBlocked() {
-    return this.isTransitioning
-      || this.offeringInProgress
-      || this.page.data.showIntro;
-    // brewing 不锁定全局：倒计时期间仍可拖动其它物品（对齐 H5 行为）
-  }
-
-  onInventoryTouchStart(e) {
-    if (this._dragBlocked()) return;
-    const { id } = e.currentTarget.dataset;
-    const item = this.page.data.inventoryItems.find((i) => i.id === id);
-    if (!item || item.hidden || item.placeholder) return;
-    const touch = e.touches[0];
-    this.dragState = {
-      fromInventory: true,
-      id,
-      startX: touch.clientX,
-      startY: touch.clientY,
-      active: false,
-    };
-  }
-
-  onInventoryTouchMove(e) {
-    this._handleInventoryDragMove(e);
-  }
-
-  onPageTouchMove(e) {
-    if (!this.dragState?.fromInventory) return;
-    this._handleInventoryDragMove(e);
-  }
-
-  _handleInventoryDragMove(e) {
-    if (!this.dragState?.fromInventory) return;
-    const touch = e.touches[0];
-    const dx = touch.clientX - this.dragState.startX;
-    const dy = touch.clientY - this.dragState.startY;
-    if (!this.dragState.active) {
-      if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
-      this.dragState.active = true;
-      const inv = this.page.data.inventoryItems.map((i) => (
-        i.id === this.dragState.id ? { ...i, placeholder: true } : i
-      ));
-      this.page.setData({ inventoryItems: inv });
-      try { this.page.audioManager.playSFX('pickup'); } catch (err) { /* noop */ }
-    }
-    const item = this.page.data.inventoryItems.find((i) => i.id === this.dragState.id);
-    if (!item) return;
-    this.page.setData({
-      dragGhost: {
-        visible: true,
-        x: touch.clientX,
-        y: touch.clientY,
-        icon: item.icon,
-        name: item.name,
-        itemType: item.itemType,
-        tone: item.tone || '',
-      },
-    });
-  }
-
-  onInventoryTouchEnd(e) {
-    this._finishInventoryDrag(e);
-  }
-
-  onPageTouchEnd(e) {
-    if (this.dragState?.fromInventory) this._finishInventoryDrag(e);
-  }
-
-  _finishInventoryDrag(e) {
-    if (!this.dragState?.fromInventory) return;
-    const touch = e.changedTouches[0];
-    const { id, active } = this.dragState;
-    this.dragState = null;
-    this.page.setData({
-      dragGhost: { visible: false, x: 0, y: 0, icon: '', name: '', itemType: 'base', tone: '' },
-    });
-
-    const inv = [...this.page.data.inventoryItems];
-    const srcIdx = inv.findIndex((i) => i.id === id);
-    if (srcIdx < 0) return;
-    const src = inv[srcIdx];
-
-    const restoreInventorySlot = (withAppear) => {
-      inv[srcIdx] = {
-        ...inv[srcIdx],
-        placeholder: false,
-        hidden: false,
-        appearing: !!withAppear,
-      };
-    };
-
-    if (!active) {
-      this._spawnFromInventory(src, this._defaultWorkshopPos());
-      restoreInventorySlot(true);
-      this.page.setData({ inventoryItems: inv }, () => this._syncLayout());
-      try { this.page.audioManager.playSFX('pickup'); } catch (err) { /* noop */ }
-      return;
-    }
-
-    const { clientX: cx, clientY: cy } = touch;
-
-    if (this._isInInventory(cx, cy)) {
-      restoreInventorySlot(false);
-      this.page.setData({ inventoryItems: inv }, () => this._syncLayout());
-      return;
-    }
-
-    if (this._isInSynthesisArea(cx, cy)) {
-      const pos = this._touchToWorkshop(cx, cy);
-      const newId = this._spawnFromInventory(src, pos);
-      restoreInventorySlot(true);
-      this.page.setData({ inventoryItems: inv }, () => this._syncLayout());
-      try { this.page.audioManager.playSFX('drop'); } catch (err) { /* noop */ }
-      this._checkWorkshopCollisionFor(newId);
-      return;
-    }
-
-    restoreInventorySlot(false);
-    this.page.setData({ inventoryItems: inv }, () => this._syncLayout());
-  }
-
-  _checkWorkshopCollisionFor(itemId) {
-    const items = [...this.page.data.workshopItems];
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return;
-    const hit = items.find((other) => {
-      if (other.id === itemId || other.locked || other.offering) return false;
-      return Math.hypot(other.x - item.x, other.y - item.y) < COLLISION_PX;
-    });
-    if (hit) this._trySynthesis(item, hit, items);
-  }
-
-  _spawnFromInventory(src, pos) {
-    const workshop = [...this.page.data.workshopItems];
-    const newItem = {
-      ...src,
-      id: nextId(),
-      inInventory: false,
-      hidden: false,
-      placeholder: false,
-      appearing: false,
-      x: pos.x,
-      y: pos.y,
-      selected: false,
-    };
-    workshop.push(newItem);
-    this.page.setData({ workshopItems: workshop });
-    return newItem.id;
-  }
-
-  _defaultWorkshopPos() {
-    const n = this.page.data.workshopItems.length;
-    return { x: 48 + (n % 3) * 88, y: 120 + Math.floor(n / 3) * 88 };
-  }
-
-  _touchToWorkshop(clientX, clientY) {
-    if (!this.synthesisRect) return this._defaultWorkshopPos();
-    return {
-      x: clientX - this.synthesisRect.left - ITEM_SIZE_PX / 2,
-      y: clientY - this.synthesisRect.top - ITEM_SIZE_PX / 2,
-    };
-  }
-
-  _isInInventory(clientX, clientY) {
-    if (!this.inventoryRect) return false;
-    const r = this.inventoryRect;
-    return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
-  }
-
-  _isInSynthesisArea(clientX, clientY) {
-    if (!this.synthesisRect) return true;
-    const r = this.synthesisRect;
-    const aboveInventory = this.inventoryRect ? clientY < this.inventoryRect.top : true;
-    return (
-      aboveInventory
-      && clientX >= r.left
-      && clientX <= r.right
-      && clientY >= r.top
-      && clientY <= r.bottom
-    );
-  }
-  onInventoryTap(e) {
-    if (this._dragBlocked()) return;
-    const { id } = e.currentTarget.dataset;
-    const src = this.page.data.inventoryItems.find((i) => i.id === id);
-    if (!src || src.hidden || src.placeholder) return;
-    this._spawnFromInventory(src, this._defaultWorkshopPos());
-    const inv = this.page.data.inventoryItems.map((i) => (
-      i.id === id ? { ...i, appearing: true } : i
-    ));
-    this.page.setData({ inventoryItems: inv }, () => this._syncLayout());
-    try { this.page.audioManager.playSFX('pickup'); } catch (err) { /* noop */ }
-  }
-
-  onWorkshopTouchStart(e) {
-    if (this._dragBlocked()) return;
-    const { id } = e.currentTarget.dataset;
-    const touch = e.touches[0];
-    const items = [...this.page.data.workshopItems];
-    const item = items.find((i) => i.id === id);
-    if (!item || item.locked || item.offering) return;
-
-    this.dragState = {
-      fromInventory: false,
-      id,
-      startX: touch.clientX,
-      startY: touch.clientY,
-      originX: item.x,
-      originY: item.y,
-      active: true,
-    };
-    item.selected = true;
-    item.offeringFlight = false;
-    this.page.setData({ workshopItems: items });
-  }
-
-  onWorkshopTouchMove(e) {
-    if (!this.dragState) return;
-    const touch = e.touches[0];
-    const dx = touch.clientX - this.dragState.startX;
-    const dy = touch.clientY - this.dragState.startY;
-    const items = [...this.page.data.workshopItems];
-    const item = items.find((i) => i.id === this.dragState.id);
-    if (!item) return;
-    item.x = this.dragState.originX + dx;
-    item.y = this.dragState.originY + dy;
-    this.page.setData({ workshopItems: items });
-  }
-
-  onWorkshopTouchEnd() {
-    if (!this.dragState) return;
-    const { id } = this.dragState;
-    this.dragState = null;
-
-    const items = [...this.page.data.workshopItems];
-    const item = items.find((i) => i.id === id);
-    if (!item) return;
-    item.selected = false;
-
-    const hit = items.find((other) => {
-      if (other.id === id || other.locked) return false;
-      const dist = Math.hypot(other.x - item.x, other.y - item.y);
-      return dist < COLLISION_PX;
-    });
-
-    if (hit) {
-      this._trySynthesis(item, hit, items);
-    } else {
-      this.page.setData({ workshopItems: items });
-    }
-  }
-
-  onTradeTap(e) {
-    const { input, output } = e.currentTarget.dataset;
-    const workshop = [...this.page.data.workshopItems];
-    const gem = workshop.find((i) => i.name === input && !i.locked);
-    if (!gem) {
-      this._showToast('需要「珠宝」才能交换');
-      return;
-    }
-    workshop.splice(workshop.indexOf(gem), 1);
-    workshop.push(this._makeItem(output, gem.x, gem.y, false));
-    this.page.setData({ workshopItems: workshop });
-    levelManager.discoverItem(output);
-    this._showToast(`换到了 ${output}`);
-  }
-
-  _isNearDoor(item) {
-    if (!this.synthesisRect || !this.doorRect) return item.y < 80;
-    const cx = this.synthesisRect.left + item.x + ITEM_SIZE_PX;
-    const cy = this.synthesisRect.top + item.y + ITEM_SIZE_PX;
-    const dx = this.doorRect.left + this.doorRect.width / 2;
-    const dy = this.doorRect.top + this.doorRect.height / 2;
-    return Math.hypot(cx - dx, cy - dy) < 110;
-  }
-
-  _doorCenterInWorkshop() {
-    if (!this.synthesisRect || !this.doorRect) {
-      return { x: 120, y: 20 };
-    }
-    return {
-      x: this.doorRect.left + this.doorRect.width / 2 - this.synthesisRect.left - ITEM_SIZE_PX,
-      y: this.doorRect.top + this.doorRect.height / 2 - this.synthesisRect.top - ITEM_SIZE_PX,
-    };
-  }
-
-  _trySynthesis(item1, item2, items) {
-    synthesisEngine.synthesize({ name: item1.name }, { name: item2.name }, (result) => {
-      if (result.type === 'failed') {
-        this._showToast(result.message);
-        try { this.page.audioManager.playSFX('error'); } catch (err) { /* noop */ }
-        this._chapterSynthHooksAfterFailedAttempt();
-        items.forEach((i) => {
-          if (i.id === item1.id || i.id === item2.id) {
-            i.selected = false;
-            i.shakeAnim = true;
-          }
-        });
-        this.page.setData({ workshopItems: items });
-        // shake 动画结束后清 flag
-        setTimeout(() => {
-          const ws = [...this.page.data.workshopItems];
-          let changed = false;
-          ws.forEach((i) => { if (i.shakeAnim) { i.shakeAnim = false; changed = true; } });
-          if (changed) this.page.setData({ workshopItems: ws });
-        }, 500);
-        return;
-      }
-
-      const idx1 = items.findIndex((i) => i.id === item1.id);
-      const idx2 = items.findIndex((i) => i.id === item2.id);
-      if (idx1 < 0 || idx2 < 0) return;
-
-      const cx = (item1.x + item2.x) / 2;
-      const cy = (item1.y + item2.y) / 2;
-
-      if (result.type === 'timer') {
-        items.splice(Math.max(idx1, idx2), 1);
-        items.splice(Math.min(idx1, idx2), 1);
-        const brewings = [...(this.page.data.brewings || [])];
-        const offset = brewings.length * 18;
-        const brewing = {
-          id: nextId(),
-          name: result.result,
-          x: cx + offset,
-          y: cy + offset,
-          secondsLeft: result.duration,
-          total: result.duration,
-          message: result.message,
-          recipe: result.recipe,
-        };
-        brewings.push(brewing);
-        this.page.setData({ workshopItems: items, brewings });
-        this._startBrewTimer(brewing.id);
-        return;
-      }
-
-      this._finishSynthesis(items, idx1, idx2, result, cx, cy);
-    });
-  }
-
-  _updateBrewing(brewId, patch) {
-    const brewings = (this.page.data.brewings || []).map((b) => (
-      b.id === brewId ? { ...b, ...patch } : b
-    ));
-    this.page.setData({ brewings });
-  }
-
-  onBrewingTouchStart(e) {
-    const { id } = e.currentTarget.dataset;
-    const brewing = (this.page.data.brewings || []).find((b) => b.id === id);
-    if (!brewing) return;
-    const t = e.touches && e.touches[0];
-    if (!t) return;
-    this.brewDragState = {
-      id,
-      startX: t.clientX,
-      startY: t.clientY,
-      originX: brewing.x,
-      originY: brewing.y,
-    };
-    this._updateBrewing(id, { dragging: true });
-  }
-
-  onBrewingTouchMove(e) {
-    if (!this.brewDragState) return;
-    const t = e.touches && e.touches[0];
-    if (!t) return;
-    const { id, startX, startY, originX, originY } = this.brewDragState;
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    this._updateBrewing(id, {
-      x: originX + dx,
-      y: originY + dy,
-    });
-  }
-
-  onBrewingTouchEnd() {
-    if (this.brewDragState) {
-      this._updateBrewing(this.brewDragState.id, { dragging: false });
-    }
-    this.brewDragState = null;
-  }
-
-  _clearBrewTimer(brewId) {
-    if (this.brewTimers[brewId]) {
-      clearInterval(this.brewTimers[brewId]);
-      delete this.brewTimers[brewId];
-    }
-  }
-
-  _finishBrewing(brewId) {
-    const brewings = [...(this.page.data.brewings || [])];
-    const idx = brewings.findIndex((b) => b.id === brewId);
-    if (idx < 0) return;
-    const b = brewings[idx];
-    brewings.splice(idx, 1);
-    this._clearBrewTimer(brewId);
-
-    const items = [...this.page.data.workshopItems];
-    this.synthCount += 1;
-    const newItem = this._makeItem(b.name, b.x, b.y, false);
-    const isTarget = this._isTargetItem(b.name);
-    newItem.isTarget = isTarget;
-    newItem.revealedItem = true;
-    if (isTarget) newItem.targetEntry = true;
-    items.push(newItem);
-    levelManager.discoverItem(b.name);
-    this._addToInventoryIfNeeded(b.name);
-    if (b.recipe?.ingredients) {
-      levelManager.recordCompletionRecipe(this.levelId, b.recipe.ingredients);
-    }
-    this._updateDoorTriggers(b.name);
-    this.page.setData({ brewings, workshopItems: items });
-    if (b.message && !isTarget) this._showToast(b.message);
-    try { this.page.audioManager.playSFX(isTarget ? 'craft-target' : 'craft-normal'); } catch (err) { /* noop */ }
-    setTimeout(() => {
-      const ws = [...this.page.data.workshopItems];
-      const ri = ws.findIndex((i) => i.id === newItem.id);
-      if (ri >= 0) { ws[ri] = { ...ws[ri], revealedItem: false }; this.page.setData({ workshopItems: ws }); }
-    }, 600);
-    if (isTarget) {
-      setTimeout(() => {
-        const ws2 = [...this.page.data.workshopItems];
-        const ri2 = ws2.findIndex((i) => i.id === newItem.id);
-        if (ri2 >= 0) { ws2[ri2] = { ...ws2[ri2], targetEntry: false }; this.page.setData({ workshopItems: ws2 }); }
-      }, 1200);
-    }
-    this._onItemSynthesized(b.name, newItem.id);
-  }
-
-  _startBrewTimer(brewId) {
-    this._clearBrewTimer(brewId);
-    this.brewTimers[brewId] = setInterval(() => {
-      const brewings = [...(this.page.data.brewings || [])];
-      const idx = brewings.findIndex((b) => b.id === brewId);
-      if (idx < 0) {
-        this._clearBrewTimer(brewId);
-        return;
-      }
-      const b = { ...brewings[idx] };
-      b.secondsLeft -= 1;
-      if (b.secondsLeft <= 0) {
-        this._finishBrewing(brewId);
-      } else {
-        brewings[idx] = b;
-        this.page.setData({ brewings });
-      }
-    }, 1000);
-  }
-
-  _finishSynthesis(items, idx1, idx2, result, cx, cy) {
-    items.splice(Math.max(idx1, idx2), 1);
-    items.splice(Math.min(idx1, idx2), 1);
-
-    this.synthCount += 1;
-    const newItem = this._makeItem(result.result, cx, cy, false);
-    const isTarget = this._isTargetItem(result.result);
-    newItem.isTarget = isTarget;
-    newItem.synthesisAnim = true;
-    if (isTarget) newItem.targetEntry = true;  // 两阶段：入场弹出
-    items.push(newItem);
-
-    levelManager.discoverItem(result.result);
-    this._addToInventoryIfNeeded(result.result);
-
-    if (result.recipe?.ingredients) {
-      levelManager.recordCompletionRecipe(this.levelId, result.recipe.ingredients);
-    }
-
-    this._updateDoorTriggers(result.result);
-
-    // 生成飞溅粒子（10 个，随机方向）
-    const particles = [];
-    for (let i = 0; i < 10; i += 1) {
-      const angle = (i / 10) * Math.PI * 2 + Math.random() * 0.5;
-      const dist = 35 + Math.random() * 30;
-      const size = 5 + Math.random() * 7;
-      particles.push({
-        id: `p${i}`,
-        tx: Math.round(Math.cos(angle) * dist),
-        ty: Math.round(Math.sin(angle) * dist),
-        size: Math.round(size),
-        cx: Math.round(cx),
-        cy: Math.round(cy),
-      });
-    }
-    this.page.setData({ workshopItems: items, synthParticles: particles });
-
-    if (result.message && !isTarget) this._showToast(result.message);
-    try { this.page.audioManager.playSFX(isTarget ? 'craft-target' : 'craft-normal'); } catch (err) { /* noop */ }
-
-    // 合成弹出结束后清 synthesisAnim
-    setTimeout(() => {
-      const ws = [...this.page.data.workshopItems];
-      const idx = ws.findIndex((i) => i.id === newItem.id);
-      if (idx >= 0) {
-        ws[idx] = { ...ws[idx], synthesisAnim: false };
-        this.page.setData({ workshopItems: ws });
-      }
-    }, 700);
-    // 目标物：1200ms 后 targetEntry 结束，切换为 targetBreathe 呼吸循环
-    if (isTarget) {
-      setTimeout(() => {
-        const ws2 = [...this.page.data.workshopItems];
-        const idx2 = ws2.findIndex((i) => i.id === newItem.id);
-        if (idx2 >= 0) {
-          ws2[idx2] = { ...ws2[idx2], targetEntry: false };
-          this.page.setData({ workshopItems: ws2 });
-        }
-      }, 1200);
-    }
-    setTimeout(() => this.page.setData({ synthParticles: [] }), 1500);
-
-    this._onItemSynthesized(result.result, newItem.id);
-  }
-
-  _onItemSynthesized(itemName, itemId) {
-    this.synthesizedItems.add(itemName);
-    this._checkTriggerDialogs('onSynthesize', itemName);
-    this._chapterSynthHooksAfterSuccess(itemName);
-    this._checkLevelCompletion(itemName, itemId);
-  }
-
-  _checkTriggerDialogs(event, itemName) {
-    const triggers = this.levelData.triggerDialogs;
-    if (!triggers) return;
-
-    let lines = null;
-    let triggerKey = '';
-
-    if (event === 'onSynthesize' && triggers.onSynthesize?.[itemName]) {
-      triggerKey = `synth_${itemName}`;
-      lines = triggers.onSynthesize[itemName];
-    }
-
-    if (!lines || this._firedTriggers.has(triggerKey)) return;
-    this._firedTriggers.add(triggerKey);
-
-    lines.forEach((line) => {
-      if (line?.text) showTriggerDialog(this.page, line.text);
-    });
-  }
-
-  _isTargetItem(name) {
-    if (this.levelData.multiTarget && this.levelData.multiTargets) {
-      return this.levelData.multiTargets.includes(name);
-    }
-    return name === this.levelData.target;
-  }
-
-  _buildMultiTargetRows(targets, completed) {
-    return (targets || []).map((name, i) => ({
-      name,
-      num: i + 1,
-      done: completed.includes(name),
-    }));
-  }
-
-  _addToInventoryIfNeeded(name) {
-    const inv = [...this.page.data.inventoryItems];
-    const exists = inv.some((i) => i.name === name);
-    if (exists) return;
-    inv.push({ ...this._makeItem(name, 0, 0, true), hidden: false });
-    this.page.setData({ inventoryItems: inv }, () => this._syncLayout());
-  }
-
-  _updateDoorTriggers(itemName) {
-    if (!this.levelData.doorTriggers) return;
-    for (const [stage, triggers] of Object.entries(this.levelData.doorTriggers)) {
-      if (triggers.includes(itemName) && !this.discoveredTriggers.has(itemName)) {
-        this.discoveredTriggers.add(itemName);
-        const stageNum = parseInt(stage.replace('stage', ''), 10);
-        if (stageNum > this.doorStage) {
-          this.doorStage = stageNum;
-          this.page.setData({ doorStage: stageNum });
-        }
-      }
-    }
-  }
-
-  _checkLevelCompletion(itemName, itemId) {
-    if (this.levelData.multiTarget && this.levelData.multiTargets) {
-      if (!this.levelData.multiTargets.includes(itemName)) return;
-      if (this.multiCompleted.includes(itemName)) return;
-      this.multiCompleted.push(itemName);
-      const multiCompleted = [...this.multiCompleted];
-      const items = this.page.data.workshopItems.map((i) => (
-        i.id === itemId ? { ...i, isTarget: true } : i
-      ));
-      this.page.setData({
-        multiCompleted,
-        multiTargetRows: this._buildMultiTargetRows(this.levelData.multiTargets, multiCompleted),
-        workshopItems: items,
-      });
-      // 每合成一个目标就献门一次（等入场动画结束）
-      setTimeout(() => this._queueOfferToDoor(itemId), 1200);
-      return;
-    }
-
-    if (itemName !== this.levelData.target) return;
-
-    this.targetReady = true;
-    this.doorStage = 3;
-    const items = this.page.data.workshopItems.map((i) => (
-      i.id === itemId ? { ...i, isTarget: true } : i
-    ));
-    this.page.setData({ targetReady: true, doorStage: 3, workshopItems: items });
-    setTimeout(() => this._queueOfferToDoor(itemId), 1200);
-  }
-
-  _queueOfferToDoor(itemId) {
-    this._offerQueue.push(itemId);
-    this._processOfferQueue();
-  }
-
-  _processOfferQueue() {
-    if (this.offeringInProgress || this.isTransitioning) return;
-    while (this._offerQueue.length) {
-      const itemId = this._offerQueue[0];
-      const item = (this.page.data.workshopItems || []).find((i) => i.id === itemId);
-      if (!item) {
-        this._offerQueue.shift();
-        continue;
-      }
-      this._offerQueue.shift();
-      this._autoOfferToDoor(itemId);
-      return;
-    }
-  }
-
-  _autoOfferToDoor(itemId) {
-    if (this.offeringInProgress || this.isTransitioning) return;
-
-    const items = [...this.page.data.workshopItems];
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return;
-
-    this.offeringInProgress = true;
-    this.targetReady = false;
-    const dest = this._doorCenterInWorkshop();
-
-    item.isTarget = true;
-    item.offering = true;
-    item.offeringFlight = true;
-    const startX = item.x;
-    const startY = item.y;
-    item.x = dest.x;
-    item.y = dest.y;
-
-    // 生成飞行轨迹粒子
-    const trails = [];
-    for (let i = 0; i < 10; i += 1) {
-      const t = i / 10;
-      trails.push({
-        id: `t${i}`,
-        x: Math.round(startX + (dest.x - startX) * t + (Math.random() - 0.5) * 12),
-        y: Math.round(startY + (dest.y - startY) * t + (Math.random() - 0.5) * 12),
-        size: Math.round(4 + Math.random() * 5),
-        delay: parseFloat((i * 0.04).toFixed(2)),
-      });
-    }
-
-    this.page.setData({
-      workshopItems: items,
-      doorOffering: true,
-      targetReady: false,
-      trailParticles: trails,
-    });
-    setTimeout(() => this.page.setData({ trailParticles: [] }), OFFER_ANIM_MS + 300);
-
-    setTimeout(() => this._performOffering(itemId), OFFER_ANIM_MS);
-  }
-
-  _performOffering(itemId) {
-    const items = this.page.data.workshopItems.filter((i) => i.id !== itemId);
-    this.page.setData({
-      workshopItems: items,
-      doorOffering: false,
-      targetReady: false,
-    });
-
-    try { this.page.audioManager.playSFX('door-absorb'); } catch (err) { /* noop */ }
-
-    this.offeringInProgress = false;
-
-    if (this.levelData.multiTarget && this.levelData.multiTargets) {
-      const allDone = this.multiCompleted.length >= this.levelData.multiTargets.length;
-      if (allDone) {
-        this.targetReady = true;
-        this.doorStage = 3;
-        this.page.setData({ targetReady: true, doorStage: 3 });
-        if (this.hasNextObjective() && this._inChapterFlow) {
-          levelManager.recordSynthCount(this.levelId, this.synthCount);
-          this._performChapterTransition();
-          return;
-        }
-        this._completeLevelFlow();
-        return;
-      }
-      this._processOfferQueue();
-      return;
-    }
-
-    if (this.hasNextObjective() && this._inChapterFlow) {
-      levelManager.recordSynthCount(this.levelId, this.synthCount);
-      this._performChapterTransition();
-      return;
-    }
-
-    this._completeLevelFlow();
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   _shouldShowBasicCompletion() {
     return this.levelId === 104
@@ -1405,7 +626,7 @@ class GameController {
     });
   }
 
-  _completeLevelFlow() {
+  async _completeLevelFlow() {
     if (this.isTransitioning) return;
     this.isTransitioning = true;
     this.targetReady = false;
@@ -1413,8 +634,15 @@ class GameController {
 
     levelManager.recordSynthCount(this.levelId, this.synthCount);
     levelManager.completeLevel(this.levelId);
+    if (levelManager.refreshAtlasUnlocks()) {
+      levelManager.saveProgress();
+    }
 
     if (this.levelId === 106) {
+      const dialogs = this.levelData.completionDialogs;
+      if (dialogs?.length) {
+        await playLevelDialogs(this.page, dialogs);
+      }
       this.page.setData({ endingVisible: true, successVisible: false });
       wx.setStorageSync('chapter1_main_entrance', '1');
       return;
@@ -1454,11 +682,20 @@ class GameController {
 
   destroy() {
     Object.keys(this.brewTimers).forEach((id) => this._clearBrewTimer(id));
+    if (this.tradeStation) this.tradeStation.destroy();
     this._offerQueue = [];
     this._clearLvl104DualHints();
     if (this._introOuterTimer) clearTimeout(this._introOuterTimer);
     if (this._introAutoTimer) clearTimeout(this._introAutoTimer);
   }
 }
+
+Object.assign(GameController.prototype, dragMixin);
+Object.assign(GameController.prototype, doorMixin);
+Object.assign(GameController.prototype, synthesisFlowMixin);
+Object.assign(GameController.prototype, brewingMixin);
+Object.assign(GameController.prototype, inventoryMixin);
+Object.assign(GameController.prototype, recipeBookMixin);
+Object.assign(GameController.prototype, completionMixin);
 
 module.exports = GameController;

@@ -51,6 +51,100 @@
 .game-item.has-effect {
   border: 2.5px solid rgba(0, 200, 255, 0.55);
   box-shadow: 0 0 10px rgba(0, 200, 255, 0.15), 0 4px 12px rgba(107, 83, 68, 0.1);
+  animation: effectBorderBreath 2.5s ease-in-out infinite;
+}
+
+@keyframes effectBorderBreath {
+  0%, 100% {
+    border-color: rgba(0, 200, 255, 0.45);
+    box-shadow: 0 0 8px rgba(0, 200, 255, 0.1), 0 4px 12px rgba(107, 83, 68, 0.1);
+  }
+  50% {
+    border-color: rgba(0, 200, 255, 0.7);
+    box-shadow: 0 0 14px rgba(0, 200, 255, 0.25), 0 4px 12px rgba(107, 83, 68, 0.1);
+  }
+}
+
+.game-item.lp-gold-burst {
+  border-color: rgba(232, 200, 115, 0.95) !important;
+  box-shadow:
+    0 0 12px 3px rgba(232, 200, 115, 0.6),
+    0 0 28px 6px rgba(232, 200, 115, 0.3),
+    inset 0 0 8px rgba(232, 200, 115, 0.15) !important;
+  animation: lpGoldFlash 0.8s ease-out !important;
+}
+
+@keyframes lpGoldFlash {
+  0% {
+    border-color: rgba(255, 230, 150, 1);
+    box-shadow: 0 0 20px 6px rgba(255, 220, 100, 0.8), 0 0 40px 10px rgba(232, 200, 115, 0.4);
+  }
+  100% {
+    border-color: rgba(232, 200, 115, 0.95);
+    box-shadow: 0 0 12px 3px rgba(232, 200, 115, 0.6), 0 0 28px 6px rgba(232, 200, 115, 0.3);
+  }
+}
+
+/* 长按充能环 — 对齐 H5 lp-ring-svg，加粗便于辨认 */
+.lp-ring-track {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  border-radius: 50%;
+  border: 5px solid rgba(232, 200, 115, 0.28);
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.lp-ring-charge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 6px solid transparent;
+  pointer-events: none;
+  z-index: 21;
+  transform: rotate(-90deg);
+  animation: lpRingDraw 0.8s linear forwards;
+}
+
+@keyframes lpRingDraw {
+  0% {
+    border-top-color: #FFD666;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+  25% {
+    border-top-color: #FFD666;
+    border-right-color: #FFD666;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+  50% {
+    border-top-color: #FFD666;
+    border-right-color: #FFD666;
+    border-bottom-color: #FFD666;
+    border-left-color: transparent;
+  }
+  75% {
+    border-top-color: #FFD666;
+    border-right-color: #FFD666;
+    border-bottom-color: #FFD666;
+    border-left-color: #FFD666;
+  }
+  100% {
+    border-top-color: #FFD666;
+    border-right-color: #FFD666;
+    border-bottom-color: #FFD666;
+    border-left-color: #FFD666;
+  }
 }
 
 .game-item.recipe-book-spawn {
@@ -246,6 +340,16 @@
   margin-bottom: 2px;
 }
 
+.game-item-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.door-target-svg {
+  width: 36px;
+  height: 36px;
+}
+
 /* 名称区 — 圆的下缘独立底条（对齐 H5 .game-item .name） */
 .item-name {
   display: block;
@@ -299,6 +403,28 @@
 .game-item.in-inventory.fading {
   opacity: 0;
   transform: scale(0.75) !important;
+}
+
+/* 合成新进物品栏 — 快弹（章间转场仍用 1.9s 的 item-pop-in） */
+.item-pop-body.item-pop-in-quick {
+  animation: invItemPopInQuick 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes invItemPopInQuick {
+  0%   { transform: scale(0.45); opacity: 0; }
+  55%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.item-pop-glow-quick {
+  animation: popGlowQuick 0.42s ease-out forwards;
+  animation-delay: 0.04s;
+}
+
+@keyframes popGlowQuick {
+  0%   { opacity: 0; transform: scale(0.6); }
+  30%  { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.25); }
 }
 
 /* 物品栏出现（对齐 H5 item-pop-in） */
@@ -443,5 +569,16 @@
 @keyframes timerRingOrbit {
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 合成台 workbench 物品 pop-in（对齐 H5 spawnWorkbenchItemPopIn） */
+.game-item.workbench-pop-in {
+  animation: workbenchPopIn 1.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes workbenchPopIn {
+  0%   { transform: scale(0); opacity: 0; }
+  55%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 

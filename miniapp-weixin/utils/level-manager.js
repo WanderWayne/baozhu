@@ -1,8 +1,10 @@
+/** @feature progress @see docs/features/progress.md */
 // 关卡与世界管理系统（对齐 H5 js/level.js）
 const { WORLDS, LEVELS, CHAPTERS } = require('../data/worlds.js');
 const { FRAGMENTS, ITEMS } = require('../data/items.js');
 const atlas = require('../data/atlas.js');
 const { getAtlasSlotById } = require('./atlas-counts');
+const devPlaytest = require('./dev-playtest');
 
 const STORAGE_KEY = 'bojoo_game_progress_v2';
 const CLAIMED_TASKS_KEY = 'baozhu_claimed_tasks';
@@ -72,6 +74,7 @@ class LevelManager {
   }
 
   isWorldUnlocked(worldId) {
+    if (devPlaytest.isEnabled()) return true;
     if (worldId === 1) return true;
     if (this.currentProgress.unlockedWorlds.includes(worldId)) return true;
 
@@ -94,6 +97,7 @@ class LevelManager {
   }
 
   isLevelUnlocked(levelId) {
+    if (devPlaytest.isEnabled()) return true;
     const level = LEVELS.find((l) => l.id === levelId);
     if (!level) return false;
     if (!this.isWorldUnlocked(level.worldId)) return false;
@@ -381,6 +385,10 @@ class LevelManager {
 
   resetProgress() {
     this.currentProgress = defaultProgress();
+    if (devPlaytest.isEnabled()) {
+      this.currentProgress.unlockedWorlds = WORLDS.map((w) => w.id);
+      this.currentProgress.unlockedLevels = LEVELS.map((l) => l.id);
+    }
     this.saveProgress();
     wx.removeStorageSync('baozhu_basic_completed');
     wx.removeStorageSync(SESSION_START_KEY);

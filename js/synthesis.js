@@ -1,3 +1,4 @@
+/** @feature synthesis @see docs/features/synthesis.md */
 // 合成引擎 V2
 class SynthesisEngine {
     constructor() {

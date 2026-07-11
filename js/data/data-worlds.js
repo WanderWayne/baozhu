@@ -255,7 +255,6 @@ const LEVELS = [
         tradeStations: [
             { input: "珠宝", output: "玫瑰" },
             { input: "珠宝", output: "菊花" },
-            { input: "珠宝", output: "茉莉花" },
         ],
         doorTriggers: {
             stage1: ["玫瑰酒酿"],

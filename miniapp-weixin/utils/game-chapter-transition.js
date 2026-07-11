@@ -2,6 +2,7 @@
  * 章内关间转场 — 对齐 H5 performChapterTransition → performGoldenGlowTransition → performItemTransition
  */
 const levelManager = require('./level-manager');
+const devPlaytest = require('./dev-playtest');
 const { getItemMeta } = require('./game-item-style');
 const { createFoamBurst, appendFoam } = require('./game-foam');
 const { showDialog, playLevelDialogs } = require('./door-dialog');
@@ -119,7 +120,9 @@ async function runChapterTransition(controller) {
   const transitionText = controller.getTransitionText() || '第一关，通过。';
   const oldCount = (page.data.inventoryItems || []).filter((i) => !i.hidden).length;
   const discovered = levelManager.currentProgress.discoveredItems || [];
-  const isNextRecipePhase = nextData.recipeBookPhase && !discovered.includes('配方书');
+  const isNextRecipePhase = nextData.recipeBookPhase && (
+    !discovered.includes('配方书') || devPlaytest.forceRecipeBookPhase(nextData.id)
+  );
   const newItemNames = isNextRecipePhase ? [] : (nextData.initialItems || []);
 
   // —— Phase 1: 门关闭 ——
@@ -150,6 +153,11 @@ async function runChapterTransition(controller) {
   await delay(1200);
   await setPage(page, { levelCompletePopVisible: false });
   await delay(300);
+
+  if (controller.levelId === 105 && !levelManager.hasSeenChapterPhaseSettlement()) {
+    levelManager.completeLevel(controller.levelId);
+    await controller.showSettlementScreen();
+  }
 
   // —— Phase 4: 物品栏金光 ——
   const goldenItems = (page.data.inventoryItems || []).map((i) => ({
@@ -245,6 +253,7 @@ async function runChapterTransition(controller) {
   controller._introFromTransition = true;
   await controller.showLevelIntro();
   controller._introFromTransition = false;
+  controller._scheduleTradeStationTutorialAfterIntro();
 
   // —— Phase 9: 收尾 ——
   await setPage(page, {
@@ -260,13 +269,11 @@ async function runChapterTransition(controller) {
     await setPage(page, { targetPopIn: false, targetFlash: false });
   }
   if (isNextRecipePhase) {
-    playLevelDialogs(page, controller.levelData.dialogs || [])
+    await playLevelDialogs(page, controller.levelData.dialogs || [])
       .then(() => controller._spawnRecipeBookDirectly());
-  } else {
-    const dlg = controller.levelData.dialogs?.[0];
-    if (dlg?.text) {
-      setTimeout(() => showDialog(page, dlg.text), 400);
-    }
+  } else if (controller.levelData.dialogs?.[0]?.text) {
+    await delay(400);
+    await showDialog(page, controller.levelData.dialogs[0].text);
   }
   controller._syncLayout();
 }

@@ -1,3 +1,4 @@
+/** @feature gallery @see docs/features/gallery.md */
 // 记忆长廊逻辑
 class Gallery {
     constructor() {

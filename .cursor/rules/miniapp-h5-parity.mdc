@@ -8,6 +8,16 @@ alwaysApply: false
 
 完成 `miniapp-weixin/` 内任一页面/波次改动后，**不得**仅凭代码审查宣告完成。
 
+## 0. 功能导航（改玩法前先读）
+
+用户提到功能名（交易台、拖拽、门献上等）时：
+
+1. 读 [`docs/FEATURE_INDEX.md`](docs/FEATURE_INDEX.md) 定位 feature ID
+2. 读 [`docs/features/<id>.md`](docs/features/<id>.md) 获取 **H5 与小程序完整文件表**
+3. 修改须 **双端同步** 文档中列出的主入口文件，而非只改 `game-controller.js` / `game-core.js`
+
+H5 玩法已拆至 `js/game/game-*.js`（如 `game-trade.js`、`game-drag.js`、`game-door.js`）；小程序对应 `miniapp-weixin/utils/game/*.js`。
+
 ## 1. 确保 MCP 可用
 
 ```powershell
@@ -17,6 +27,8 @@ node miniapp-weixin/tools/mcp-health.cjs
 
 ## 2. 截图 + 比对
 
+对照 [`docs/FEATURE_INDEX.md`](docs/FEATURE_INDEX.md) 中该 feature 的 **parity 命令**（默认关卡见下）。
+
 选关页：
 
 ```powershell
@@ -24,10 +36,12 @@ cd miniapp-weixin/tools
 node compare-parity.cjs levels
 ```
 
-玩法页（101/102 等）：
+玩法页（101/102/105 等）：
 
 ```powershell
 node compare-parity.cjs game 101
+node compare-parity.cjs game 102
+node compare-parity.cjs game 105
 ```
 
 输出在 `miniapp-weixin/tools/screenshots/`：
@@ -42,7 +56,7 @@ node compare-parity.cjs game 101
 
 若 diff 过高或目视不一致，或 **玩法与 H5 不一致**：
 
-1. 对照 H5 源码（`js/drag-drop.js`、`js/game/game-core.js` 等）确认行为，再改小程序 `utils/game-controller.js`
+1. 打开对应 `docs/features/<id>.md`，对照 **H5 文件表** 与 **小程序文件表** 修改
 2. 对照 H5 的 `css/game/` 修改小程序样式
 3. 重新编译微信开发者工具
 4. 再跑 `compare-parity.cjs` 直到通过
@@ -57,7 +71,7 @@ node compare-parity.cjs game 101
 
 ### 物品栏（无限供应）
 
-H5：`drag-drop.js` 从物品栏拖出时 **clone 到合成区**，原槽位仅 `placeholder` 隐藏，松手到合成区后 `removePlaceholder()` 恢复，**永不 `hidden` 消耗**。小程序须同样逻辑。
+H5：`game-drag.js` 从物品栏拖出时 **clone 到合成区**，原槽位仅 `placeholder` 隐藏，松手到合成区后 `removePlaceholder()` 恢复，**永不 `hidden` 消耗**。小程序须同样逻辑（`utils/game/drag.js`）。
 
 ## 4. 向用户汇报
 

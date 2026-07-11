@@ -221,6 +221,16 @@
   flex-shrink: 0;
   line-height: 1;
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.recipe-entry-icon {
+  width: 28px;
+  height: 28px;
 }
 
 .recipe-name {

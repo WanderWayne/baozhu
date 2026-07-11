@@ -1,6 +1,6 @@
 # Parity Report
 
-Generated: 2026-05-10T08:54:46.141Z
+Generated: 2026-07-06T04:00:34.986Z
 
 - [x] recipe_001: 牛奶 + 冰糖碎 => 甜牛奶 (got: 甜牛奶)
 - [x] recipe_002: 发酵 + 牛奶 => 酸奶 (got: 酸奶)

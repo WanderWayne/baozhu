@@ -1,4 +1,6 @@
+/** @feature level-select @see docs/features/level-select.md */
 const levelManager = require('../../utils/level-manager');
+const devPlaytest = require('../../utils/dev-playtest');
 const { WORLDS } = require('../../utils/level-manager');
 const { getWorldDisplayIcon, getLevelDoorIcon } = require('../../utils/levels-display');
 const { navigateToWithFade, navigateBackWithFade } = require('../../utils/page-transitions');
@@ -39,6 +41,7 @@ Page({
     theme: 'dairy',
     worlds: [],
     worldIcon: '🧀',
+    worldIconName: '',
     worldName: '',
     storyText: '',
     levels: [],
@@ -121,10 +124,12 @@ Page({
 
     const worlds = WORLDS.map((w) => {
       const progress = levelManager.getWorldProgress(w.id);
+      const display = getWorldDisplayIcon(w);
       return {
         id: w.id,
         icon: w.icon,
-        displayIcon: getWorldDisplayIcon(w),
+        displayIcon: display.emoji,
+        iconName: display.iconName,
         unlocked: levelManager.isWorldUnlocked(w.id),
         active: w.id === worldId,
         completed: progress.percentage === 100,
@@ -148,11 +153,14 @@ Page({
         targetLabel = unlocked ? `目标 · ${lv.multiTargets.join('，')}` : '尚未解锁';
       }
       const latest = unlocked && !completed && index === firstOpen;
+      const door = getLevelDoorIcon(lv, unlocked);
       return {
         id: lv.id,
         name: lv.name,
+        target: lv.target || '',
         icon: lv.icon || '🍨',
-        doorIcon: getLevelDoorIcon(lv, unlocked),
+        doorIcon: door.emoji,
+        doorIconName: door.iconName,
         targetLabel,
         unlocked,
         completed,
@@ -163,11 +171,13 @@ Page({
     });
 
     const newTheme = world.theme || 'dairy';
+    const wIcon = getWorldDisplayIcon(world);
     this.setData({
       currentWorldId: worldId,
       theme: newTheme,
       worlds,
-      worldIcon: getWorldDisplayIcon(world),
+      worldIcon: wIcon.emoji,
+      worldIconName: wIcon.iconName,
       worldName: world.name,
       storyText: world.description || '',
       levels,
@@ -300,6 +310,12 @@ Page({
 
   onBack() {
     this.audioManager.playClickBack();
+    if (
+      devPlaytest.isEnabled()
+      || (wx.getStorageSync('tut_first_exit_game') === '1' && !wx.getStorageSync('tut_main_guide_done'))
+    ) {
+      wx.setStorageSync('tut_guide_tasks_on_main', '1');
+    }
     navigateBackWithFade('/pages/index/index');
   },
 });

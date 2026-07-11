@@ -36,14 +36,18 @@
           data-id="{{item.id}}"
           bindtap="onWorldTap"
         >
-          <text class="world-icon">{{item.displayIcon}}</text>
+          <view class="world-icon">
+            <item-icon name="{{item.iconName}}" emoji="{{item.displayIcon}}" size="32" class-name="world-node-icon" />
+          </view>
           <view class="world-check" wx:if="{{item.completed}}">✓</view>
         </view>
       </view>
     </view>
 
     <view class="chapter-header">
-      <text class="chapter-icon">{{worldIcon}}</text>
+      <view class="chapter-icon">
+        <item-icon name="{{worldIconName}}" emoji="{{worldIcon}}" size="40" class-name="chapter-header-icon" />
+      </view>
       <view class="chapter-title-group">
         <text class="chapter-name">{{worldName}}</text>
         <text class="chapter-desc">{{storyText}}</text>
@@ -80,7 +84,9 @@
         >
           <view class="completed-badge" wx:if="{{item.completed}}">✓</view>
           <view class="door-frame">
-            <text class="door-icon">{{item.doorIcon}}</text>
+            <view class="door-icon">
+              <item-icon name="{{item.doorIconName}}" emoji="{{item.doorIcon}}" size="36" class-name="level-door-icon" />
+            </view>
           </view>
           <view class="door-info">
             <text class="door-name">{{item.unlocked ? item.name : '· · ·'}}</text>

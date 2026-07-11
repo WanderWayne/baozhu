@@ -1,0 +1,314 @@
+/* 交易神坛 — 对齐 H5 game-synthesis.css .trade-station */
+
+.trade-station {
+  position: absolute;
+  right: 12px;
+  z-index: 1;
+  animation: tradeStationIn 0.5s cubic-bezier(0, 0, 0.2, 1.2) forwards;
+}
+
+.trade-station.centered {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.trade-station.entering {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.trade-station.centered.entering {
+  transform: translateY(-50%) scale(0);
+}
+
+@keyframes tradeStationIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.trade-station.centered:not(.entering) {
+  animation: tradeStationInCentered 0.5s cubic-bezier(0, 0, 0.2, 1.2) forwards;
+}
+
+@keyframes tradeStationInCentered {
+  0% { transform: translateY(-50%) scale(0); opacity: 0; }
+  100% { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+.ts-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(145deg, #8B7355 0%, #7A6548 50%, #6B5344 100%);
+  border: 2px solid #A08060;
+  border-radius: 4px;
+  box-shadow:
+    0 4px 20px rgba(107, 83, 68, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.ts-body::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(232, 200, 115, 0.25);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.ts-slot {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  gap: 1px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.ts-slot-name {
+  font-size: 8px;
+  color: #F0E8D8;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-top: -2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ts-slot-input {
+  border: 2px dashed rgba(232, 200, 115, 0.4);
+  background: rgba(60, 50, 40, 0.3);
+}
+
+.ts-ghost-icon {
+  opacity: 0.35;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+}
+
+.ts-slot-input .ts-ghost-icon {
+  opacity: 0.35;
+}
+
+.ts-slot-output .ts-ghost-icon {
+  opacity: 0.9;
+}
+
+.ts-slot-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.ts-slot-output {
+  border: 2px solid rgba(232, 200, 115, 0.35);
+  background: rgba(80, 70, 55, 0.4);
+}
+
+.ts-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ts-arrow {
+  font-size: 20px;
+  color: #D4B060;
+  opacity: 0.8;
+  line-height: 1;
+}
+
+.ts-label {
+  font-size: 10px;
+  color: #E8C873;
+  letter-spacing: 3px;
+  font-weight: 500;
+}
+
+.trade-station-hitbox {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  z-index: 3;
+}
+
+.trade-station-hitbox.trade-hover {
+  box-shadow: 0 0 20px rgba(232, 200, 115, 0.4), inset 0 0 12px rgba(232, 200, 115, 0.2);
+  background: rgba(232, 200, 115, 0.1);
+}
+
+.trade-station-hitbox.trade-wrong {
+  animation: shake 0.4s ease-in-out;
+}
+
+.trade-restock-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #8B7355 0%, #7A6548 100%);
+  border: 2px solid #A08060;
+  border-radius: 4px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.trade-restock-overlay.active {
+  display: flex;
+}
+
+.trade-restock-title {
+  font-size: 11px;
+  color: #E8C873;
+  letter-spacing: 2px;
+}
+
+.trade-restock-countdown {
+  font-size: 26px;
+  font-weight: 600;
+  color: #F0E8D8;
+  line-height: 1.1;
+}
+
+.trade-restock-unit {
+  font-size: 12px;
+  color: #D4B060;
+  letter-spacing: 1px;
+}
+
+.trade-station.sold-out {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+.trade-station.sold-out .ts-body {
+  background: linear-gradient(145deg, #6B5B4A 0%, #5A4A3A 100%);
+  border-color: #807060;
+}
+
+/* 交易确认弹窗 */
+.trade-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: tradeDialogIn 0.25s ease-out;
+}
+
+@keyframes tradeDialogIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.trade-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(107, 83, 68, 0.18);
+}
+
+.trade-confirm-box {
+  position: relative;
+  background: #FFFDF7;
+  border: 1.5px solid rgba(166, 124, 82, 0.25);
+  border-radius: 18px;
+  padding: 22px 28px 18px;
+  box-shadow: 0 8px 32px rgba(107, 83, 68, 0.12);
+  text-align: center;
+  max-width: 300px;
+  animation: tradeBoxPop 0.3s cubic-bezier(0, 0, 0.2, 1.2);
+}
+
+@keyframes tradeBoxPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.trade-confirm-text {
+  font-size: 15px;
+  color: #6B5344;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.trade-confirm-input-name,
+.trade-confirm-output-name {
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+
+.confirm-item-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.trade-confirm-input-name {
+  color: #E8C873;
+  font-size: 16px;
+}
+
+.trade-confirm-output-name {
+  color: #6B5344;
+  font-size: 16px;
+}
+
+.trade-confirm-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.trade-confirm-cancel,
+.trade-confirm-ok {
+  padding: 8px 24px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(166, 124, 82, 0.2);
+  font-size: 14px;
+}
+
+.trade-confirm-cancel {
+  background: transparent;
+  color: #A67C52;
+}
+
+.trade-confirm-ok {
+  background: #E8C873;
+  color: #6B5344;
+  font-weight: 600;
+}
+
+.trade-confirm-ok.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.trade-confirm-note {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #A08060;
+}

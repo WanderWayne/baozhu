@@ -1,4 +1,6 @@
+/** @feature codex @see docs/features/codex.md */
 const levelManager = require('../../utils/level-manager');
+const { getItemMeta } = require('../../utils/game-item-style');
 const { getAtlasProgressCounts } = require('../../utils/atlas-counts');
 const atlas = require('../../data/atlas.js');
 const { ITEMS, RECIPES } = require('../../data/items.js');
@@ -73,11 +75,14 @@ Page({
 
     const categories = categorizeRecipes();
     const mapSection = (title, list) => {
-      const items = list.map((r) => ({
-        name: r.name,
-        icon: r.icon || '✨',
-        discovered: this.discovered.includes(r.name),
-      }));
+      const items = list.map((r) => {
+        const meta = getItemMeta(r.name);
+        return {
+          name: r.name,
+          icon: meta.icon || r.icon || '✨',
+          discovered: this.discovered.includes(r.name),
+        };
+      });
       const discovered = items.filter((i) => i.discovered).length;
       return { title, items, discovered, total: items.length };
     };
@@ -115,6 +120,7 @@ Page({
     const name = e.currentTarget.dataset.name;
     if (!this.discovered.includes(name)) return;
     const data = ITEMS[name] || {};
+    const meta = getItemMeta(name);
     const recipeData = RECIPES.find((r) => r.result === name);
     let formula = '配方来源未知';
     if (recipeData) {
@@ -123,7 +129,7 @@ Page({
     this.setData({
       detailVisible: true,
       detail: {
-        icon: data.icon || '✨',
+        icon: meta.icon || data.icon || '✨',
         name,
         desc: data.desc || '',
         formula,

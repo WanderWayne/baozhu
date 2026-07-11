@@ -1,3 +1,4 @@
+/** @feature audio-nav @see docs/features/audio-nav.md */
 const BGM_KEY = 'baozhu_bgm_volume';
 const SFX_KEY = 'baozhu_sfx_volume';
 
@@ -27,6 +28,9 @@ class AudioManager {
       'recipe-book': '/assets/audio/SFX30 page.mp3',
       'recipe-tab': '/assets/audio/SFX36 click_close.mp3',
       'inventory-slot-pop': '/assets/audio/SFX37 bubblepoph.mp3',
+      'trade': '/assets/audio/SFX26 trade.mp3',
+      'drop': '/assets/audio/SFX34 click.mp3',
+      'settlement-phase-complete': '/assets/audio/SFX33 complete.mp3',
     };
 
     this.loadVolumeSettings();
@@ -95,6 +99,31 @@ class AudioManager {
 
   stopBGM() {
     if (this.currentBGM) this.currentBGM.stop();
+  }
+
+  fadeOutBGM(durationMs = 1600, onDone) {
+    if (!this.currentBGM || this.bgmVolume <= 0) {
+      if (onDone) onDone();
+      return;
+    }
+    const startVol = this.currentBGM.volume;
+    const steps = 16;
+    const stepMs = durationMs / steps;
+    let step = 0;
+    const tick = () => {
+      step += 1;
+      const t = step / steps;
+      if (this.currentBGM) {
+        this.currentBGM.volume = startVol * (1 - t);
+      }
+      if (step >= steps) {
+        this.stopBGM();
+        if (onDone) onDone();
+        return;
+      }
+      setTimeout(tick, stepMs);
+    };
+    tick();
   }
 
   playSFX(name) {

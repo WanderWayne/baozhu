@@ -44,7 +44,7 @@
         <text class="main-footer-divider">·</text>
         <view class="main-footer-side main-footer-side-right">
           <view class="main-link-btn-wrap">
-            <view class="main-link-btn" hover-class="link-btn-flash" bindtap="onTasks">任务</view>
+            <view class="main-link-btn" id="tasks-main-btn" hover-class="link-btn-flash" bindtap="onTasks">任务</view>
             <view wx:if="{{showClaimableDot}}" class="claimable-dot footer-claimable-dot"></view>
           </view>
         </view>
@@ -110,5 +110,19 @@
         </view>
       </view>
     </view>
+  </view>
+
+  <view
+    class="tut-overlay {{tutOverlay.visible ? 'visible' : ''}} {{tutOverlay.fadeOut ? 'fade-out' : ''}}"
+    wx:if="{{tutOverlay.active}}"
+    catchtap="onTutorialDismiss"
+  >
+    <canvas
+      type="2d"
+      id="tut-spotlight-canvas"
+      class="tut-canvas"
+      style="width: {{tutOverlay.screenW}}px; height: {{tutOverlay.screenH}}px;"
+      catchtap="onTutorialDismiss"
+    ></canvas>
   </view>
 </view>

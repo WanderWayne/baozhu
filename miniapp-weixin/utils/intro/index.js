@@ -1,3 +1,4 @@
+/** @feature intro @see docs/features/intro.md */
 const IntroSystem = require('./intro-core');
 
 require('./intro-particles')(IntroSystem);

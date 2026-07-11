@@ -5,6 +5,7 @@
 @import './game-level-intro.wxss';
 @import './game-recipe-book.wxss';
 @import './game-basic-completion.wxss';
+@import './game-trade-station.wxss';
 
 page {
   height: 100%;
