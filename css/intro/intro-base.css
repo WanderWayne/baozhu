@@ -75,6 +75,19 @@
     pointer-events: none;
 }
 
+/* 左下角构建版本号 */
+#intro-version {
+    position: absolute;
+    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 210;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    pointer-events: none;
+}
+
 /* ========== 白点（初始状态）========== */
 #intro-dot {
     position: absolute;

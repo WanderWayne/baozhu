@@ -547,14 +547,6 @@ Game.prototype.openRecipeBook = function() {
             <div class="recipe-book-search">
                 <input type="text" class="recipe-search-input" id="recipe-search" placeholder="搜索配方...">
             </div>
-            <div class="recipe-book-tabs">
-                <button class="recipe-tab active" data-tab="recorded">记载</button>
-                <button class="recipe-tab" data-tab="discovered">发现</button>
-            </div>
-            <div class="recipe-book-tab-hint">
-                <span>记载：配方书中的固定配方</span>
-                <span>发现：你游玩中自行解锁的配方</span>
-            </div>
             <div class="recipe-book-divider"></div>
             <div class="recipe-book-content" id="recipe-book-list"></div>
             <div class="recipe-book-footer">— 记载于宝珠酿造坊 —</div>
@@ -564,7 +556,6 @@ Game.prototype.openRecipeBook = function() {
     document.body.appendChild(overlay);
 
     // State
-    let currentTab = 'recorded';
     const listEl = overlay.querySelector('#recipe-book-list');
     const searchInput = overlay.querySelector('#recipe-search');
     const self = this;
@@ -601,106 +592,58 @@ Game.prototype.openRecipeBook = function() {
 
     function renderList() {
         const query = searchInput.value.trim().toLowerCase();
-
-        if (currentTab === 'recorded') {
-            const discovered = new Set(window.LevelManager.currentProgress.discoveredItems || []);
-            let allRecorded = self._recordedRecipes.map(r => {
-                const isLocked = !!(r.lockedFormula && !discovered.has(r.name));
-                const entry = isLocked
-                    ? { icon: r.icon, name: r.name, formula: r.lockedFormula || '', note: r.note || '' }
-                    : { icon: r.icon, name: r.name, formula: r.formula, note: r.note };
-                entry.category = r.category || 'ingredient';
-                entry._isLocked = isLocked;
-                entry._originalRecipe = r;
-                entry._showWriteBtn = isLocked && !r.skipWriteRecipe;
-                entry._dualCheeseGoldenHint = isLocked && r.name === '双酪';
-                return entry;
-            });
-
-            if (query) {
-                allRecorded = allRecorded.filter(e =>
-                    e.name.toLowerCase().includes(query) ||
-                    e.formula.toLowerCase().includes(query)
-                );
-            }
-
-            const ingredients = allRecorded.filter(e => e.category === 'ingredient');
-            const beverages = allRecorded.filter(e => e.category === 'beverage');
-
-            if (ingredients.length === 0 && beverages.length === 0) {
-                listEl.innerHTML = '<div class="recipe-empty">' +
-                    (query ? '没有找到匹配的配方' : '暂无记载') + '</div>';
-                return;
-            }
-
-            let html = '';
-            if (ingredients.length > 0) {
-                html += '<div class="recipe-group-label">小料</div>';
-                html += ingredients.map(e => renderEntryHTML(e, e._showWriteBtn)).join('');
-            }
-            if (beverages.length > 0) {
-                html += '<div class="recipe-group-label">饮品</div>';
-                html += beverages.map(e => renderEntryHTML(e, e._showWriteBtn)).join('');
-            }
-            listEl.innerHTML = html;
-
-            // Bind write-recipe buttons
-            listEl.querySelectorAll('.recipe-write-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const recipeName = btn.dataset.recipe;
-                    const recipeData = self._recordedRecipes.find(r => r.name === recipeName);
-                    if (recipeData) self.showRecipeWriteUI(recipeData, overlay);
-                });
-            });
-        } else {
-            const recordedNames = new Set(self._recordedRecipes.map(r => r.name));
-            const discoveredList = window.LevelManager.currentProgress.discoveredItems || [];
-            let entries = [];
-            discoveredList.forEach(itemName => {
-                const itemData = window.ITEMS[itemName];
-                if (!itemData) return;
-                if (itemData.type === 'base' || itemData.type === 'tool' || itemData.type === 'process') return;
-                if (itemData.isRecipeBook) return;
-                if (recordedNames.has(itemName)) return;
-
-                const recipe = window.RECIPES.find(r => r.result === itemName);
-                const formula = recipe ? recipe.ingredients.join(' + ') : '未知来源';
-                entries.push({
-                    icon: itemData.icon || '?',
-                    name: itemName,
-                    formula: formula,
-                    note: itemData.desc || ''
-                });
-            });
-
-            if (query) {
-                entries = entries.filter(e =>
-                    e.name.toLowerCase().includes(query) ||
-                    e.formula.toLowerCase().includes(query)
-                );
-            }
-
-            if (entries.length === 0) {
-                listEl.innerHTML = '<div class="recipe-empty">' +
-                    (query ? '没有找到匹配的配方' : '还没有发现任何配方') + '</div>';
-                return;
-            }
-
-            listEl.innerHTML = entries.map(renderEntryHTML).join('');
-        }
-    }
-
-    // Tab switching
-    overlay.querySelectorAll('.recipe-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            if (window.AudioManager) window.AudioManager.playSFX('recipe-tab');
-            overlay.querySelectorAll('.recipe-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentTab = tab.dataset.tab;
-            renderList();
+        const discovered = new Set(window.LevelManager.currentProgress.discoveredItems || []);
+        const recordedNames = new Set(self._recordedRecipes.map(r => r.name));
+        let entries = self._recordedRecipes.map(r => {
+            const isLocked = !!(r.lockedFormula && !discovered.has(r.name));
+            const entry = isLocked
+                ? { icon: r.icon, name: r.name, formula: r.lockedFormula || '', note: r.note || '' }
+                : { icon: r.icon, name: r.name, formula: r.formula, note: r.note };
+            entry._showWriteBtn = isLocked && !r.skipWriteRecipe;
+            entry._dualCheeseGoldenHint = isLocked && r.name === '双酪';
+            return entry;
         });
-    });
+
+        (window.LevelManager.currentProgress.discoveredItems || []).forEach(itemName => {
+            const itemData = window.ITEMS[itemName];
+            if (!itemData) return;
+            if (itemData.type === 'base' || itemData.type === 'tool' || itemData.type === 'process') return;
+            if (itemData.isRecipeBook) return;
+            if (recordedNames.has(itemName)) return;
+
+            const recipe = window.RECIPES.find(r => r.result === itemName);
+            const formula = recipe ? recipe.ingredients.join(' + ') : '未知来源';
+            entries.push({
+                icon: itemData.icon || '?',
+                name: itemName,
+                formula: formula,
+                note: itemData.desc || ''
+            });
+        });
+
+        if (query) {
+            entries = entries.filter(e =>
+                e.name.toLowerCase().includes(query) ||
+                e.formula.toLowerCase().includes(query)
+            );
+        }
+
+        if (entries.length === 0) {
+            listEl.innerHTML = '<div class="recipe-empty">' +
+                (query ? '没有找到匹配的配方' : '暂无配方') + '</div>';
+            return;
+        }
+
+        listEl.innerHTML = entries.map(e => renderEntryHTML(e, e._showWriteBtn)).join('');
+        listEl.querySelectorAll('.recipe-write-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const recipeName = btn.dataset.recipe;
+                const recipeData = self._recordedRecipes.find(r => r.name === recipeName);
+                if (recipeData) self.showRecipeWriteUI(recipeData, overlay);
+            });
+        });
+    }
 
     // Search
     searchInput.addEventListener('input', renderList);
@@ -1005,4 +948,3 @@ Game.prototype._showSingleCompletionBadge = function(badge) {
         requestAnimationFrame(() => ov.classList.add('visible'));
     });
 };
-

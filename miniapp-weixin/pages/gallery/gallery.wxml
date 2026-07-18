@@ -1,18 +1,18 @@
 <view class="gallery-page">
   <header style="padding-top: {{statusBarHeight}}px;">
-    <button class="back-btn" bindtap="onBack">←</button>
+    <view class="back-btn" bindtap="onBack">←</view>
     <text class="page-title">记忆长廊</text>
     <text class="header-progress">{{progressText}}</text>
   </header>
 
   <view class="category-row">
-    <button
+    <view
       wx:for="{{categories}}"
       wx:key="id"
       class="category-btn {{currentCategory === item.id ? 'active' : ''}}"
       data-id="{{item.id}}"
       bindtap="onCategoryTap"
-    >{{item.label}}</button>
+    >{{item.label}}</view>
   </view>
 
   <view class="progress-bar-wrap">
@@ -48,4 +48,13 @@
       <button class="modal-close" bindtap="hideDetail">关闭</button>
     </view>
   </view>
+
 </view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

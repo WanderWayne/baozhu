@@ -124,29 +124,6 @@
     transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-/* 关卡完成文字弹窗 */
-.level-complete-pop {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.5);
-    font-size: 48px;
-    font-weight: 800;
-    color: #1a1510;
-    z-index: 6000;
-    opacity: 0;
-    pointer-events: none;
-    letter-spacing: 12px;
-    white-space: nowrap;
-    font-family: "Source Han Serif SC", "Noto Serif SC", "SimSun", serif;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.level-complete-pop.visible {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
 /* 目标文字亮金光并缩放动画 */
 .target-name-highlight {
     animation: goldGlowScale 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -217,49 +194,77 @@
     opacity: 1;
 }
 
-.settlement-stats {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
+.settlement-encouragement {
+    max-width: 320px;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 17px;
+    line-height: 1.8;
+    letter-spacing: 1px;
     opacity: 0;
     transform: translateY(8px);
-    transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
+    transition: opacity 0.6s ease 0.75s, transform 0.6s ease 0.75s;
 }
 
-.settlement-overlay.visible .settlement-stats {
+.settlement-overlay.visible .settlement-encouragement {
     opacity: 1;
     transform: translateY(0);
 }
 
-.settlement-stat {
+.settlement-progress {
+    width: 100%;
+    margin-top: 28px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
-    color: rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.6s ease 1s, transform 0.6s ease 1s;
+}
+
+.settlement-overlay.visible .settlement-progress {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.settlement-progress-label {
+    color: rgba(255, 255, 255, 0.62);
     font-size: 14px;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
 }
 
-.settlement-stat-icon {
-    font-size: 18px;
+.settlement-progress-value {
+    color: #ffe2a7;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 0 18px rgba(255, 213, 130, 0.35);
 }
 
-.settlement-stat-value {
-    color: #ffd96b;
-    font-weight: 600;
-    text-shadow: 0 0 8px rgba(255, 217, 107, 0.4);
+.settlement-progress-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.settlement-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #d7aa70 0%, #ffe2a7 100%);
+    box-shadow: 0 0 16px rgba(255, 221, 158, 0.45);
 }
 
 .settlement-message {
     margin-top: 28px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.55);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.66);
     letter-spacing: 2px;
     line-height: 1.8;
     opacity: 0;
     transform: translateY(8px);
-    transition: opacity 0.6s ease 1.2s, transform 0.6s ease 1.2s;
+    transition: opacity 0.6s ease 1.3s, transform 0.6s ease 1.3s;
 }
 
 .settlement-overlay.visible .settlement-message {
@@ -273,7 +278,7 @@
     margin-top: 36px;
     opacity: 0;
     transform: translateY(8px);
-    transition: opacity 0.6s ease 1.6s, transform 0.6s ease 1.6s;
+    transition: opacity 0.6s ease 1.65s, transform 0.6s ease 1.65s;
 }
 
 .settlement-overlay.visible .settlement-buttons {

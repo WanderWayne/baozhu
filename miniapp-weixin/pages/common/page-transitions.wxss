@@ -1,0 +1,31 @@
+/* 页面过渡 — 对齐 H5 css/transitions.css */
+
+.page-transition-portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483647;
+}
+
+.page-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  z-index: 2147483647;
+  opacity: 0;
+  pointer-events: auto;
+  transform: translateZ(0);
+}
+
+.page-transition-overlay.fade-to-black {
+  background-color: #101010;
+}
+
+.page-transition-overlay.fade-to-warm {
+  background-color: #FDF8F0;
+}

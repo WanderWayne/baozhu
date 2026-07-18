@@ -233,7 +233,7 @@ const LEVELS = [
         }
     },
 
-    // 第5关：酪饮之道 - 珠宝交易花材
+    // 第5关：酪饮之道 - 雪酪兑换花材
     {
         id: 105,
         worldId: 1,
@@ -246,25 +246,22 @@ const LEVELS = [
         storyIntro: "玫瑰与酒酿相遇，双酪承载芬芳。",
         icon: "🌹",
         duration: "2-3分钟",
-        initialItems: ["雪酪", "奶酪", "酒酿原浆"],
-        /** 仅出现在合成台、不进物品栏；用后即无（无 infiniteItems 补货） */
-        workbenchInitialItems: ["珠宝"],
+        initialItems: ["酸奶", "冰糖碎", "滤布", "酒酿原浆"],
         dialogs: [
-            { text: '注意点，你现在可没什么钱' }
+            { text: '注意点，轻盈的雪酪能换来花香。' }
         ],
         tradeStations: [
-            { input: "珠宝", output: "玫瑰" },
-            { input: "珠宝", output: "菊花" },
+            { input: "雪酪", output: "玫瑰" },
         ],
         doorTriggers: {
-            stage1: ["玫瑰酒酿"],
+            stage1: ["玫瑰双酪"],
             stage2: [],
             stage3: ["酒酿玫瑰酪"]
         },
         completionText: "玫瑰与酒酿相遇，双酪承载芬芳。酪饮之道，始于此刻。",
         cultureNote: "平阴玫瑰，千年花都的馈赠。",
         realProductNote: "酒酿玫瑰酪：奶酪、雪酪、玫瑰原浆、燕麦爆爆珠、冰块、平阴玫瑰花干。",
-        teachingRule: "花香 + 酒酿原浆 → 花香酒酿；双酪 + 花香酒酿 → 酪饮品",
+        teachingRule: "酸奶 + 冰糖碎 → 甜酸奶；玫瑰 + 双酪 → 玫瑰双酪；玫瑰双酪 + 酒酿原浆 → 酒酿玫瑰酪",
         minSynthCount: 3
     },
 

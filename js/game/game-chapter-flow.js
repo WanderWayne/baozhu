@@ -31,19 +31,7 @@ Game.prototype._clearLvl102SecondStepHints = function() {
     }
 
 Game.prototype._scheduleLvl102SecondStepHints = function() {
-        if (this.levelId !== 102) return;
-        if (this._lvl102HintsMuted) return;
-        if (!this.synthesizedItems.has('酸奶') || this.synthesizedItems.has('奶酪')) return;
-
-        if (this._lvl102HintTimer) clearTimeout(this._lvl102HintTimer);
-        this._lvl102HintTimer = setTimeout(() => {
-            this._lvl102HintTimer = null;
-            if (this.levelId !== 102) return;
-            if (this._lvl102HintsMuted) return;
-            if (!this.synthesizedItems.has('酸奶') || this.synthesizedItems.has('奶酪')) return;
-            this.showTriggerDialog('还有第二步哦');
-            this._scheduleLvl102SecondStepHints();
-        }, 7000);
+        // 合成后自动弹出的提示对白已关闭。
     }
 
 Game.prototype._clearLvl104DualHints = function() {
@@ -55,22 +43,7 @@ Game.prototype._clearLvl104DualHints = function() {
     }
 
 Game.prototype._scheduleLvl104DualCheeseHints = function() {
-        if (this.levelId !== 104 || !this._lvl104AwaitDual) return;
-        if (this.synthesizedItems.has('双酪')) {
-            this._clearLvl104DualHints();
-            return;
-        }
-        if (this._lvl104DualHintTimer) clearTimeout(this._lvl104DualHintTimer);
-        this._lvl104DualHintTimer = setTimeout(() => {
-            this._lvl104DualHintTimer = null;
-            if (this.levelId !== 104 || !this._lvl104AwaitDual) return;
-            if (this.synthesizedItems.has('双酪')) {
-                this._clearLvl104DualHints();
-                return;
-            }
-            this.showTriggerDialog('双酪到底是什么呢...');
-            this._scheduleLvl104DualCheeseHints();
-        }, 10000);
+        // 合成后自动弹出的提示对白已关闭。
     }
 
 Game.prototype._chapterSynthHooksAfterSuccess = function(resultName) {

@@ -97,8 +97,9 @@ async function main() {
   const names = Object.keys(ITEM_SVGS);
 
   const { ITEMS } = require(path.join(__dirname, '../data/items.js'));
-  const emojiByName = { _diamond: '💎' };
+  const emojiByName = { _diamond: '💎', _home: '🏠' };
   names.forEach((name) => {
+    if (emojiByName[name]) return;
     emojiByName[name] = (ITEMS[name] && ITEMS[name].icon) || '🍨';
   });
 

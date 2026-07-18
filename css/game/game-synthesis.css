@@ -144,6 +144,11 @@
     overflow: hidden;
 }
 
+.game-item.lp-ring-visible {
+    overflow: visible;
+    z-index: 120;
+}
+
 /* 有长按效果的物品 — 荧光蓝边框 + 呼吸光晕 */
 .game-item.has-effect {
     border: 2.5px solid rgba(0, 200, 255, 0.55);
@@ -326,18 +331,18 @@
 }
 
 .game-item .name {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--old-wood);
     text-align: center;
-    width: 88%;
+    width: 94%;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    padding: 2px 4px;
+    padding: 3px 5px;
     background: rgba(255, 253, 247, 0.7);
-    border-radius: 6px;
-    margin-top: 2px;
-    letter-spacing: 0.5px;
+    border-radius: 7px;
+    margin-top: 3px;
+    letter-spacing: 0;
 }
 
 /* 合成成功特效 - 柔和奶感 */
@@ -481,22 +486,11 @@
     to { transform: rotate(360deg); }
 }
 
-.timer-count {
-    position: relative;
-    z-index: 2;
-    font-size: 26px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--brand-color, #c4956a);
-    line-height: 1;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
 .timer-text {
     position: relative;
     z-index: 2;
-    margin-top: 6px;
-    font-size: 9px;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--text-light);
     text-align: center;
     padding: 0 8px;
@@ -1141,7 +1135,8 @@
 .recipe-book-btn {
     position: absolute;
     top: 22px;
-    right: 16px;
+    left: 16px;
+    right: auto;
     padding: 6px 14px;
     background: var(--milk-foam, #FFFDF7);
     border: 1px solid rgba(166, 124, 82, 0.2);
@@ -1212,7 +1207,7 @@
 }
 
 .recipe-book-page {
-    width: 88%;
+    width: min(84%, calc(100vw - 36px));
     max-width: 360px;
     max-height: 80vh;
     background: #FDF8EE;
@@ -1233,8 +1228,6 @@
 
 .recipe-book-header,
 .recipe-book-search,
-.recipe-book-tabs,
-.recipe-book-tab-hint,
 .recipe-book-divider {
     flex-shrink: 0;
 }
@@ -1312,7 +1305,8 @@
 
 .recipe-search-input {
     width: 100%;
-    padding: 8px 14px;
+    min-height: 38px;
+    padding: 10px 14px;
     border: 1px solid rgba(166, 124, 82, 0.15);
     border-radius: 10px;
     background: rgba(255, 253, 247, 0.8);
@@ -1333,43 +1327,6 @@
 }
 
 /* 标签页切换 */
-.recipe-book-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(166, 124, 82, 0.12);
-}
-
-.recipe-tab {
-    flex: 1;
-    padding: 8px 0;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    font-size: 13px;
-    color: #B8A590;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: all 0.25s;
-    font-family: "Source Han Serif SC", "Noto Serif SC", "PingFang SC", serif;
-}
-
-.recipe-tab.active {
-    color: #6B5344;
-    border-bottom-color: #A67C52;
-}
-
-.recipe-book-tab-hint {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-bottom: 8px;
-    font-size: 10px;
-    color: #A8917A;
-    letter-spacing: 0.4px;
-    line-height: 1.45;
-}
-
 .recipe-book-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(166, 124, 82, 0.25), transparent);

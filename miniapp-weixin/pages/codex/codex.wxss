@@ -15,11 +15,26 @@ header {
   border: none;
   width: 72rpx;
   height: 72rpx;
+  min-width: 72rpx;
+  min-height: 72rpx;
+  max-width: 72rpx;
+  max-height: 72rpx;
   border-radius: 50%;
   font-size: 36rpx;
   color: #6B5344;
-  line-height: 72rpx;
+  line-height: 1;
   padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 72rpx;
+  overflow: hidden;
+}
+
+.back-btn:active {
+  transform: scale(0.92);
 }
 
 .page-title { flex: 1; text-align: center; font-size: 34rpx; color: #6B5344; }

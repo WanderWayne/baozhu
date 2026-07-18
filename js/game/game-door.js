@@ -46,84 +46,16 @@ Game.prototype._pickBubbleSide = function() {
     }
 
 Game.prototype.showDoorBubble = function(text) {
-        const doorRect = this._getDoorRect();
-        const gameArea = document.querySelector('.game-container') || document.body;
-        if (!doorRect) return null;
-
-        const side = this._pickBubbleSide();
-        const screenW = window.innerWidth;
-        const screenH = window.innerHeight;
-        const pad = 6;
-        const gap = 16 + Math.random() * 10;
-
-        let availW;
-        if (side === 'right') {
-            availW = screenW - doorRect.right - gap - pad;
-        } else {
-            availW = doorRect.left - gap - pad;
-        }
-        availW = Math.max(availW, 80);
-        const maxW = Math.min(300, screenW * 0.44, availW);
-
-        const bubble = document.createElement('div');
-        bubble.className = 'door-bubble';
-        bubble.classList.add(side === 'left' ? 'tail-right' : 'tail-left');
-        bubble.textContent = text;
-        bubble.style.maxWidth = maxW + 'px';
-
-        gameArea.appendChild(bubble);
-
-        const bw = bubble.offsetWidth;
-        const bh = bubble.offsetHeight;
-
-        const yRange = Math.max(doorRect.height * 0.7, 60);
-        const yCenterBase = doorRect.top + doorRect.height * 0.45;
-        const yJitter = (Math.random() - 0.5) * yRange;
-        let y = yCenterBase - bh / 2 + yJitter;
-
-        let x;
-        if (side === 'right') {
-            x = doorRect.right + gap;
-        } else {
-            x = doorRect.left - bw - gap;
-        }
-
-        x = Math.max(pad, Math.min(x, screenW - bw - pad));
-        y = Math.max(pad, Math.min(y, screenH - bh - pad));
-
-        bubble.style.left = x + 'px';
-        bubble.style.top = y + 'px';
-
-        const dur = this._calcDuration(text);
-        setTimeout(() => {
-            bubble.classList.add('fade-out');
-            setTimeout(() => bubble.remove(), 900);
-        }, dur);
-
-        return bubble;
+        // 深色背景白字门对白已统一关闭。
+        return null;
     }
 
 Game.prototype.showDialog = function(text) {
-        const lines = this._splitDialogText(text);
-        let chain = Promise.resolve();
-        for (const line of lines) {
-            chain = chain.then(() => new Promise(resolve => {
-                this.showDoorBubble(line);
-                const dur = this._calcDuration(line);
-                this._dialogTimer = setTimeout(() => {
-                    this._dialogTimer = null;
-                    resolve();
-                }, dur);
-            }));
-        }
-        return chain;
+        return Promise.resolve();
     }
 
-Game.prototype.showTriggerDialog = function(text) {
-        const lines = this._splitDialogText(text);
-        for (const line of lines) {
-            this.showDoorBubble(line);
-        }
+Game.prototype.showTriggerDialog = function() {
+        return Promise.resolve();
     }
 
 Game.prototype.dismissAllDialogs = function() {
@@ -161,7 +93,7 @@ Game.prototype._doorClickLines = {
         },
         105: {
             hints: ['翻翻配方书。'],
-            chat: ['...', '花挑错了可不行。', '别浪费珠宝。']
+            chat: ['...', '花挑错了可不行。', '别浪费雪酪。']
         },
         106: {
             hints: ['在考试呢，想什么呢。'],

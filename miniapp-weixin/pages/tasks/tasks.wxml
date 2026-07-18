@@ -1,0 +1,49 @@
+<view class="tasks-page">
+  <header style="padding-top: {{statusBarHeight}}px;">
+    <view class="back-btn" bindtap="onBack">‹</view>
+    <text class="page-title">任务</text>
+    <text class="header-spacer"></text>
+  </header>
+
+  <scroll-view class="task-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view
+      wx:for="{{taskRows}}"
+      wx:key="id"
+      class="task-card {{item.canClaim ? 'claimable' : ''}} {{item.alreadyClaimed ? 'claimed' : ''}}"
+    >
+      <view class="task-main">
+        <view class="task-copy">
+          <view class="task-title-row">
+            <text class="task-name">{{item.name}}</text>
+            <text wx:if="{{item.done}}" class="task-check">OK</text>
+          </view>
+          <text class="task-desc">{{item.description}}</text>
+        </view>
+        <view
+          class="task-reward {{item.canClaim ? 'active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onClaimTask"
+        >
+          <text class="reward-label">{{item.rewardLabel}}</text>
+          <view class="reward-gems">
+            <image class="reward-gem-icon" src="/assets/icons/_diamond.png" mode="aspectFit" />
+            <text>{{item.gems}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="task-progress-bar">
+        <view class="task-progress-fill" style="width: {{item.percent}}%;"></view>
+      </view>
+      <text class="task-count">{{item.current}} / {{item.total}}</text>
+    </view>
+  </scroll-view>
+</view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

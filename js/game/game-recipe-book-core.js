@@ -28,7 +28,7 @@ Game.prototype._spawnRecipeBookDirectly = function() {
                 if (!window.TutorialGuide || window.TutorialGuide._active) return;
                 window.TutorialGuide.show({
                     target: newItem,
-                    text: '发<span style="color:#6cf;text-shadow:0 0 8px rgba(100,200,255,0.8),0 0 16px rgba(100,200,255,0.4)">蓝光</span>的物品拥有特殊能力<br>长按它来激活',
+                    text: '发蓝光的物品拥有特殊能力\n长按它来激活',
                     position: 'bottom',
                     padding: 10,
                     borderRadius: 50

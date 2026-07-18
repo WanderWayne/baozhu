@@ -170,7 +170,7 @@ class Gallery {
 document.addEventListener('DOMContentLoaded', () => {
     // 播放主界面BGM
     if (window.AudioManager) {
-        window.AudioManager.playBGM('bgm-menu');
+        window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     }
     new Gallery();
 });

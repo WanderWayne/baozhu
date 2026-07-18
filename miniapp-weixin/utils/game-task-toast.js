@@ -65,6 +65,10 @@ const GameTaskToast = {
         taskToastVisible: true,
         taskToastText: `任务达成 · ${taskName}`,
       });
+      try {
+        const page = this._page;
+        if (page && page.audioManager) page.audioManager.playSFX('task-milestone');
+      } catch (e) { /* noop */ }
       setTimeout(() => {
         if (this._page) {
           this._page.setData({ taskToastVisible: false, taskToastText: '' });

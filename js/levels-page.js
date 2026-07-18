@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 播放主界面BGM
     if (window.AudioManager) {
-        window.AudioManager.playBGM('bgm-menu');
+        window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     }
     
     // 返回按钮
@@ -65,11 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         backBtn.addEventListener('click', () => {
             if (window.AudioManager) {
                 window.AudioManager.playClickBack();
-            }
-            // 如果是第一次从游戏退出并返回主界面，设置引导标记
-            if (localStorage.getItem('tut_first_exit_game') === '1' && 
-                !localStorage.getItem('tut_main_guide_done')) {
-                localStorage.setItem('tut_guide_tasks_on_main', '1');
             }
             window.navigateTo('index.html');
         });
@@ -212,6 +207,55 @@ function updateWorldHeader(world) {
 
 let currentLevels = [];
 let selectedLevelIndex = 0;
+let selectedFallbackMode = false;
+
+function updateLevelSpacerHeight() {
+    const container = document.getElementById('level-doors');
+    if (!container || currentLevels.length < 3) return;
+
+    const firstDoor = container.querySelector('.level-door');
+    const spacers = container.querySelectorAll('.level-spacer');
+    if (!firstDoor || !spacers.length) return;
+
+    const spacerHeight = Math.max(
+        0,
+        Math.round((container.clientHeight - firstDoor.offsetHeight) / 2)
+    );
+
+    spacers.forEach((spacer) => {
+        spacer.style.height = `${spacerHeight}px`;
+        spacer.style.flexShrink = '0';
+    });
+}
+
+function findPlayableLevelIndex() {
+    if (!currentLevels || !currentLevels.length) return 0;
+
+    const firstIncomplete = currentLevels.findIndex((level) => {
+        return window.LevelManager.isLevelUnlocked(level.id)
+            && !window.LevelManager.isLevelCompleted(level.id);
+    });
+    if (firstIncomplete >= 0) return firstIncomplete;
+
+    for (let i = currentLevels.length - 1; i >= 0; i -= 1) {
+        if (window.LevelManager.isLevelUnlocked(currentLevels[i].id)) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+function findSelectableLevelIndex(centerIndex) {
+    if (!currentLevels || !currentLevels.length) return 0;
+    const start = Math.max(0, Math.min(currentLevels.length - 1, centerIndex));
+    for (let i = start; i >= 0; i -= 1) {
+        if (window.LevelManager.isLevelUnlocked(currentLevels[i].id)) {
+            return i;
+        }
+    }
+    return findPlayableLevelIndex();
+}
 
 function initLevelDoors(worldId) {
     const doorsContainer = document.getElementById('level-doors');
@@ -222,19 +266,13 @@ function initLevelDoors(worldId) {
     doorsContainer.innerHTML = '';
     
     // 找到第一个未完成的关卡作为默认选中
-    selectedLevelIndex = 0;
-    for (let i = 0; i < currentLevels.length; i++) {
-        if (!window.LevelManager.isLevelCompleted(currentLevels[i].id)) {
-            selectedLevelIndex = i;
-            break;
-        }
-    }
+    selectedLevelIndex = findPlayableLevelIndex();
+    selectedFallbackMode = false;
     
     // 如果关卡数 >= 3，添加顶部占位符
     if (currentLevels.length >= 3) {
         const topSpacer = document.createElement('div');
         topSpacer.className = 'level-spacer';
-        topSpacer.style.height = '120px';
         topSpacer.style.flexShrink = '0';
         doorsContainer.appendChild(topSpacer);
     }
@@ -248,7 +286,6 @@ function initLevelDoors(worldId) {
     if (currentLevels.length >= 3) {
         const bottomSpacer = document.createElement('div');
         bottomSpacer.className = 'level-spacer';
-        bottomSpacer.style.height = '120px';
         bottomSpacer.style.flexShrink = '0';
         doorsContainer.appendChild(bottomSpacer);
     }
@@ -258,6 +295,7 @@ function initLevelDoors(worldId) {
     
     // 初始化选中状态
     setTimeout(() => {
+        updateLevelSpacerHeight();
         updateSelectedLevel(selectedLevelIndex);
         scrollToLevel(selectedLevelIndex, false);
         handleCarouselScroll();
@@ -391,22 +429,27 @@ function handleCarouselScroll() {
         }
 
         // 未解锁：在同滚动位置下始终比已解锁更淡（避免 inline opacity 盖掉 .locked 样式）
+        let scale = 1 - t * 0.08;
+
         if (door.classList.contains('locked') && opacity > 0) {
             opacity *= 0.52;
         }
 
         door.style.opacity = String(opacity);
         door.style.pointerEvents = opacity < 0.05 ? 'none' : '';
-        door.style.transform = `scale(${1 - t * 0.08})`;
+        door.style.transform = `scale(${scale})`;
     });
     
-    if (closestIndex !== selectedLevelIndex) {
-        updateSelectedLevel(closestIndex);
+    const selectableIndex = findSelectableLevelIndex(closestIndex);
+    const fallbackMode = selectableIndex !== closestIndex;
+    if (selectableIndex !== selectedLevelIndex || fallbackMode !== selectedFallbackMode) {
+        updateSelectedLevel(selectableIndex, fallbackMode);
     }
 }
 
-function updateSelectedLevel(index) {
+function updateSelectedLevel(index, fallbackMode = false) {
     selectedLevelIndex = index;
+    selectedFallbackMode = fallbackMode;
     
     const container = document.getElementById('level-doors');
     const doors = container.querySelectorAll('.level-door');
@@ -414,9 +457,13 @@ function updateSelectedLevel(index) {
     doors.forEach((door) => {
         const doorIndex = parseInt(door.dataset.index);
         door.classList.remove('selected');
+        door.classList.remove('fallback-selected');
         
         if (doorIndex === index) {
             door.classList.add('selected');
+            if (fallbackMode) {
+                door.classList.add('fallback-selected');
+            }
         }
     });
 }
@@ -424,6 +471,7 @@ function updateSelectedLevel(index) {
 function scrollToLevel(index, smooth = true) {
     const container = document.getElementById('level-doors');
     const doors = container.querySelectorAll('.level-door');
+    updateLevelSpacerHeight();
     
     // 找到对应index的door
     let targetDoor = null;
@@ -452,7 +500,11 @@ function enterLevel(levelId) {
     // 播放进入音效并停止BGM
     if (window.AudioManager) {
         window.AudioManager.playClickEnter();
-        window.AudioManager.stopBGM();
+        if (typeof window.AudioManager.fadeOutBGM === 'function') {
+            window.AudioManager.fadeOutBGM(2000);
+        } else {
+            window.AudioManager.stopBGM();
+        }
     }
     
     // 宝珠风格的淡出过渡

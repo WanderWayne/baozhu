@@ -54,6 +54,14 @@ class DragSystem {
         this.userHasInteracted = true;
     }
 
+    isCollisionBlocked(item) {
+        return item.dataset.locked === '1'
+            || item.classList.contains('target-item')
+            || item.classList.contains('target-entry')
+            || item.classList.contains('offering-flight')
+            || item.classList.contains('offering-flight-lock');
+    }
+
     initEvents() {
         // 绑定方法
         this.boundDragStart = this.dragStart.bind(this);
@@ -285,6 +293,7 @@ class DragSystem {
         circle.style.strokeDasharray = C;
         circle.style.strokeDashoffset = C;
         svg.appendChild(circle);
+        target.classList.add('lp-ring-visible');
         target.appendChild(svg);
 
         // Force layout, then start transition
@@ -298,6 +307,7 @@ class DragSystem {
         target.classList.add('lp-gold-burst');
         const svg = target.querySelector('.lp-ring-svg');
         if (svg) svg.remove();
+        target.classList.remove('lp-ring-visible');
         setTimeout(() => target.classList.remove('lp-gold-burst'), 800);
     }
 
@@ -305,6 +315,7 @@ class DragSystem {
         if (!target) return;
         const svg = target.querySelector('.lp-ring-svg');
         if (svg) svg.remove();
+        target.classList.remove('lp-ring-visible');
     }
 
     drag(e) {
@@ -577,23 +588,7 @@ class DragSystem {
                 this.game._syncBrewingPartnerToSynthCoords(relX2, relY2, this.activeItem);
             }
 
-            // 第二关首次放物品到合成区时，引导长按查看属性
-            if (this.game && this.game.levelId === 102
-                && !localStorage.getItem('tut_longPress')
-                && window.TutorialGuide && !window.TutorialGuide._active) {
-                localStorage.setItem('tut_longPress', '1');
-                const itemRef = this.activeItem;
-                setTimeout(() => {
-                    if (!itemRef || !itemRef.parentElement) return;
-                    window.TutorialGuide.show({
-                        target: itemRef,
-                        text: '长按物品可以查看属性',
-                        position: 'top',
-                        padding: 10,
-                        borderRadius: 50
-                    });
-                }, 400);
-            }
+            // 暂时关闭：第二关首次放物品到合成区时的长按查看属性引导
         } else if (this.fromInventory) {
             // 不在任何有效区域，但是从物品栏拖出的 -> 回到物品栏
             this.returnToInventory();
@@ -684,7 +679,7 @@ class DragSystem {
             if (item === this.activeItem) continue;
             if (item.querySelector('.timer-overlay')) continue;
             if (item.classList.contains('brewing-item')) continue;
-            if (item.dataset.locked === '1') continue;
+            if (this.isCollisionBlocked(item)) continue;
 
             const rect = item.getBoundingClientRect();
             const center = {
@@ -715,7 +710,7 @@ class DragSystem {
             if (item === this.activeItem) continue;
             if (item.querySelector('.timer-overlay')) continue;
             if (item.classList.contains('brewing-item')) continue;
-            if (item.dataset.locked === '1') continue;
+            if (this.isCollisionBlocked(item)) continue;
 
             const rect = item.getBoundingClientRect();
             const center = {

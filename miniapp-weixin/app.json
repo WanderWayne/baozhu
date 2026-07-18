@@ -2,16 +2,27 @@
   "pages": [
     "pages/intro/intro",
     "pages/index/index",
+    "pages/tasks/tasks",
+    "pages/settings/settings",
     "pages/levels/levels",
-    "pages/game/game",
     "pages/codex/codex",
     "pages/gallery/gallery"
   ],
+  "subPackages": [
+    {
+      "root": "pages/game",
+      "name": "game",
+      "pages": [
+        "game"
+      ]
+    }
+  ],
   "window": {
     "navigationStyle": "custom",
-    "backgroundColor": "#F5E6E0",
+    "backgroundColor": "#101010",
     "backgroundTextStyle": "light"
   },
+  "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json",
   "style": "v2"
 }

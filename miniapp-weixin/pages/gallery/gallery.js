@@ -2,6 +2,7 @@
 const levelManager = require('../../utils/level-manager');
 const { FRAGMENTS } = require('../../data/items.js');
 const { navigateBackWithFade } = require('../../utils/page-transitions');
+const pageTransitionBehavior = require('../../behaviors/page-transition');
 
 const CATEGORY_LABELS = {
   all: '全部',
@@ -14,6 +15,7 @@ const CATEGORY_LABELS = {
 };
 
 Page({
+  behaviors: [pageTransitionBehavior],
   data: {
     statusBarHeight: 0,
     progressText: '0/15',
@@ -38,6 +40,7 @@ Page({
   collected: [],
 
   onLoad() {
+    this._preparePageTransitionEnter();
     const sys = wx.getSystemInfoSync();
     this.setData({ statusBarHeight: sys.statusBarHeight || 0 });
     this.audioManager = require('../../utils/audio-manager');
@@ -45,8 +48,9 @@ Page({
   },
 
   onShow() {
+    this._handlePageTransitionEnter();
     this.audioManager.unlock();
-    this.audioManager.playBGM('bgm-menu');
+    this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     this.refresh();
   },
 

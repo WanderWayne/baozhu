@@ -28,8 +28,11 @@ class IntroSystem {
     this._timers = [];
     this._rafId = null;
     this._destroyed = false;
+    this._transitionOpacity = 0;
     this.ambience = null;
     this.audioManager = null;
+    this._iconImages = {};
+    this._inventoryPanelProgress = 0;
 
     this.config = {
       minParticles: 200,
@@ -81,6 +84,20 @@ class IntroSystem {
     return Date.now();
   }
 
+  setTransitionOpacity(value) {
+    this._transitionOpacity = Math.max(0, Math.min(1, Number(value) || 0));
+  }
+
+  drawTransitionOverlay() {
+    if (this._transitionOpacity <= 0 || !this.ctx) return;
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = 'source-over';
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = `rgba(16, 16, 16, ${this._transitionOpacity})`;
+    this.ctx.fillRect(0, 0, this.logicalWidth, this.logicalHeight);
+    this.ctx.restore();
+  }
+
   schedule(fn, ms) {
     const id = setTimeout(() => {
       if (!this._destroyed) fn();
@@ -123,13 +140,41 @@ class IntroSystem {
 
   playSFX(name) {
     if (this.audioManager && typeof this.audioManager.playSFX === 'function') {
+      if (typeof this.audioManager.unlock === 'function') this.audioManager.unlock();
       this.audioManager.playSFX(name);
     }
   }
 
-  playBGM(name) {
+  _getIconImage(item) {
+    if (!item || !item.name || !this.canvas || !this.canvas.createImage) return null;
+    if (this._iconImages[item.name]) return this._iconImages[item.name];
+    const image = this.canvas.createImage();
+    const rawSrc = `/assets/icons/${item.name}.png`;
+    const srcList = [];
+    try {
+      srcList.push(encodeURI(rawSrc));
+    } catch (e) {
+      /* noop */
+    }
+    srcList.push(rawSrc);
+    const entry = { image, loaded: false, failed: false, srcIndex: 0, srcList };
+    this._iconImages[item.name] = entry;
+    image.onload = () => { entry.loaded = true; };
+    image.onerror = () => {
+      entry.srcIndex += 1;
+      if (entry.srcIndex < entry.srcList.length) {
+        image.src = entry.srcList[entry.srcIndex];
+        return;
+      }
+      entry.failed = true;
+    };
+    image.src = entry.srcList[0];
+    return entry;
+  }
+
+  playBGM(name, options = {}) {
     if (this.audioManager && typeof this.audioManager.playBGM === 'function') {
-      this.audioManager.playBGM(name);
+      this.audioManager.playBGM(name, options);
     }
   }
 

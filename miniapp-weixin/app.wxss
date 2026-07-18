@@ -1,4 +1,5 @@
 @import './pages/common/tutorial-guide.wxss';
+@import './pages/common/page-transitions.wxss';
 
 page {
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;

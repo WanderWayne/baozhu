@@ -122,35 +122,6 @@
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.level-complete-pop {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.5);
-  font-size: 48px;
-  font-weight: 800;
-  color: #1a1510;
-  z-index: 6000;
-  opacity: 0;
-  pointer-events: none;
-  letter-spacing: 12px;
-  white-space: nowrap;
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.level-complete-pop.visible {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.level-complete-pop text {
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 0 20px rgba(232, 200, 115, 0.8), 0 0 40px rgba(232, 200, 115, 0.4);
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: 4px;
-}
-
 /* 105 阶段结算 — 对齐 H5 game-level-intro.css .settlement-* */
 .settlement-overlay {
   position: fixed;
@@ -211,60 +182,95 @@
   opacity: 1;
 }
 
-.settlement-stats {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
+.settlement-encouragement {
+  max-width: 320px;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 17px;
+  line-height: 1.8;
+  letter-spacing: 1px;
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
+  transition: opacity 0.6s ease 0.75s, transform 0.6s ease 0.75s;
 }
 
-.settlement-overlay.visible .settlement-stats {
+.settlement-overlay.visible .settlement-encouragement {
   opacity: 1;
   transform: translateY(0);
 }
 
-.settlement-stat {
+.settlement-progress {
+  width: 100%;
+  margin-top: 28px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 10px;
-  color: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease 1s, transform 0.6s ease 1s;
+}
+
+.settlement-overlay.visible .settlement-progress {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.settlement-progress-label {
+  color: rgba(255, 255, 255, 0.62);
   font-size: 14px;
+  letter-spacing: 2px;
 }
 
-.settlement-stat-icon {
-  font-size: 16px;
+.settlement-progress-value {
+  color: #ffe2a7;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(255, 213, 130, 0.35);
 }
 
-.settlement-stat-value {
-  font-weight: 600;
-  color: #fff;
-  margin-left: 4px;
+.settlement-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.settlement-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d7aa70 0%, #ffe2a7 100%);
+  box-shadow: 0 0 16px rgba(255, 221, 158, 0.45);
 }
 
 .settlement-message {
-  margin-top: 24px;
+  margin-top: 28px;
   font-size: 14px;
-  line-height: 2;
-  color: rgba(255, 255, 255, 0.65);
-  letter-spacing: 1px;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.66);
+  letter-spacing: 2px;
   opacity: 0;
-  transition: opacity 0.6s ease 1.1s;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease 1.3s, transform 0.6s ease 1.3s;
+}
+
+.settlement-message text {
+  display: block;
 }
 
 .settlement-overlay.visible .settlement-message {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .settlement-buttons {
   display: flex;
-  gap: 16px;
-  margin-top: 28px;
+  gap: 20px;
+  margin-top: 36px;
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.6s ease 1.3s, transform 0.6s ease 1.3s;
+  transition: opacity 0.6s ease 1.65s, transform 0.6s ease 1.65s;
 }
 
 .settlement-overlay.visible .settlement-buttons {

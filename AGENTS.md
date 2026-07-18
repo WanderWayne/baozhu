@@ -96,6 +96,7 @@ The parity docs use a visual diff target of under 12%, with manual review for ac
 - Do not restore deleted `miniapp-weixin/tools/data/*`; docs say that duplicate data copy was removed in Phase 3.
 - Do not commit generated Cocos folders such as `minigame-cocos/library/`, `temp/`, `build/`, `native/`, or `profiles/`.
 - Do not add new package managers or framework layers unless the user asks.
+- Every completed change must update the in-game build version shown at the lower-left of the intro. Use `M.DvN` format, for example `7.15v1`; increment `vN` for additional changes on the same date. Keep H5 `js/build-version.js` and miniapp `miniapp-weixin/utils/build-version.js` synchronized.
 - Use `rg` / `rg --files` for search.
 - Prefer `apply_patch` for manual edits.
 

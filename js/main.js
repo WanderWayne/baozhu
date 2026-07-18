@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 更新进度面板
     updateProgressPanel();
+    updateSettingsBuildVersion();
 
     // 绑定主菜单按钮
     bindMenuButtons();
@@ -28,36 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (window.AudioManager) {
-            window.AudioManager.playBGM('bgm-menu');
+            window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
         }
     }
     
-    // 检查是否需要继续新手引导（第一次从游戏返回主界面时）
-    if (localStorage.getItem('tut_guide_tasks_on_main') === '1' && window.TutorialGuide) {
-        localStorage.removeItem('tut_guide_tasks_on_main');
-        setTimeout(() => _showTasksTutorial(), 800);
-    }
 });
 
-// 主界面任务按钮新手引导
-async function _showTasksTutorial() {
-    const tasksBtn = document.getElementById('free-mode-btn');
-    
-    // 引导点击任务按钮
-    if (tasksBtn) {
-        await window.TutorialGuide.show({
-            target: tasksBtn,
-            text: '点击查看任务进度与奖励',
-            position: 'bottom',
-            padding: 10,
-            borderRadius: 16
-        });
-        
-        // 标记引导已完成，避免重复显示
-        localStorage.setItem('tut_main_guide_done', '1');
-        // 标记进入任务面板后引导领取奖励
-        localStorage.setItem('tut_guide_claim_reward', '1');
-    }
+function updateSettingsBuildVersion() {
+    const versionEl = document.getElementById('settings-build-version');
+    if (!versionEl) return;
+    const version = window.BUILD_VERSION || '';
+    versionEl.textContent = version ? `宝珠酿造 ${version}` : '宝珠酿造';
 }
 
 // ==================== 成长系统初始化 ====================

@@ -1,0 +1,42 @@
+<view class="settings-page">
+  <header style="padding-top: {{statusBarHeight}}px;">
+    <view class="back-btn" bindtap="onBack">‹</view>
+    <text class="page-title">设置</text>
+    <text class="header-spacer"></text>
+  </header>
+
+  <view class="settings-content">
+    <view class="setting-row">
+      <view class="setting-label">
+        <text class="setting-icon">♫</text>
+        <text class="setting-name">背景音乐</text>
+      </view>
+      <slider class="volume-slider" min="0" max="100" value="{{bgmVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="18" bindchanging="onBgmChanging" bindchange="onBgmChange" />
+      <text class="volume-value">{{bgmVolume}}%</text>
+    </view>
+
+    <view class="setting-row">
+      <view class="setting-label">
+        <text class="setting-icon">♪</text>
+        <text class="setting-name">音效</text>
+      </view>
+      <slider class="volume-slider" min="0" max="100" value="{{sfxVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="18" bindchanging="onSfxChanging" bindchange="onSfxChange" />
+      <text class="volume-value">{{sfxVolume}}%</text>
+    </view>
+
+    <view class="version-block">
+      <text class="brand">宝珠酿造 {{buildVersion}}</text>
+      <text class="subtitle">唤醒酿造之力</text>
+    </view>
+
+    <view class="reset-btn" bindtap="onReset">重置进度</view>
+  </view>
+</view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

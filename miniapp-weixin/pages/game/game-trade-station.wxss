@@ -206,6 +206,26 @@
   border-color: #807060;
 }
 
+.trade-flyer {
+  position: fixed;
+  z-index: 9998;
+  pointer-events: none;
+  transition:
+    left 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    top 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.35s ease;
+}
+
+.game-item.trade-output-appear {
+  animation: tradeOutputAppear 0.45s cubic-bezier(0, 0, 0.2, 1.2) forwards;
+}
+
+@keyframes tradeOutputAppear {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* 交易确认弹窗 */
 .trade-confirm-overlay {
   position: fixed;

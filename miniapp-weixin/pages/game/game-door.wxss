@@ -24,8 +24,8 @@
 
 .door-container {
   position: relative;
-  width: 132px;
-  height: 198px;
+  width: 106px;
+  height: 158px;
   margin: 5px auto 12px;
   display: flex;
   justify-content: center;
@@ -36,11 +36,11 @@
 
 .door-aura {
   position: absolute;
-  top: -16px;
-  left: -16px;
-  right: -16px;
-  bottom: -16px;
-  border-radius: 83px 83px 0 0;
+  top: -13px;
+  left: -13px;
+  right: -13px;
+  bottom: -13px;
+  border-radius: 66px 66px 0 0;
   background: radial-gradient(ellipse at center 40%, rgba(232, 200, 115, 0.08) 0%, transparent 60%);
   pointer-events: none;
   animation: auraBreath 4s ease-in-out infinite;
@@ -54,7 +54,7 @@
 .door-frame {
   width: 100%;
   height: 100%;
-  border-radius: 66px 66px 0 0;
+  border-radius: 53px 53px 0 0;
   background: transparent;
   border: 3px solid rgba(150, 150, 150, 0.55);
   box-sizing: border-box;
@@ -70,7 +70,7 @@
   left: 6px;
   right: 6px;
   bottom: 0;
-  border-radius: 59px 59px 0 0;
+  border-radius: 47px 47px 0 0;
   background: #000;
   display: flex;
   align-items: center;
@@ -111,13 +111,22 @@
 }
 
 .door-target-silhouette {
-  font-size: 57px;
+  font-size: 46px;
   line-height: 1;
   opacity: 0.45;
-  filter: blur(2px);
+  filter: blur(4px) grayscale(80%);
   transform: scale(0.88);
   z-index: 3;
   position: relative;
+  transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.door-target-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .door-container.stage-0 .door-frame {
@@ -132,6 +141,8 @@
 
 .door-container.stage-0 .door-target-silhouette {
   opacity: 0.4;
+  filter: blur(4px) grayscale(80%);
+  transform: scale(0.88);
   animation: targetBreath 3s ease-in-out infinite;
 }
 
@@ -157,6 +168,12 @@
   animation: doorBreathGlow 2s ease-in-out infinite;
 }
 
+.door-container.stage-1 .door-target-silhouette {
+  opacity: 0.56;
+  filter: blur(3px) grayscale(58%);
+  transform: scale(0.94);
+}
+
 .door-container.stage-2 .door-frame {
   border-color: rgba(200, 185, 140, 0.7);
   box-shadow: 0 0 20px rgba(232, 200, 115, 0.25);
@@ -177,6 +194,12 @@
 .door-container.stage-2 .door-glow::before {
   opacity: 0.5;
   animation: doorBreathGlow 1.6s ease-in-out infinite;
+}
+
+.door-container.stage-2 .door-target-silhouette {
+  opacity: 0.78;
+  filter: blur(1px) grayscale(22%);
+  transform: scale(1);
 }
 
 @keyframes doorFrameShake {
@@ -202,9 +225,9 @@
 }
 
 .door-container.stage-3 .door-target-silhouette {
-  opacity: 0.85;
+  opacity: 1;
   filter: blur(0);
-  transform: scale(1);
+  transform: scale(1.08);
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
   animation: targetBreathStage3 1.5s ease-in-out infinite;
 }
@@ -219,9 +242,62 @@
   50% { opacity: 0.55; transform: scale(0.92); }
 }
 
-.door-container.awaiting-offer .door-offer-hint { opacity: 1; }
+.door-click-wave {
+  position: absolute;
+  inset: -2px;
+  border-radius: 66px 66px 0 0;
+  border: 2px solid rgba(232, 200, 115, 0.72);
+  box-shadow: 0 0 18px rgba(232, 200, 115, 0.42);
+  pointer-events: none;
+  z-index: 8;
+  animation: doorClickWave 1.5s ease-out forwards;
+}
 
-/* 等待献上时门框脉冲（对齐 H5 awaitingPulse） */
+@keyframes doorClickWave {
+  0% { transform: scale(1); opacity: 0.86; }
+  100% { transform: scale(1.72); opacity: 0; }
+}
+
+.door-container.stage-0.maturity-1 .door-target-silhouette,
+.door-container.stage-0.maturity-2 .door-target-silhouette {
+  opacity: 0.52;
+  filter: blur(3px) grayscale(62%);
+  transform: scale(0.92);
+  animation: none;
+}
+
+.door-container.stage-0.maturity-3 .door-target-silhouette,
+.door-container.stage-0.maturity-4 .door-target-silhouette {
+  opacity: 0.7;
+  filter: blur(2px) grayscale(38%);
+  transform: scale(0.98);
+  animation: none;
+}
+
+.door-container.stage-0.maturity-5 .door-target-silhouette {
+  opacity: 0.88;
+  filter: blur(0.5px) grayscale(10%);
+  transform: scale(1.03);
+  animation: none;
+}
+
+.door-container.maturity-1 .door-aura,
+.door-container.maturity-2 .door-aura {
+  background: radial-gradient(ellipse at center 38%, rgba(232, 200, 115, 0.1) 0%, transparent 62%);
+}
+
+.door-container.maturity-3 .door-aura,
+.door-container.maturity-4 .door-aura {
+  background: radial-gradient(ellipse at center 38%, rgba(232, 200, 115, 0.14) 0%, transparent 60%);
+}
+
+.door-container.maturity-5 .door-aura {
+  background: radial-gradient(ellipse at center 36%, rgba(255, 228, 160, 0.18) 0%, rgba(232, 200, 115, 0.06) 45%, transparent 65%);
+}
+
+.door-offer-hint {
+  display: none;
+}
 .door-container.stage-3.awaiting-offer .door-frame {
   animation: awaitingPulse 1.4s ease-in-out infinite !important;
 }
@@ -316,25 +392,6 @@
   opacity: 1;
 }
 
-.door-offer-hint {
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(212, 165, 116, 0.95);
-  color: #fff;
-  padding: 6px 16px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  white-space: nowrap;
-  z-index: 4;
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
-}
-
 .level-info {
   display: flex;
   flex-direction: column;
@@ -350,27 +407,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 6px;
-  padding: 6px 14px;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 5px 11px;
   background: rgba(212, 165, 116, 0.1);
   border: 1px solid rgba(212, 165, 116, 0.3);
-  border-radius: 20px;
+  border-radius: 16px;
   transition: transform 0.4s ease-in, opacity 0.4s ease-in;
 }
 
 .level-target-display.multi-target-mode {
   flex-direction: row;
   align-items: flex-start;
-  gap: 10px;
-  padding: 8px 14px 10px;
+  gap: 8px;
+  padding: 6px 11px 8px;
 }
 
 .multi-target-list {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 1px;
   flex: 1;
   min-width: 0;
 }
@@ -378,18 +435,18 @@
 .multi-target-item {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  line-height: 1.35;
+  gap: 3px;
+  line-height: 1.25;
 }
 
 .multi-target-item .mt-num {
-  font-size: 12px;
+  font-size: 10px;
   color: #A67C52;
-  min-width: 18px;
+  min-width: 14px;
 }
 
 .multi-target-item .mt-name {
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 600;
   color: #E8C873;
   letter-spacing: 0.5px;
@@ -403,18 +460,18 @@
 }
 
 .target-label {
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 500;
   color: #A67C52;
   letter-spacing: 2px;
   flex-shrink: 0;
   white-space: nowrap;
-  line-height: 1.35;
+  line-height: 1.25;
   padding-top: 1px;
 }
 
 .target-name {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #E8C873;
   letter-spacing: 1px;

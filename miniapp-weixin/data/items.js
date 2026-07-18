@@ -176,12 +176,6 @@ module.exports = {
       "desc": "记着前人试错与心得的旧册子。",
       "isRecipeBook": true
     },
-    "珠宝": {
-      "icon": "🪙",
-      "type": "currency",
-      "desc": "一点温润亮光，可在坊间换来稀罕花材。",
-      "noSynthesize": true
-    },
     "茉莉花": {
       "icon": "🌸",
       "type": "floral",
@@ -530,6 +524,11 @@ module.exports = {
       "type": "mid",
       "desc": "玫瑰把心事浸进酒里，香得坦荡。"
     },
+    "玫瑰双酪": {
+      "icon": "🌹",
+      "type": "mid",
+      "desc": "玫瑰先融进双酪里，等一口酒酿点醒。"
+    },
     "茉莉酒酿": {
       "icon": "🌸",
       "type": "mid",
@@ -792,7 +791,7 @@ module.exports = {
         "发酵"
       ],
       "result": "酸奶",
-      "time": 5,
+      "time": 3,
       "msg": "乳酸菌悄悄做事，奶渐渐稠成酸奶…"
     },
     {
@@ -801,7 +800,7 @@ module.exports = {
         "牛奶"
       ],
       "result": "酸奶",
-      "time": 5,
+      "time": 3,
       "msg": "乳酸菌悄悄做事，奶渐渐稠成酸奶…"
     },
     {
@@ -828,7 +827,7 @@ module.exports = {
         "酿造"
       ],
       "result": "奶酒",
-      "time": 5,
+      "time": 3,
       "msg": "谷香入奶，一盏柔性的小酒…"
     },
     {
@@ -837,7 +836,7 @@ module.exports = {
         "牛奶"
       ],
       "result": "奶酒",
-      "time": 5,
+      "time": 3,
       "msg": "谷香入奶，一盏柔性的小酒…"
     },
     {
@@ -846,7 +845,7 @@ module.exports = {
         "酿造"
       ],
       "result": "高度奶酒",
-      "time": 5,
+      "time": 3,
       "msg": "再经凝炼，酒意更厚一层…"
     },
     {
@@ -855,7 +854,7 @@ module.exports = {
         "奶酒"
       ],
       "result": "高度奶酒",
-      "time": 5,
+      "time": 3,
       "msg": "再经凝炼，酒意更厚一层…"
     },
     {
@@ -864,7 +863,7 @@ module.exports = {
         "酿造"
       ],
       "result": "酒酿",
-      "time": 5,
+      "time": 3,
       "msg": "糯米发酵，甜香弥漫..."
     },
     {
@@ -873,7 +872,7 @@ module.exports = {
         "糯米"
       ],
       "result": "酒酿",
-      "time": 5,
+      "time": 3,
       "msg": "糯米发酵，甜香弥漫..."
     },
     {
@@ -882,7 +881,7 @@ module.exports = {
         "酿造"
       ],
       "result": "米酒",
-      "time": 5,
+      "time": 3,
       "msg": "大米也能酿，但不是酒酿..."
     },
     {
@@ -891,7 +890,7 @@ module.exports = {
         "大米"
       ],
       "result": "米酒",
-      "time": 5,
+      "time": 3,
       "msg": "大米也能酿，但不是酒酿..."
     },
     {
@@ -900,7 +899,7 @@ module.exports = {
         "酿造"
       ],
       "result": "黑米露",
-      "time": 5,
+      "time": 3,
       "msg": "紫黑色的酒露，但不是目标..."
     },
     {
@@ -909,7 +908,7 @@ module.exports = {
         "黑米"
       ],
       "result": "黑米露",
-      "time": 5,
+      "time": 3,
       "msg": "紫黑色的酒露，但不是目标..."
     },
     {
@@ -918,7 +917,7 @@ module.exports = {
         "酿造"
       ],
       "result": "小米黄酒",
-      "time": 5,
+      "time": 3,
       "msg": "小米黄酒，古朴的味道..."
     },
     {
@@ -927,7 +926,7 @@ module.exports = {
         "小米"
       ],
       "result": "小米黄酒",
-      "time": 5,
+      "time": 3,
       "msg": "小米黄酒，古朴的味道..."
     },
     {
@@ -936,7 +935,7 @@ module.exports = {
         "发酵"
       ],
       "result": "甜酸奶",
-      "time": 5,
+      "time": 3,
       "msg": "甜奶也经得起发酵，稠成一碗甜酸奶…"
     },
     {
@@ -945,8 +944,26 @@ module.exports = {
         "甜牛奶"
       ],
       "result": "甜酸奶",
-      "time": 5,
+      "time": 3,
       "msg": "甜奶也经得起发酵，稠成一碗甜酸奶…"
+    },
+    {
+      "ingredients": [
+        "酸奶",
+        "冰糖碎"
+      ],
+      "result": "甜酸奶",
+      "time": 0,
+      "msg": "冰糖碎化进酸奶，甜酸奶成了。"
+    },
+    {
+      "ingredients": [
+        "冰糖碎",
+        "酸奶"
+      ],
+      "result": "甜酸奶",
+      "time": 0,
+      "msg": "冰糖碎化进酸奶，甜酸奶成了。"
     },
     {
       "ingredients": [
@@ -972,7 +989,7 @@ module.exports = {
         "酿造"
       ],
       "result": "甜奶浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "酿造把酒谷的香塞进甜奶里……轻盈酪要走发酵再滤布。"
     },
     {
@@ -981,7 +998,7 @@ module.exports = {
         "甜牛奶"
       ],
       "result": "甜奶浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "酿造把酒谷的香塞进甜奶里……轻盈酪要走发酵再滤布。"
     },
     {
@@ -1031,6 +1048,24 @@ module.exports = {
     },
     {
       "ingredients": [
+        "玫瑰",
+        "双酪"
+      ],
+      "result": "玫瑰双酪",
+      "time": 0,
+      "msg": "玫瑰落进双酪，花香先安顿下来。"
+    },
+    {
+      "ingredients": [
+        "双酪",
+        "玫瑰"
+      ],
+      "result": "玫瑰双酪",
+      "time": 0,
+      "msg": "玫瑰落进双酪，花香先安顿下来。"
+    },
+    {
+      "ingredients": [
         "菊花",
         "酒酿原浆"
       ],
@@ -1073,6 +1108,26 @@ module.exports = {
       "result": "酒酿玫瑰酪",
       "time": 3,
       "msg": "玫瑰与酪融合中…",
+      "isTarget": true
+    },
+    {
+      "ingredients": [
+        "玫瑰双酪",
+        "酒酿原浆"
+      ],
+      "result": "酒酿玫瑰酪",
+      "time": 3,
+      "msg": "酒酿慢慢渗进玫瑰双酪…",
+      "isTarget": true
+    },
+    {
+      "ingredients": [
+        "酒酿原浆",
+        "玫瑰双酪"
+      ],
+      "result": "酒酿玫瑰酪",
+      "time": 3,
+      "msg": "酒酿慢慢渗进玫瑰双酪…",
       "isTarget": true
     },
     {
@@ -1316,7 +1371,7 @@ module.exports = {
         "酿造"
       ],
       "result": "桂花浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "花香闷在糟里，浊得很，少了酒酿原浆那口气"
     },
     {
@@ -1325,7 +1380,7 @@ module.exports = {
         "桂花"
       ],
       "result": "桂花浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "花香闷在糟里，浊得很，少了酒酿原浆那口气"
     },
     {
@@ -1334,7 +1389,7 @@ module.exports = {
         "酿造"
       ],
       "result": "玫瑰浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "花瓣烂糟糟……记得先请酒酿原浆出场"
     },
     {
@@ -1343,7 +1398,7 @@ module.exports = {
         "玫瑰"
       ],
       "result": "玫瑰浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "花瓣烂糟糟……记得先请酒酿原浆出场"
     },
     {
@@ -1352,7 +1407,7 @@ module.exports = {
         "酿造"
       ],
       "result": "菊花浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "菊花清气扛不住闷酿，糊成一团"
     },
     {
@@ -1361,7 +1416,7 @@ module.exports = {
         "菊花"
       ],
       "result": "菊花浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "菊花清气扛不住闷酿，糊成一团"
     },
     {
@@ -1370,7 +1425,7 @@ module.exports = {
         "酿造"
       ],
       "result": "茉莉浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "茉莉要先遇见酒浆，直接进酿造只会浊"
     },
     {
@@ -1379,7 +1434,7 @@ module.exports = {
         "茉莉花"
       ],
       "result": "茉莉浊酿",
-      "time": 2,
+      "time": 3,
       "msg": "茉莉要先遇见酒浆，直接进酿造只会浊"
     },
     {
@@ -1460,7 +1515,7 @@ module.exports = {
         "发酵"
       ],
       "result": "塌雪酪",
-      "time": 2,
+      "time": 3,
       "msg": "雪酪塌成糊……发酵毁了轻盈"
     },
     {
@@ -1469,7 +1524,7 @@ module.exports = {
         "雪酪"
       ],
       "result": "塌雪酪",
-      "time": 2,
+      "time": 3,
       "msg": "雪酪塌成糊……发酵毁了轻盈"
     },
     {
@@ -1742,7 +1797,7 @@ module.exports = {
         "冰糖碎"
       ],
       "result": "雪域酸奶",
-      "time": 2,
+      "time": 3,
       "msg": "四步两次发酵...",
       "isTarget": true
     },
@@ -1807,7 +1862,7 @@ module.exports = {
         "酒酿原浆"
       ],
       "result": "酒酿桂花酪",
-      "time": 2,
+      "time": 3,
       "msg": "酒酿慢慢渗入..."
     },
     {
@@ -1966,7 +2021,7 @@ module.exports = {
         "加热"
       ],
       "result": "脆烤坚果",
-      "time": 2,
+      "time": 3,
       "msg": "烘烤中..."
     },
     {
@@ -2031,7 +2086,7 @@ module.exports = {
         "加热"
       ],
       "result": "温热芝士茶",
-      "time": 2,
+      "time": 3,
       "msg": "加热中..."
     },
     {
@@ -2105,7 +2160,7 @@ module.exports = {
         "蜂蜜"
       ],
       "result": "天赐宝珠酪",
-      "time": 5,
+      "time": 3,
       "msg": "传奇诞生！",
       "isTarget": true
     },
@@ -2124,7 +2179,7 @@ module.exports = {
         "牛奶"
       ],
       "result": "奇亚籽奶",
-      "time": 2,
+      "time": 3,
       "msg": "奇亚籽膨胀中..."
     },
     {

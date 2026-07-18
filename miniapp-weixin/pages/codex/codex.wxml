@@ -1,6 +1,6 @@
 <view class="codex-page">
   <header style="padding-top: {{statusBarHeight}}px;">
-    <button class="back-btn" bindtap="onBack">←</button>
+    <view class="back-btn" bindtap="onBack">←</view>
     <text class="page-title">宝珠图谱</text>
     <text class="header-progress">{{atlasProgressText}}</text>
   </header>
@@ -63,4 +63,13 @@
       <button class="modal-close" bindtap="hideDetail">关闭</button>
     </view>
   </view>
+
 </view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

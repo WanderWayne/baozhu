@@ -101,7 +101,10 @@ class Game {
         
         // 更新身份铭牌
         this.updateIdentityPlaque();
-        
+
+        const backIcon = document.getElementById('back-btn-icon');
+        if (backIcon) Game.setIconContent(backIcon, '_home', '🏠');
+
         // 绑定返回按钮
         document.getElementById('back-btn').addEventListener('click', () => {
             if (window.AudioManager) {
@@ -354,14 +357,7 @@ class Game {
         const isSpecial = this.levelData.isSpecialArea;
 
         const runOpeningDialogs = () => {
-            const dialogs = this.levelData.dialogs;
-            if (!dialogs || dialogs.length === 0) return Promise.resolve();
-
-            let chain = new Promise(r => setTimeout(r, 400));
-            for (const d of dialogs) {
-                chain = chain.then(() => this.showDialog(d.text));
-            }
-            return chain;
+            return Promise.resolve();
         };
 
         if (isRecipePhase) {
@@ -381,40 +377,11 @@ class Game {
     }
 
     playCompletionDialogs() {
-        const dialogs = this.levelData.completionDialogs;
-        if (!dialogs || dialogs.length === 0) return Promise.resolve();
-
-        let chain = new Promise(r => setTimeout(r, 600));
-
-        for (const d of dialogs) {
-            chain = chain.then(() => this.showDialog(d.text));
-        }
-
-        chain = chain.then(() => this.dismissAllDialogs());
-        return chain;
+        return Promise.resolve();
     }
 
     checkTriggerDialogs(event, itemName) {
-        const triggers = this.levelData.triggerDialogs;
-        if (!triggers) return;
-
-        let lines = null;
-        let triggerKey = '';
-
-        if (event === 'onSynthesize' && triggers.onSynthesize && triggers.onSynthesize[itemName]) {
-            triggerKey = `synth_${itemName}`;
-            lines = triggers.onSynthesize[itemName];
-        } else if (event === 'onFailedSynthesis' && triggers.onFailedSynthesis) {
-            triggerKey = 'failedSynth';
-            lines = triggers.onFailedSynthesis;
-        }
-
-        if (!lines || this._firedTriggers.has(triggerKey)) return;
-        this._firedTriggers.add(triggerKey);
-
-        for (const line of lines) {
-            this.showTriggerDialog(line.text);
-        }
+        // 深色背景白字门对白已统一关闭。
     }
 
 
@@ -522,7 +489,7 @@ class Game {
         },
         105: {
             hints: ['翻翻配方书。'],
-            chat: ['...', '花挑错了可不行。', '别浪费珠宝。']
+            chat: ['...', '花挑错了可不行。', '别浪费雪酪。']
         },
         106: {
             hints: ['在考试呢，想什么呢。'],

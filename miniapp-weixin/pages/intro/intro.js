@@ -1,7 +1,13 @@
 /** @feature intro @see docs/features/intro.md */
+const { BUILD_VERSION } = require('../../utils/build-version');
 const IntroSystem = require('../../utils/intro/index');
-const { redirectToWithFade, navigateToWithFade } = require('../../utils/page-transitions');
+const {
+  redirectToWithFade,
+  navigateToWithFade,
+  reLaunchWithFade,
+} = require('../../utils/page-transitions');
 const { INTRO_KEY, resetTutorialStorage } = require('../../utils/main-menu');
+const pageTransitionBehavior = require('../../behaviors/page-transition');
 
 function computeSkipBtnTop() {
   const sys = wx.getSystemInfoSync();
@@ -16,7 +22,9 @@ function computeSkipBtnTop() {
 }
 
 Page({
+  behaviors: [pageTransitionBehavior],
   data: {
+    buildVersion: BUILD_VERSION,
     // ── intro 动画状态 ──
     screenBg: '#000000',
     warmTransition: false,
@@ -44,13 +52,14 @@ Page({
     settingsVisible: false,
     taskRows: [],
     showClaimableDot: false,
-    bgmVolume: 0,
-    sfxVolume: 0,
+    bgmVolume: 80,
+    sfxVolume: 80,
   },
 
   intro: null,
 
   onLoad() {
+    this._preparePageTransitionEnter();
     try {
       if (wx.getStorageSync(INTRO_KEY)) {
         wx.redirectTo({ url: '/pages/index/index' });
@@ -68,11 +77,12 @@ Page({
   },
 
   onShow() {
+    this._handlePageTransitionEnter();
     try {
       const audioManager = require('../../utils/audio-manager');
       audioManager.unlock();
       if (this.data.menuMode && this.audioManager) {
-        this.audioManager.playBGM('bgm-menu');
+        this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
       }
     } catch (e) {
       /* ignore */
@@ -80,13 +90,20 @@ Page({
   },
 
   onHide() {
-    if (this.audioManager) this.audioManager.stopBGM();
+    if (this.audioManager) this.audioManager.fadeOutBGM(2000);
   },
 
   onUnload() {
     if (this.intro) {
       this.intro.destroy();
       this.intro = null;
+    }
+  },
+
+  _setCanvasTransitionOpacity(opacity) {
+    this._canvasTransitionOpacity = opacity;
+    if (this.intro && typeof this.intro.setTransitionOpacity === 'function') {
+      this.intro.setTransitionOpacity(opacity);
     }
   },
 
@@ -116,6 +133,7 @@ Page({
         if (this.intro) this.intro.destroy();
         this.intro = new IntroSystem(this);
         this.intro.init(canvas, ctx, w, h, dpr);
+        this.intro.setTransitionOpacity(this._canvasTransitionOpacity || 0);
       });
   },
 
@@ -123,6 +141,12 @@ Page({
 
   onDotTap() {
     if (this.intro && this.intro.state === 'dotIdle') {
+      try {
+        const audioManager = require('../../utils/audio-manager');
+        audioManager.unlock();
+      } catch (e) {
+        /* ignore */
+      }
       this.intro.setState('doorExpand');
     }
   },
@@ -212,19 +236,19 @@ Page({
   onContinue() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    setTimeout(() => navigateToWithFade('/pages/levels/levels'), 200);
+    navigateToWithFade('/pages/levels/levels');
   },
 
   onCodex() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    setTimeout(() => navigateToWithFade('/pages/codex/codex'), 200);
+    navigateToWithFade('/pages/codex/codex');
   },
 
   onGallery() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    setTimeout(() => navigateToWithFade('/pages/gallery/gallery'), 200);
+    navigateToWithFade('/pages/gallery/gallery');
   },
 
   // ── 面板 ──
@@ -248,13 +272,13 @@ Page({
   onSettings() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    this.openPanel('settings');
+    navigateToWithFade('/pages/settings/settings');
   },
 
   onTasks() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    this.openPanel('tasks');
+    navigateToWithFade('/pages/tasks/tasks');
   },
 
   onCloseSettings() {
@@ -330,12 +354,15 @@ Page({
       confirmColor: '#A67C52',
       success: (res) => {
         if (!res.confirm) return;
+        if (this.audioManager && typeof this.audioManager.resetBGM === 'function') {
+          this.audioManager.resetBGM();
+        }
         this.levelManager.resetProgress();
         resetTutorialStorage();
         wx.showToast({ title: '进度已重置', icon: 'success' });
         // 重新播开场
         if (this.intro) { this.intro.destroy(); this.intro = null; }
-        wx.reLaunch({ url: '/pages/intro/intro' });
+        reLaunchWithFade('/pages/intro/intro');
       },
     });
   },

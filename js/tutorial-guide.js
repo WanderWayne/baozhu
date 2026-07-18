@@ -5,6 +5,19 @@ window.TutorialGuide = {
     _active: false,
     _overlay: null,
     _resolve: null,
+    _dismissReadyTimer: null,
+    _autoDismissTimer: null,
+
+    _clearTimers() {
+        if (this._dismissReadyTimer) {
+            clearTimeout(this._dismissReadyTimer);
+            this._dismissReadyTimer = null;
+        }
+        if (this._autoDismissTimer) {
+            clearTimeout(this._autoDismissTimer);
+            this._autoDismissTimer = null;
+        }
+    },
 
     /**
      * @param {Object} opts
@@ -50,7 +63,6 @@ window.TutorialGuide = {
                 <div class="tut-border" style="left:${hx}px;top:${hy}px;width:${hw}px;height:${hh}px;border-radius:${br}px"></div>
                 <div class="tut-text-wrap" style="${this._textStyle(opts.position || 'bottom', hx, hy, hw, hh)}">
                     <div class="tut-text">${opts.text || ''}</div>
-                    <div class="tut-continue">▼<br><span>点击任意处继续</span></div>
                 </div>
             `;
 
@@ -59,23 +71,16 @@ window.TutorialGuide = {
 
             requestAnimationFrame(() => overlay.classList.add('visible'));
 
-            const continueEl = overlay.querySelector('.tut-continue');
-            setTimeout(() => {
-                continueEl.classList.add('show');
-                // Only allow dismissing after "点击任意处继续" appears
-                overlay.addEventListener('touchstart', onTouchStart, { passive: true });
-                overlay.addEventListener('touchmove', onTouchMove, { passive: true });
-                overlay.addEventListener('click', onPointerUp);
-            }, 1000);
-
             let touchStartY = null;
             const SWIPE_THRESHOLD = 15;
+            let dismissEnabled = false;
 
             const onTouchStart = (e) => {
                 touchStartY = e.touches[0].clientY;
             };
 
             const onTouchMove = (e) => {
+                if (!dismissEnabled) return;
                 if (touchStartY !== null) {
                     const dy = Math.abs(e.touches[0].clientY - touchStartY);
                     if (dy > SWIPE_THRESHOLD) {
@@ -86,7 +91,7 @@ window.TutorialGuide = {
             };
 
             const onPointerUp = (e) => {
-                if (!this._active) return;
+                if (!this._active || !dismissEnabled) return;
                 const cx = e.clientX ?? e.changedTouches?.[0]?.clientX;
                 const cy = e.clientY ?? e.changedTouches?.[0]?.clientY;
 
@@ -104,10 +109,23 @@ window.TutorialGuide = {
             };
 
             const cleanup = () => {
+                this._clearTimers();
                 overlay.removeEventListener('touchstart', onTouchStart);
                 overlay.removeEventListener('touchmove', onTouchMove);
                 overlay.removeEventListener('click', onPointerUp);
             };
+
+            this._dismissReadyTimer = setTimeout(() => {
+                dismissEnabled = true;
+                overlay.addEventListener('touchstart', onTouchStart, { passive: true });
+                overlay.addEventListener('touchmove', onTouchMove, { passive: true });
+                overlay.addEventListener('click', onPointerUp);
+            }, 1000);
+
+            this._autoDismissTimer = setTimeout(() => {
+                cleanup();
+                this._close();
+            }, 8000);
         });
     },
 
@@ -139,6 +157,7 @@ window.TutorialGuide = {
     },
 
     _close() {
+        this._clearTimers();
         this._active = false;
         const ov = this._overlay;
         if (ov) {

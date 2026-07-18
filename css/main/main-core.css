@@ -355,9 +355,9 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(107, 83, 68, 0.4);
-    backdrop-filter: blur(8px);
-    z-index: 500;
+    background: transparent;
+    backdrop-filter: none;
+    z-index: 2147483000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -386,6 +386,7 @@ body {
     transform: translateY(20px) scale(0.95);
     transition: transform 0.3s ease;
     position: relative;
+    z-index: 1;
 }
 
 /* 面板顶部温暖光效 */

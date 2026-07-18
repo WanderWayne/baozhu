@@ -1,23 +1,33 @@
-const GameController = require('../../utils/game-controller');
+const GameController = require('./game-controller');
 const levelManager = require('../../utils/level-manager');
 const GameTaskToast = require('../../utils/game-task-toast');
-const gameLayout = require('../../utils/game-layout');
-const gameAmbience = require('../../utils/game-ambience');
+const gameLayout = require('./lib/game-layout');
+const gameAmbience = require('./game-ambience');
+const gameGems = require('./lib/game-gems');
 const { navigateBackWithFade } = require('../../utils/page-transitions');
 const tutorialGuide = require('../../utils/tutorial-guide');
+const pageTransitionBehavior = require('../../behaviors/page-transition');
 
 Page({
+  behaviors: [pageTransitionBehavior],
   data: {
     showClaimableDot: false,
     synthParticles: [],
     trailParticles: [],
     layoutStyle: '',
     inventoryRowsClass: 'rows-1',
+    gemCount: 0,
+    gemBump: false,
+    gemPlusVisible: false,
+    gemPlusAmount: 0,
+    gemFlyers: [],
     levelId: 101,
     levelName: '',
     levelTarget: '',
     levelIcon: '🍨',
     doorStage: 0,
+    doorSynthMaturity: 0,
+    doorWaveVisible: false,
     targetReady: false,
     doorClosing: false,
     doorStarEntering: false,
@@ -37,8 +47,6 @@ Page({
     transitionText: '',
     inventoryGoldenGlow: false,
     inventoryGoldenFade: false,
-    levelCompletePopVisible: false,
-    levelCompletePopText: '',
     targetHidden: false,
     targetPopIn: false,
     targetFlash: false,
@@ -66,15 +74,17 @@ Page({
     tradeStationMode: false,
     tradeConfirmVisible: false,
     tradeConfirm: null,
+    tradeFlyer: { visible: false },
     themeClass: 'theme-dairy',
     taskToastVisible: false,
     taskToastText: '',
     dragGhost: { visible: false, x: 0, y: 0, icon: '', name: '', itemType: 'base', tone: '' },
+    inventoryDeleteHover: false,
     recipeBookBtnVisible: false,
     recipeBookBtnPulse: false,
     recipeBookBtnFlash: false,
+    recipeBookNudge: false,
     recipeBookOverlayVisible: false,
-    recipeBookTab: 'recorded',
     recipeBookSearch: '',
     recipeBookSections: [],
     recipeBookEmptyText: '',
@@ -92,11 +102,8 @@ Page({
     basicNewTitleName: '',
     settlementVisible: false,
     settlementFading: false,
-    settlementTime: '',
-    settlementRatingIcon: '⚡',
-    settlementRatingName: '',
-    settlementRatingColor: '#FFD700',
-    settlementGems: 0,
+    settlementChapterName: '这一章',
+    settlementProgressPercent: 0,
     tutOverlay: tutorialGuide.emptyOverlay(),
   },
 
@@ -104,7 +111,9 @@ Page({
   _dustTimer: null,
 
   onLoad(options) {
+    this._preparePageTransitionEnter();
     this.audioManager = require('../../utils/audio-manager');
+    this.audioManager.registerAudioFiles(require('./game-audio-files'));
     this.levelId = parseInt(options.level || options.id || '101', 10);
 
     GameTaskToast.bindPage(this);
@@ -116,6 +125,8 @@ Page({
       setTimeout(() => navigateBackWithFade('/pages/levels/levels?world=1'), 800);
       return;
     }
+
+    gameGems.initGemDisplay(this);
 
     this.syncGameLayout();
     this._initAmbience();
@@ -158,6 +169,7 @@ Page({
   },
 
   onShow() {
+    this._handlePageTransitionEnter();
     this.audioManager.unlock();
     this.syncGameLayout();
     setTimeout(() => this._measureGameRects(), 100);
@@ -170,9 +182,15 @@ Page({
   },
 
   onUnload() {
+    clearTimeout(this._inventoryNudgeTimer);
     this._stopDustLoop();
+    gameGems.destroyGemDisplay(this);
     if (this.controller) this.controller.destroy();
     this.audioManager.stopBGM();
+  },
+
+  showGemReward(amount) {
+    return gameGems.showGemReward(this, amount);
   },
 
   /** 对齐 H5 updateInventoryLayout：按物品数量定 rows-*，合成区 bottom = 物品栏实测高度 */
@@ -182,9 +200,66 @@ Page({
       ? impliedItemCount
       : items.filter((i) => !i.hidden).length;
     const layout = gameLayout.computeLayout(itemCount, measuredInventoryHeightPx);
-    this.setData({
+    const previousInvH = this._inventoryLayoutHeight;
+    const inventoryGrew = Number.isFinite(previousInvH) && layout.invH > previousInvH + 1;
+    this._inventoryLayoutHeight = layout.invH;
+
+    const patch = {
       layoutStyle: layout.style,
       inventoryRowsClass: layout.rowClass,
+    };
+
+    if (inventoryGrew) {
+      const viewport = gameLayout.getViewport();
+      const predictedSynthesisHeight = Math.max(250, viewport.windowHeight - layout.invH);
+      const nudged = gameLayout.nudgeWorkshopItems(
+        this.data.workshopItems || [],
+        viewport.windowWidth,
+        predictedSynthesisHeight,
+      );
+      const nudgedBrewings = gameLayout.nudgeWorkshopItems(
+        this.data.brewings || [],
+        viewport.windowWidth,
+        predictedSynthesisHeight,
+      );
+      if (nudged.changed) patch.workshopItems = nudged.items;
+      if (nudgedBrewings.changed) patch.brewings = nudgedBrewings.items;
+    }
+
+    this.setData(patch);
+
+    if (inventoryGrew) {
+      clearTimeout(this._inventoryNudgeTimer);
+      this._inventoryNudgeTimer = setTimeout(() => {
+        this._nudgeWorkshopItemsToMeasuredBounds();
+      }, 400);
+    }
+  },
+
+  _nudgeWorkshopItemsToMeasuredBounds() {
+    if (!this.controller) return;
+    const query = wx.createSelectorQuery().in(this);
+    query.select('#synthesis-area').boundingClientRect();
+    query.select('#door-container').boundingClientRect();
+    query.select('#inventory-area').boundingClientRect();
+    query.exec((res) => {
+      const synthesisRect = res && res[0];
+      if (!synthesisRect) return;
+      this.controller.measureRects(synthesisRect, res[1], res[2]);
+      const nudged = gameLayout.nudgeWorkshopItems(
+        this.data.workshopItems || [],
+        synthesisRect.width,
+        synthesisRect.height,
+      );
+      const nudgedBrewings = gameLayout.nudgeWorkshopItems(
+        this.data.brewings || [],
+        synthesisRect.width,
+        synthesisRect.height,
+      );
+      const patch = {};
+      if (nudged.changed) patch.workshopItems = nudged.items;
+      if (nudgedBrewings.changed) patch.brewings = nudgedBrewings.items;
+      if (Object.keys(patch).length) this.setData(patch);
     });
   },
 
@@ -249,8 +324,8 @@ Page({
   onBrewingTouchMove(e) {
     if (this.controller) this.controller.onBrewingTouchMove(e);
   },
-  onBrewingTouchEnd() {
-    if (this.controller) this.controller.onBrewingTouchEnd();
+  onBrewingTouchEnd(e) {
+    if (this.controller) this.controller.onBrewingTouchEnd(e);
   },
 
   onInventoryTap(e) {
@@ -357,10 +432,6 @@ Page({
 
   onRecipeBookPanelTap() {
     /* 阻止点击面板关闭 overlay */
-  },
-
-  onRecipeBookTabTap(e) {
-    if (this.controller) this.controller.onRecipeBookTabChange(e.currentTarget.dataset.tab);
   },
 
   onRecipeBookSearchInput(e) {

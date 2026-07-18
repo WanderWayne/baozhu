@@ -1,0 +1,165 @@
+.tasks-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fffaf0 0%, #f7efe3 100%);
+  color: #6b5344;
+  box-sizing: border-box;
+  padding-bottom: 40rpx;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 32rpx 18rpx;
+}
+
+.back-btn {
+  width: 72rpx;
+  height: 72rpx;
+  min-width: 72rpx;
+  min-height: 72rpx;
+  max-width: 72rpx;
+  max-height: 72rpx;
+  border-radius: 50%;
+  background: rgba(245, 230, 224, 0.92);
+  color: #6b5344;
+  font-size: 46rpx;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 72rpx;
+  overflow: hidden;
+}
+
+.back-btn:active {
+  transform: scale(0.92);
+}
+
+.page-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.header-spacer {
+  width: 72rpx;
+  flex: 0 0 72rpx;
+}
+
+.task-scroll {
+  height: calc(100vh - 126rpx);
+  box-sizing: border-box;
+  padding: 0 32rpx 40rpx;
+}
+
+.task-card {
+  margin-bottom: 22rpx;
+  padding: 24rpx 24rpx 22rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 253, 247, 0.9);
+  border: 2rpx solid rgba(166, 124, 82, 0.12);
+  box-shadow: 0 12rpx 28rpx rgba(107, 83, 68, 0.08);
+}
+
+.task-card.claimable {
+  border-color: rgba(126, 177, 132, 0.45);
+}
+
+.task-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+}
+
+.task-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.task-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-height: 44rpx;
+}
+
+.task-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #6b5344;
+}
+
+.task-check {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #6aa36f;
+}
+
+.task-desc {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.45;
+  color: #a67c52;
+}
+
+.task-reward {
+  width: 142rpx;
+  min-height: 86rpx;
+  border-radius: 12rpx;
+  color: rgba(166, 124, 82, 0.72);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  flex: 0 0 142rpx;
+}
+
+.task-reward.active {
+  background: rgba(126, 177, 132, 0.14);
+  color: #6aa36f;
+}
+
+.reward-label {
+  font-size: 23rpx;
+}
+
+.reward-gems {
+  font-size: 24rpx;
+  color: #c49342;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  line-height: 28rpx;
+}
+
+.reward-gem-icon {
+  width: 28rpx;
+  height: 28rpx;
+  flex: 0 0 28rpx;
+}
+
+.task-progress-bar {
+  height: 10rpx;
+  margin-top: 18rpx;
+  border-radius: 999rpx;
+  background: rgba(166, 124, 82, 0.16);
+  overflow: hidden;
+}
+
+.task-progress-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #e8c873, #d9b24a);
+}
+
+.task-count {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: rgba(166, 124, 82, 0.75);
+}

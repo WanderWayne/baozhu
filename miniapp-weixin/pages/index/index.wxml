@@ -1,4 +1,4 @@
-<view class="main-page {{postIntroHandoff ? 'post-intro-handoff' : ''}}" style="background-color: {{bgColor}};">
+<view class="main-page {{postIntroHandoff ? 'post-intro-handoff' : ''}} {{settingsVisible || tasksVisible ? 'panel-open' : ''}}" style="background-color: {{bgColor}};">
   <view wx:if="{{loadError}}" class="load-error">
     <text class="load-error-text">加载失败：{{loadError}}</text>
   </view>
@@ -10,7 +10,11 @@
       class="ambience-canvas"
       style="opacity: {{ambienceOpacity}};"
     ></canvas>
-    <canvas type="2d" id="main-canvas" class="main-canvas"></canvas>
+    <canvas
+      type="2d"
+      id="main-canvas"
+      class="main-canvas"
+    ></canvas>
   </view>
 
   <view class="main-ui {{menuVisible ? 'menu-visible' : ''}} {{postIntroHandoff ? 'post-intro-handoff' : ''}}">
@@ -53,64 +57,8 @@
   </view>
 
   <!-- 任务面板 -->
-  <view class="panel-overlay {{tasksVisible ? 'visible' : ''}}" bindtap="onTasksOverlayTap">
-    <view class="panel tasks-panel" catchtap="noop">
-      <button class="panel-close" bindtap="onCloseTasks">✕</button>
-      <view class="panel-title">任务</view>
-      <view class="tasks-list">
-        <view
-          wx:for="{{taskRows}}"
-          wx:key="id"
-          class="task-row {{item.done ? 'task-done' : ''}} {{item.alreadyClaimed ? 'task-claimed' : ''}}"
-        >
-          <view class="task-left">
-            <view class="task-info">
-              <text class="task-name">{{item.name}}<text wx:if="{{item.done}}" class="task-check"> ✓</text></text>
-              <text class="task-desc">{{item.description}}</text>
-            </view>
-            <view class="task-progress-bar">
-              <view class="task-progress-fill" style="width: {{item.percent}}%;"></view>
-            </view>
-            <text class="task-progress-text">{{item.current}} / {{item.total}}</text>
-          </view>
-          <view
-            class="task-reward {{item.canClaim ? 'task-claimable' : ''}}"
-            data-id="{{item.id}}"
-            bindtap="onClaimTask"
-          >
-            <view wx:if="{{item.canClaim}}" class="claimable-dot"></view>
-            <text class="task-reward-label">{{item.rewardLabel}}</text>
-            <text class="task-reward-value">{{item.reward}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-  </view>
 
   <!-- 设置面板 -->
-  <view class="panel-overlay {{settingsVisible ? 'visible' : ''}}" bindtap="onSettingsOverlayTap">
-    <view class="panel settings-panel" catchtap="noop">
-      <button class="panel-close" bindtap="onCloseSettings">✕</button>
-      <view class="panel-title">设置</view>
-      <view class="settings-content">
-        <view class="settings-row">
-          <text class="settings-label">🎵 背景音乐</text>
-          <slider class="volume-slider" min="0" max="100" value="{{bgmVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="16" bindchanging="onBgmChanging" bindchange="onBgmChange" />
-          <text class="volume-value">{{bgmVolume}}%</text>
-        </view>
-        <view class="settings-row">
-          <text class="settings-label">🔊 音效</text>
-          <slider class="volume-slider" min="0" max="100" value="{{sfxVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="16" bindchanging="onSfxChanging" bindchange="onSfxChange" />
-          <text class="volume-value">{{sfxVolume}}%</text>
-        </view>
-        <view class="settings-divider"></view>
-        <view class="settings-info">
-          <text>宝珠酿造 v1.0</text>
-          <text class="info-sub">唤醒酿造之力</text>
-        </view>
-      </view>
-    </view>
-  </view>
 
   <view
     class="tut-overlay {{tutOverlay.visible ? 'visible' : ''}} {{tutOverlay.fadeOut ? 'fade-out' : ''}}"
@@ -125,4 +73,13 @@
       catchtap="onTutorialDismiss"
     ></canvas>
   </view>
+
 </view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

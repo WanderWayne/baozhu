@@ -8,16 +8,19 @@
   bottom: 0;
   z-index: 9999;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
 .tut-overlay.visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .tut-overlay.fade-out {
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 
 .tut-canvas {

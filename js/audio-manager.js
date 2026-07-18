@@ -66,6 +66,12 @@ class AudioManager {
 
         /** @type {ReturnType<typeof setInterval> | null} */
         this._bgmFadeInterval = null;
+        this._bgmTransitioning = false;
+        this._bgmLoopEnvelope = {
+            hum: { fadeInMs: 2000, fadeOutMs: 2000 },
+            'bgm-intro': { fadeInMs: 2000, fadeOutMs: 4000 }
+        };
+        this._bgmLoopEnvelopeInterval = setInterval(() => this._applyBGMLoopEnvelope(), 50);
         
         // 循环播放的音效
         this.loopingSFX = new Map();
@@ -132,10 +138,8 @@ class AudioManager {
             const audio = new Audio(path);
             audio.preload = 'auto';
             
-            if (name.startsWith('bgm-')) {
-                // 开场曲播一遍即止；其余 BGM 循环
-                const loop = name !== 'bgm-intro';
-                audio.loop = loop;
+            if (name.startsWith('bgm-') || name === 'hum') {
+                audio.loop = true;
                 if (name === 'bgm-intro') {
                     audio.addEventListener('ended', () => {
                         if (this.currentBGM === audio && this.currentBGMName === 'bgm-intro') {
@@ -173,7 +177,55 @@ class AudioManager {
     // ==================== BGM 控制 ====================
     
     // 播放BGM
-    playBGM(name) {
+    _getBGMTargetVolume(name) {
+        const volumeMul = name === 'hum' ? 1.15 : 1;
+        return Math.max(0, Math.min(1, this.bgmVolume * volumeMul));
+    }
+
+    _applyBGMLoopEnvelope() {
+        if (this._bgmTransitioning || !this.currentBGM || !this.currentBGMName) return;
+        const envelope = this._bgmLoopEnvelope[this.currentBGMName];
+        if (!envelope) return;
+        const duration = Number(this.currentBGM.duration);
+        const currentTime = Number(this.currentBGM.currentTime);
+        if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(currentTime)) return;
+
+        const inGain = Math.min(1, currentTime / (envelope.fadeInMs / 1000));
+        const outGain = Math.min(1, Math.max(0, duration - currentTime) / (envelope.fadeOutMs / 1000));
+        this.currentBGM.volume = this._getBGMTargetVolume(this.currentBGMName) * Math.min(inGain, outGain);
+    }
+
+    _fadeBGMTo(audio, targetVolume, duration = 1200, onComplete) {
+        if (this._bgmFadeInterval) {
+            clearInterval(this._bgmFadeInterval);
+            this._bgmFadeInterval = null;
+        }
+
+        this._bgmTransitioning = true;
+        if (!audio || duration <= 0) {
+            if (audio) audio.volume = targetVolume;
+            this._bgmTransitioning = false;
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
+
+        const startVolume = audio.volume;
+        const steps = Math.max(1, Math.ceil(duration / 50));
+        let step = 0;
+        this._bgmFadeInterval = setInterval(() => {
+            step += 1;
+            const t = Math.min(step / steps, 1);
+            audio.volume = startVolume + (targetVolume - startVolume) * t;
+            if (t >= 1) {
+                clearInterval(this._bgmFadeInterval);
+                this._bgmFadeInterval = null;
+                this._bgmTransitioning = false;
+                if (typeof onComplete === 'function') onComplete();
+            }
+        }, 50);
+    }
+
+    playBGM(name, options = {}) {
         if (!this.bgm[name]) {
             console.warn(`BGM not found: ${name}`);
             return;
@@ -181,27 +233,43 @@ class AudioManager {
         
         // 如果已经在播放同一个BGM，不重复播放
         if (this.currentBGMName === name && this.currentBGM && !this.currentBGM.paused) {
+            if (this._bgmTransitioning) return;
+            const targetVolume = this._getBGMTargetVolume(name);
+            if (options.fadeInMs) {
+                this._fadeBGMTo(this.currentBGM, targetVolume, options.fadeInMs);
+            } else {
+                this.currentBGM.volume = targetVolume;
+            }
             return;
         }
         
         // 停止当前BGM
         this.stopBGM();
         
-        // 播放新BGM（除开场曲外均循环；每次播放时显式写入，避免被其它逻辑改掉）
+        // 播放新BGM（均循环；每次播放时显式写入，避免被其它逻辑改掉）
         this.currentBGM = this.bgm[name];
         this.currentBGMName = name;
-        this.currentBGM.loop = name !== 'bgm-intro';
-        this.currentBGM.volume = this.bgmVolume;
+        this.currentBGM.loop = true;
+        const targetVolume = this._getBGMTargetVolume(name);
+        this.currentBGM.volume = options.fadeInMs ? 0 : targetVolume;
         this.currentBGM.currentTime = 0;
         this.currentBGM.play().catch(e => {
             console.log('BGM autoplay blocked, waiting for user interaction');
             // 保存待播放的BGM，等用户交互后播放
             this.pendingBGM = name;
         });
+        if (options.fadeInMs) {
+            this._fadeBGMTo(this.currentBGM, targetVolume, options.fadeInMs);
+        }
     }
     
     // 停止BGM
     stopBGM() {
+        if (this._bgmFadeInterval) {
+            clearInterval(this._bgmFadeInterval);
+            this._bgmFadeInterval = null;
+        }
+        this._bgmTransitioning = false;
         if (this.currentBGM) {
             this.currentBGM.pause();
             this.currentBGM.currentTime = 0;
@@ -215,7 +283,7 @@ class AudioManager {
      * @param {number} [duration]
      * @param {() => void} [onComplete]
      */
-    fadeOutBGM(duration = 1000, onComplete) {
+    fadeOutBGM(duration = 2000, onComplete) {
         if (this._bgmFadeInterval) {
             clearInterval(this._bgmFadeInterval);
             this._bgmFadeInterval = null;
@@ -226,6 +294,7 @@ class AudioManager {
             return;
         }
 
+        this._bgmTransitioning = true;
         const bgm = this.currentBGM;
         const startVolume = bgm.volume;
         const steps = Math.max(1, Math.ceil(duration / 50));
@@ -236,9 +305,10 @@ class AudioManager {
             if (bgm.volume <= 0) {
                 clearInterval(this._bgmFadeInterval);
                 this._bgmFadeInterval = null;
+                this._bgmTransitioning = false;
                 bgm.pause();
                 bgm.currentTime = 0;
-                bgm.volume = this.bgmVolume;
+                bgm.volume = this._getBGMTargetVolume(this.currentBGMName || '');
                 if (this.currentBGM === bgm) {
                     this.currentBGM = null;
                     this.currentBGMName = null;
@@ -246,6 +316,69 @@ class AudioManager {
                 if (typeof onComplete === 'function') onComplete();
             }
         }, 50);
+    }
+
+    fadeToBGM(name, options = {}) {
+        const fadeOutMs = options.fadeOutMs || 2000;
+        const fadeInMs = options.fadeInMs || 2000;
+        if (this.currentBGMName === name && this.currentBGM) {
+            this.playBGM(name, { fadeInMs });
+            return;
+        }
+        if (!this.currentBGM) {
+            this.playBGM(name, { fadeInMs });
+            return;
+        }
+
+        const nextBGM = this.bgm[name];
+        if (!nextBGM) {
+            console.warn(`BGM not found: ${name}`);
+            return;
+        }
+        if (this._bgmFadeInterval) {
+            clearInterval(this._bgmFadeInterval);
+            this._bgmFadeInterval = null;
+        }
+
+        this._bgmTransitioning = true;
+        const oldBGM = this.currentBGM;
+        const oldStartVolume = oldBGM.volume;
+        const targetVolume = this._getBGMTargetVolume(name);
+        const duration = Math.max(fadeOutMs, fadeInMs);
+        const steps = Math.max(1, Math.ceil(duration / 50));
+        let step = 0;
+
+        nextBGM.loop = true;
+        nextBGM.currentTime = 0;
+        nextBGM.volume = 0;
+        nextBGM.play().catch(() => {
+            this.pendingBGM = name;
+        });
+        this.currentBGM = nextBGM;
+        this.currentBGMName = name;
+
+        this._bgmFadeInterval = setInterval(() => {
+            step += 1;
+            const elapsed = Math.min(duration, (step / steps) * duration);
+            const outT = Math.min(1, elapsed / fadeOutMs);
+            const inT = Math.min(1, elapsed / fadeInMs);
+
+            oldBGM.volume = oldStartVolume * (1 - outT);
+            if (this.currentBGM === nextBGM) {
+                nextBGM.volume = targetVolume * inT;
+            }
+
+            if (elapsed >= duration) {
+                clearInterval(this._bgmFadeInterval);
+                this._bgmFadeInterval = null;
+                this._bgmTransitioning = false;
+                oldBGM.pause();
+                oldBGM.currentTime = 0;
+                if (this.currentBGM === nextBGM) {
+                    nextBGM.volume = targetVolume;
+                }
+            }
+        }, duration / steps);
     }
     
     // 设置BGM音量

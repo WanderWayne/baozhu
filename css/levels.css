@@ -424,6 +424,13 @@ h1 {
         0 0 0 1px var(--chapter-glow);
 }
 
+.level-door.fallback-selected {
+    border-color: rgba(232, 200, 115, 0.72);
+    box-shadow:
+        0 6px 22px rgba(107, 83, 68, 0.09),
+        0 8px 28px rgba(232, 200, 115, 0.20);
+}
+
 .level-door:active {
     transform: scale(0.98);
 }

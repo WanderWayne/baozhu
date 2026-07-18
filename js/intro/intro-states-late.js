@@ -234,7 +234,16 @@ IntroSystem.prototype.initShowStartButton = function() {
     });
     
     if (window.AudioManager) {
-        window.AudioManager.playBGM('bgm-menu');
+        if (typeof window.AudioManager.fadeToBGM === 'function') {
+            window.AudioManager.fadeToBGM('bgm-menu', { fadeOutMs: 4000, fadeInMs: 2000 });
+        } else if (
+            window.AudioManager.currentBGMName === 'bgm-intro' &&
+            typeof window.AudioManager.fadeOutBGM === 'function'
+        ) {
+            window.AudioManager.fadeOutBGM(4000, () => window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 }));
+        } else {
+            window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
+        }
     }
 
     // 显示多层次环境效果（canvas 先隐藏，渐入在下面统一触发）

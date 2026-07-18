@@ -59,6 +59,7 @@ module.exports = function attachIntroRender(IntroSystem) {
     this.updateItemAnimations(dt);
     this.drawParticles();
     this.drawDoor();
+    this.drawInventoryPanel();
     this.drawItems();
     this.drawPulseWaves();
     this.drawSynthesisFlashes();
@@ -76,6 +77,34 @@ module.exports = function attachIntroRender(IntroSystem) {
         this.ctx.fillRect(0, 0, this.logicalWidth, this.logicalHeight);
       }
     }
+
+    this.drawTransitionOverlay();
+  };
+
+  IntroSystem.prototype.drawInventoryPanel = function drawInventoryPanel() {
+    const target = this.page && this.page.data && this.page.data.inventoryVisible ? 1 : 0;
+    if (this._inventoryPanelProgress == null) this._inventoryPanelProgress = 0;
+    this._inventoryPanelProgress += (target - this._inventoryPanelProgress) * 0.14;
+    if (this._inventoryPanelProgress <= 0.01) return;
+
+    const ctx = this.ctx;
+    const h = 180;
+    const y = this.logicalHeight - h * this._inventoryPanelProgress;
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, this._inventoryPanelProgress);
+    const panel = ctx.createLinearGradient(0, y, 0, this.logicalHeight);
+    panel.addColorStop(0, 'rgba(30, 30, 35, 0.82)');
+    panel.addColorStop(1, 'rgba(20, 20, 24, 0.92)');
+    ctx.fillStyle = panel;
+    ctx.fillRect(0, y, this.logicalWidth, h);
+
+    const shadow = ctx.createLinearGradient(0, y - 28, 0, y + 8);
+    shadow.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    shadow.addColorStop(1, 'rgba(0, 0, 0, 0.42)');
+    ctx.fillStyle = shadow;
+    ctx.fillRect(0, y - 28, this.logicalWidth, 36);
+    ctx.restore();
   };
 
   // ==================== 门（canvas 绘制，确保实心遮挡粒子）====================
@@ -194,12 +223,20 @@ module.exports = function attachIntroRender(IntroSystem) {
       ctx.shadowBlur = 0;
 
       // 图标 + 名称
-      ctx.fillStyle = '#fff';
+      const iconEntry = this._getIconImage ? this._getIconImage(it) : null;
+      if (iconEntry && iconEntry.loaded && !iconEntry.failed) {
+        const iconSize = Math.min(rad * 1.35, 46);
+        ctx.drawImage(iconEntry.image, -iconSize / 2, -iconSize / 2 - 5, iconSize, iconSize);
+      } else {
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '22px sans-serif';
+        ctx.fillText((it.name || '').slice(0, 1), 0, -6);
+      }
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '26px sans-serif';
-      ctx.fillText(it.icon, 0, -6);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
       ctx.font = '11px sans-serif';
       ctx.fillText(it.name, 0, rad - 12);
 

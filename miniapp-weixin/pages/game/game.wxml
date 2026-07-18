@@ -8,23 +8,25 @@
     <view
       wx:if="{{recipeBookBtnVisible}}"
       id="recipe-book-btn"
-      class="recipe-book-btn {{recipeBookBtnPulse ? 'golden-pulse' : ''}} {{recipeBookBtnFlash ? 'btn-flash' : ''}}"
+      class="recipe-book-btn {{recipeBookBtnPulse ? 'golden-pulse' : ''}} {{recipeBookBtnFlash ? 'btn-flash' : ''}} {{recipeBookNudge ? 'needs-attention' : ''}}"
       catchtap="onRecipeBookTap"
     >📖 配方书</view>
     <view
-      class="door-container stage-{{doorStage}} {{targetReady && !doorOffering ? 'awaiting-offer' : ''}} {{doorStarEntering ? 'star-entering' : ''}} {{doorClosing ? 'closing' : ''}} {{doorClosed ? 'closed' : ''}} {{doorOffering ? 'offering' : ''}}"
+      class="door-container stage-{{doorStage}} maturity-{{doorSynthMaturity}} {{targetReady && !doorOffering ? 'awaiting-offer' : ''}} {{doorStarEntering ? 'star-entering' : ''}} {{doorClosing ? 'closing' : ''}} {{doorClosed ? 'closed' : ''}} {{doorOffering ? 'offering' : ''}}"
       id="door-container"
       catchtap="onDoorTap"
     >
+      <view wx:if="{{doorWaveVisible}}" class="door-click-wave"></view>
       <view class="door-aura"></view>
       <view class="door-frame">
         <view class="door-glow">
           <view class="door-fog"></view>
           <text class="door-target-silhouette" wx:if="{{!levelTarget}}">{{levelIcon}}</text>
-          <item-icon wx:else name="{{levelTarget}}" emoji="{{levelIcon}}" size="36" class-name="door-target-svg" />
+          <view wx:else class="door-target-silhouette door-target-svg-wrap">
+            <item-icon name="{{levelTarget}}" emoji="{{levelIcon}}" size="29" class-name="door-target-svg" />
+          </view>
         </view>
       </view>
-      <text class="door-offer-hint" wx:if="{{targetReady && !doorOffering}}">献上</text>
     </view>
     <view class="level-info">
       <text class="level-name">{{levelName}}</text>
@@ -84,7 +86,7 @@
       wx:for="{{workshopItems}}"
       wx:key="id"
       wx:if="{{item.hasEffect}}"
-      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} has-effect {{item.selected ? 'selected' : ''}} {{item.recipeBookSpawn ? 'recipe-book-spawn' : ''}} {{item.lpBurst ? 'lp-gold-burst' : ''}}"
+      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} has-effect {{item.selected ? 'selected' : ''}} {{item.collisionPreview ? 'collision-preview' : ''}} {{item.recipeBookSpawn ? 'recipe-book-spawn' : ''}} {{item.appearing ? 'trade-output-appear' : ''}} {{item.lpRing ? 'lp-ring-active' : ''}} {{item.lpBurst ? 'lp-gold-burst' : ''}}"
       style="left: {{item.x}}px; top: {{item.y}}px;"
       data-id="{{item.id}}"
       catchtouchstart="onWorkshopTouchStart"
@@ -103,7 +105,7 @@
       wx:for="{{workshopItems}}"
       wx:key="id"
       wx:if="{{!item.hasEffect}}"
-      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.selected ? 'selected' : ''}} {{item.isTarget ? 'target-item' : ''}} {{item.targetEntry ? 'target-entry' : ''}} {{item.offeringFlight ? 'offering-flight' : ''}} {{item.shrinking ? 'shrinking' : ''}} {{item.synthesisAnim ? 'synthesis-anim' : ''}} {{item.shakeAnim ? 'shake-anim' : ''}} {{item.revealedItem ? 'revealed-item' : ''}} {{item.workbenchPopIn ? 'workbench-pop-in' : ''}} {{item.lpBurst ? 'lp-gold-burst' : ''}}"
+      class="game-item type-{{item.itemType}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.selected ? 'selected' : ''}} {{item.collisionPreview ? 'collision-preview' : ''}} {{item.isTarget ? 'target-item' : ''}} {{item.targetEntry ? 'target-entry' : ''}} {{item.offeringFlight ? 'offering-flight' : ''}} {{item.shrinking ? 'shrinking' : ''}} {{item.synthesisAnim ? 'synthesis-anim' : ''}} {{item.shakeAnim ? 'shake-anim' : ''}} {{item.revealedItem ? 'revealed-item' : ''}} {{item.workbenchPopIn ? 'workbench-pop-in' : ''}} {{item.appearing ? 'trade-output-appear' : ''}} {{item.lpRing ? 'lp-ring-active' : ''}} {{item.lpBurst ? 'lp-gold-burst' : ''}}"
       style="left: {{item.x}}px; top: {{item.y}}px;"
       data-id="{{item.id}}"
       catchtouchstart="onWorkshopTouchStart"
@@ -131,8 +133,7 @@
       <view class="brew-ring-track"></view>
       <view class="brew-ring-spin"></view>
       <view class="brew-inner">
-        <text class="brew-name">{{item.name}}</text>
-        <text class="brew-timer">{{item.secondsLeft}}s</text>
+        <text class="brew-name">酿造中</text>
       </view>
     </view>
 
@@ -171,7 +172,7 @@
         </view>
         <view class="ts-middle">
           <text class="ts-arrow">→</text>
-          <text class="ts-label">交易</text>
+          <text class="ts-label">兑换</text>
         </view>
         <view class="ts-slot ts-slot-output">
           <view class="ts-ghost-icon">
@@ -202,7 +203,29 @@
     >{{item.input}} → {{item.output}}</view>
   </view>
 
-  <view class="inventory-area {{inventoryRowsClass}} {{inventoryGoldenGlow ? 'golden-glow' : ''}} {{inventoryGoldenFade ? 'golden-fade' : ''}}" id="inventory-area">
+  <view class="inventory-delete-cue {{inventoryDeleteHover ? 'visible' : ''}}">
+    <view class="delete-bin">
+      <view class="delete-bin-lid"></view>
+      <view class="delete-bin-body"></view>
+    </view>
+  </view>
+
+  <view id="gem-display" class="gem-display">
+    <image class="gem-display-icon" src="/assets/icons/_diamond.png" mode="aspectFit" />
+    <text class="gem-count {{gemBump ? 'gem-bump' : ''}}">{{gemCount}}</text>
+  </view>
+
+  <view
+    wx:for="{{gemFlyers}}"
+    wx:key="id"
+    class="gem-flyer {{item.active ? 'flying' : ''}}"
+    style="left: {{item.active ? item.toX : item.fromX}}px; top: {{item.active ? item.toY : item.fromY}}px; transition-delay: {{item.delay}}ms, {{item.delay}}ms, {{item.delay}}ms, {{item.opacityDelay}}ms;"
+  >
+    <image src="/assets/icons/_diamond.png" mode="aspectFit" />
+  </view>
+  <text wx:if="{{gemPlusVisible}}" class="gem-plus-label">+{{gemPlusAmount}}</text>
+
+  <view class="inventory-area {{inventoryRowsClass}} {{inventoryGoldenGlow ? 'golden-glow' : ''}} {{inventoryGoldenFade ? 'golden-fade' : ''}} {{inventoryDeleteHover ? 'delete-hover' : ''}}" id="inventory-area">
     <view
       wx:for="{{inventoryItems}}"
       wx:key="id"
@@ -266,10 +289,6 @@
   <view class="toast" wx:if="{{toastMessage}}">{{toastMessage}}</view>
   <view class="task-toast" wx:if="{{taskToastVisible}}">{{taskToastText}}</view>
 
-  <view class="level-complete-pop {{levelCompletePopVisible ? 'visible' : ''}}" wx:if="{{levelCompletePopVisible}}">
-    <text>{{levelCompletePopText}}</text>
-  </view>
-
   <view class="level-intro-overlay {{showIntro ? 'visible' : ''}} {{introFadeOut ? 'fade-out' : ''}}" catchtap="dismissIntro">
     <view class="level-intro-content">
       <text class="intro-level-name">{{introTitle}}</text>
@@ -309,6 +328,17 @@
   </view>
 
   <view
+    wx:if="{{tradeFlyer.visible}}"
+    class="trade-flyer game-item type-{{tradeFlyer.itemType}} {{tradeFlyer.tone ? 'tone-' + tradeFlyer.tone : ''}}"
+    style="left: {{tradeFlyer.x}}px; top: {{tradeFlyer.y}}px; opacity: {{tradeFlyer.opacity}}; transform: scale({{tradeFlyer.scale}});"
+  >
+    <view class="item-icon-wrap">
+      <item-icon name="{{tradeFlyer.name}}" emoji="{{tradeFlyer.icon}}" size="48" class-name="game-item-icon" />
+    </view>
+    <text class="item-name">{{tradeFlyer.name}}</text>
+  </view>
+
+  <view
     class="recipe-book-overlay {{recipeBookOverlayVisible ? 'visible' : ''}}"
     wx:if="{{recipeBookOverlayVisible}}"
     catchtap="onRecipeBookOverlayTap"
@@ -325,22 +355,6 @@
           value="{{recipeBookSearch}}"
           bindinput="onRecipeBookSearchInput"
         />
-      </view>
-      <view class="recipe-book-tabs">
-        <view
-          class="recipe-tab {{recipeBookTab === 'recorded' ? 'active' : ''}}"
-          data-tab="recorded"
-          catchtap="onRecipeBookTabTap"
-        >记载</view>
-        <view
-          class="recipe-tab {{recipeBookTab === 'discovered' ? 'active' : ''}}"
-          data-tab="discovered"
-          catchtap="onRecipeBookTabTap"
-        >发现</view>
-      </view>
-      <view class="recipe-book-tab-hint">
-        <text>记载：配方书中的固定配方</text>
-        <text>发现：你游玩中自行解锁的配方</text>
       </view>
       <view class="recipe-book-divider"></view>
       <scroll-view class="recipe-book-content" scroll-y>
@@ -428,7 +442,7 @@
           <item-icon name="{{tradeConfirm.isGem ? '_diamond' : tradeConfirm.input}}" emoji="{{tradeConfirm.inputIcon}}" size="18" class-name="confirm-item-icon" />
           <text>{{tradeConfirm.inputLabel}}</text>
         </view>
-        交易
+        兑换
         <view class="trade-confirm-output-name">
           <item-icon name="{{tradeConfirm.outputName}}" emoji="{{tradeConfirm.outputIcon}}" size="18" class-name="confirm-item-icon" />
           <text>{{tradeConfirm.outputLabel}}</text>
@@ -447,31 +461,21 @@
     <view class="settlement-content">
       <text class="settlement-title">阶段完成</text>
       <view class="settlement-sep"></view>
-      <view class="settlement-stats">
-        <view class="settlement-stat">
-          <text class="settlement-stat-icon">⏱</text>
-          <text>用时</text>
-          <text class="settlement-stat-value">{{settlementTime}}</text>
-        </view>
-        <view class="settlement-stat">
-          <text class="settlement-stat-icon">{{settlementRatingIcon}}</text>
-          <text>评价</text>
-          <text class="settlement-stat-value" style="color: {{settlementRatingColor}};">{{settlementRatingName}}</text>
-        </view>
-        <view class="settlement-stat">
-          <text class="settlement-stat-icon">💎</text>
-          <text>获得钻石</text>
-          <text class="settlement-stat-value">{{settlementGems}}</text>
+      <text class="settlement-encouragement">做得很好，这一章的香气已经被你点亮了一大半。</text>
+      <view class="settlement-progress">
+        <text class="settlement-progress-label">{{settlementChapterName}}已完成</text>
+        <text class="settlement-progress-value">{{settlementProgressPercent}}%</text>
+        <view class="settlement-progress-track">
+          <view class="settlement-progress-fill" style="width: {{settlementProgressPercent}}%;"></view>
         </view>
       </view>
       <view class="settlement-message">
-        <text>你已经掌握了酿造的基础语言</text>
-        <text>接下来将是一个挑战</text>
-        <text>可以先休息一下</text>
+        <text>接下来会进入更完整的酿造组合。</text>
+        <text>要不要先休息一下？</text>
       </view>
       <view class="settlement-buttons">
         <view class="settlement-btn settlement-btn-exit" catchtap="onSettlementRest">休息一下</view>
-        <view class="settlement-btn settlement-btn-continue" catchtap="onSettlementContinue">继续挑战</view>
+        <view class="settlement-btn settlement-btn-continue" catchtap="onSettlementContinue">继续酿造</view>
       </view>
     </view>
   </view>
@@ -493,8 +497,17 @@
   <!-- 固定顶层，避免被 intro / 合成区遮挡 -->
   <view class="game-nav-back" catchtap="onBack">
     <view class="back-btn">
-      <text class="back-arrow">←</text>
+      <item-icon name="_home" emoji="🏠" size="22" class-name="back-btn-icon" />
       <view wx:if="{{showClaimableDot}}" class="claimable-dot"></view>
     </view>
   </view>
+
 </view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

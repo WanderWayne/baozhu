@@ -127,6 +127,9 @@ Game.prototype.initUI = function() {
         this.updateIdentityPlaque();
         this._autoShowRecipeBook();
 
+        const backIcon = document.getElementById('back-btn-icon');
+        if (backIcon) Game.setIconContent(backIcon, '_home', '🏠');
+
         const backBtn = document.getElementById('back-btn');
         if (backBtn && window.LevelManager && window.LevelManager.hasAnyClaimableTask()) {
             if (!backBtn.querySelector('.claimable-dot')) {

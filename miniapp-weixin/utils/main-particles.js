@@ -28,6 +28,7 @@ class MainParticleSystem {
     this.spawnTimers = { bubble: 0 };
     this._rafId = null;
     this._destroyed = false;
+    this._transitionOpacity = 0;
 
     this.colors = {
       milkFoam: { r: 255, g: 253, b: 247 },
@@ -87,6 +88,20 @@ class MainParticleSystem {
       this.initFermentationSystem();
       this.initTextureParticles(params.textureSpread);
     }
+  }
+
+  setTransitionOpacity(value) {
+    this._transitionOpacity = Math.max(0, Math.min(1, Number(value) || 0));
+  }
+
+  drawTransitionOverlay() {
+    if (this._transitionOpacity <= 0) return;
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = 'source-over';
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = `rgba(16, 16, 16, ${this._transitionOpacity})`;
+    this.ctx.fillRect(0, 0, this.logicalWidth, this.logicalHeight);
+    this.ctx.restore();
   }
 
   getGrowthParams() {
@@ -355,6 +370,8 @@ class MainParticleSystem {
       this.updateTextParticles(dt);
       this.drawTextParticles(params);
     }
+
+    this.drawTransitionOverlay();
   }
 
   updateBubbles(dt, params) {

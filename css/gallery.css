@@ -46,9 +46,12 @@ header {
 .back-btn {
     width: 40px;
     height: 40px;
+    min-width: 40px;
     background: var(--card-bg);
     border: 1px solid rgba(212, 165, 116, 0.3);
     border-radius: 50%;
+    padding: 0;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -127,10 +130,10 @@ h1 {
 
 .category-btn {
     flex-shrink: 0;
-    padding: 8px 16px;
+    padding: 7px 12px;
     background: var(--card-bg);
     border: 1px solid rgba(212, 165, 116, 0.2);
-    border-radius: 20px;
+    border-radius: 14px;
     font-size: 13px;
     color: var(--text-light);
     cursor: pointer;
@@ -438,4 +441,3 @@ h1 {
         padding-bottom: calc(40px + env(safe-area-inset-bottom));
     }
 }
-

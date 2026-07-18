@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 播放开场
         if (introScreen) introScreen.style.display = 'flex';
         if (mainScreen) mainScreen.style.display = 'none';
+        const versionEl = document.getElementById('intro-version');
+        if (versionEl) versionEl.textContent = window.BUILD_VERSION || '';
         window.introSystem = new IntroSystem();
     } else {
         // 跳过开场 - 显示主界面
@@ -47,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 播放主界面BGM
             if (window.AudioManager) {
-                window.AudioManager.playBGM('bgm-menu');
+                window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
             }
 
             if (ch1MainEntrance) {

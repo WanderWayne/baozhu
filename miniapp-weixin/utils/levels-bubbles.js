@@ -11,6 +11,7 @@ class FermentationWorld {
     this.theme = options.theme || 'dairy';
     this._destroyed = false;
     this._rafId = null;
+    this._transitionOpacity = 0;
 
     this.bubbles = [];
     this.goldenDust = [];
@@ -39,6 +40,20 @@ class FermentationWorld {
     };
 
     this._init();
+  }
+
+  setTransitionOpacity(value) {
+    this._transitionOpacity = Math.max(0, Math.min(1, Number(value) || 0));
+  }
+
+  _drawTransitionOverlay() {
+    if (this._transitionOpacity <= 0) return;
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = 'source-over';
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = `rgba(16, 16, 16, ${this._transitionOpacity})`;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+    this.ctx.restore();
   }
 
   setTheme(theme) {
@@ -417,6 +432,8 @@ class FermentationWorld {
     this._drawBubbles();
 
     this.ctx.restore();
+
+    this._drawTransitionOverlay();
 
     this._rafId = this.canvas.requestAnimationFrame((t) => this.animate(t));
   }

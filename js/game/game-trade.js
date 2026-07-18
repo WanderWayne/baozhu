@@ -105,14 +105,14 @@ Game.prototype._createTradeStation = function(cfg, index) {
                 <div class="ts-slot ts-slot-input">${inputContent}${inputName}</div>
                 <div class="ts-middle">
                     <span class="ts-arrow">→</span>
-                    <span class="ts-label">交易</span>
+                    <span class="ts-label">兑换</span>
                 </div>
                 <div class="ts-slot ts-slot-output">${tsOutputIcon}${outputName}</div>
             </div>
             <div class="trade-station-hitbox"></div>
             <div class="trade-restock-overlay">
                 <span class="trade-restock-title">进货中</span>
-                <span class="trade-restock-countdown">15</span>
+                <span class="trade-restock-countdown">5</span>
                 <span class="trade-restock-unit">秒</span>
             </div>
         `;
@@ -184,7 +184,13 @@ Game.prototype.initTradeStation = function() {
             const synthArea = document.getElementById('synthesis-area');
             const synthRect = synthArea ? synthArea.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
             const doorBottom = doorArea ? doorArea.getBoundingClientRect().bottom : synthRect.top;
-            const invTop = invArea ? invArea.getBoundingClientRect().top : synthRect.bottom;
+            let invTop = invArea ? invArea.getBoundingClientRect().top : synthRect.bottom;
+            if (this.levelId === 105 && n >= 3) {
+                const h = window.innerHeight || document.documentElement.clientHeight || 800;
+                const row1 = h <= 600 ? 95 : (h <= 750 ? 105 : 110);
+                const row2 = h <= 600 ? 185 : (h <= 750 ? 196 : 206);
+                invTop -= Math.max(0, row2 - row1);
+            }
             const midY = (doorBottom + invTop) / 2;
             const synthTop = synthRect.top;
             const offsetY = midY - synthTop - totalH / 2;
@@ -214,7 +220,7 @@ Game.prototype._maybeShowTradeStationTutorial = function() {
         setTimeout(() => {
             window.TutorialGuide.show({
                 target: firstTs,
-                text: '将物品放入/点击交易台以交易',
+                text: '将物品放入/点击兑换台以兑换',
                 position: 'bottom',
                 padding: 8,
                 borderRadius: 14
@@ -251,7 +257,7 @@ Game.prototype.startTradeRestock = function(ts) {
 
         const overlay = ts.overlay;
         const countdownEl = ts.countdownEl;
-        const duration = 15;
+        const duration = 5;
         let remaining = duration;
 
         if (overlay) {
@@ -319,7 +325,7 @@ Game.prototype._spawnTradeOutput = function(ts) {
                     if (!window.TutorialGuide || window.TutorialGuide._active) return;
                     window.TutorialGuide.show({
                         target: newItem,
-                        text: '发<span style="color:#6cf;text-shadow:0 0 8px rgba(100,200,255,0.8),0 0 16px rgba(100,200,255,0.4)">蓝光</span>的物品拥有特殊能力<br>长按它来激活',
+                        text: '发蓝光的物品拥有特殊能力\n长按它来激活',
                         position: 'bottom',
                         padding: 10,
                         borderRadius: 50
@@ -402,7 +408,7 @@ Game.prototype.showTradeConfirm = function(ts) {
             <div class="trade-confirm-box">
                 <div class="trade-confirm-text">
                     确认用 <span class="trade-confirm-input-name">${inputLabel}</span>
-                    交易 <span class="trade-confirm-output-name">${outputLabel}</span> 吗？
+                    兑换 <span class="trade-confirm-output-name">${outputLabel}</span> 吗？
                 </div>
                 <div class="trade-confirm-btns">
                     <button class="trade-confirm-cancel">取消</button>

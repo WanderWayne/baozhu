@@ -30,3 +30,4 @@
 ## 已知差异 / 历史 bug
 
 - 合成区 bottom 必须等于物品栏实测高度
+- 物品栏从一行增高到多行时，H5 `_nudgeSynthItemsAboveInventory()` 与小程序 `nudgeWorkshopItems()` 会把侵入新边界的合成区物品向上推出；小程序在高度动画结束后还会用实测矩形复核一次。

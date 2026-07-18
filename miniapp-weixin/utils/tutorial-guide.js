@@ -6,7 +6,19 @@ let _active = false;
 let _resolve = null;
 let _canDismiss = false;
 let _continueTimer = null;
+let _autoDismissTimer = null;
 let _paintState = null;
+
+function clearTimers() {
+  if (_continueTimer) {
+    clearTimeout(_continueTimer);
+    _continueTimer = null;
+  }
+  if (_autoDismissTimer) {
+    clearTimeout(_autoDismissTimer);
+    _autoDismissTimer = null;
+  }
+}
 
 function hasSeen(key) {
   if (devPlaytest.isEnabled()) return false;
@@ -18,24 +30,22 @@ function markSeen(key) {
   wx.setStorageSync(key, '1');
 }
 
-function delay(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+const FADE_MS = 400;
 
 function emptyOverlay() {
   return {
     active: false,
     visible: false,
     fadeOut: false,
-    showContinue: false,
     screenW: 375,
     screenH: 667,
   };
 }
 
 function formatTextFields(raw) {
-  const text = (raw || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
-  return { textPlain: text };
+  return {
+    textPlain: String(raw || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ''),
+  };
 }
 
 function resolveShape(opts, hw, hh, borderRadius) {
@@ -161,22 +171,7 @@ function drawGuideText(ctx, hole) {
   ctx.restore();
 }
 
-function drawContinueHint(ctx, W, H) {
-  ctx.save();
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.font = '12px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
-  ctx.fillText('▼', W / 2, H - 52);
-  ctx.font = '11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
-  ctx.fillText('点击任意处继续', W / 2, H - 34);
-  ctx.restore();
-}
-
-function paintTutorialFrame(page, showContinue) {
+function paintTutorialFrame(page) {
   const hole = _paintState;
   if (!hole) return;
 
@@ -225,7 +220,6 @@ function paintTutorialFrame(page, showContinue) {
 
           strokeHoleBorder(ctx, hole);
           drawGuideText(ctx, hole);
-          if (showContinue) drawContinueHint(ctx, W, H);
         });
     }, 80);
   });
@@ -263,34 +257,31 @@ function mountOverlay(page, rect, opts) {
       active: true,
       visible: false,
       fadeOut: false,
-      showContinue: false,
       screenW: W,
       screenH: H,
     },
   }, () => {
-    paintTutorialFrame(page, false);
+    paintTutorialFrame(page);
+    wx.nextTick(() => {
+      setTimeout(() => page.setData({ 'tutOverlay.visible': true }), 20);
+    });
   });
 
-  setTimeout(() => page.setData({ 'tutOverlay.visible': true }), 50);
-
-  if (_continueTimer) clearTimeout(_continueTimer);
+  clearTimers();
   _canDismiss = false;
   _continueTimer = setTimeout(() => {
     _canDismiss = true;
-    page.setData({ 'tutOverlay.showContinue': true }, () => {
-      paintTutorialFrame(page, true);
-    });
   }, 1000);
+  _autoDismissTimer = setTimeout(() => {
+    close(page);
+  }, 8000);
 }
 
 function close(page) {
   _active = false;
   _canDismiss = false;
   _paintState = null;
-  if (_continueTimer) {
-    clearTimeout(_continueTimer);
-    _continueTimer = null;
-  }
+  clearTimers();
   if (page) {
     const { screenW, screenH } = page.data.tutOverlay || {};
     page.setData({
@@ -305,7 +296,7 @@ function close(page) {
     });
     setTimeout(() => {
       page.setData({ tutOverlay: emptyOverlay() });
-    }, 350);
+    }, FADE_MS);
   }
   if (_resolve) {
     _resolve();
@@ -353,22 +344,6 @@ function dismiss(page) {
   close(page);
 }
 
-async function maybeShowTasksOnMain(page) {
-  if (!wx.getStorageSync('tut_guide_tasks_on_main')) return;
-  wx.removeStorageSync('tut_guide_tasks_on_main');
-  await delay(800);
-  await show(page, {
-    targetSelector: '#tasks-main-btn',
-    text: '点击查看任务进度与奖励',
-    position: 'bottom',
-    padding: 10,
-    borderRadius: 16,
-    shape: 'roundRect',
-  });
-  markSeen('tut_main_guide_done');
-  wx.setStorageSync('tut_guide_claim_reward', '1');
-}
-
 function maybeShowClaimReward(page) {
   if (!wx.getStorageSync('tut_guide_claim_reward')) return;
   wx.removeStorageSync('tut_guide_claim_reward');
@@ -384,17 +359,11 @@ function maybeShowClaimReward(page) {
   }, 400);
 }
 
-function maybeShowMainGuide(page) {
-  maybeShowTasksOnMain(page);
-}
-
 module.exports = {
   hasSeen,
   markSeen,
   show,
   dismiss,
-  maybeShowMainGuide,
-  maybeShowTasksOnMain,
   maybeShowClaimReward,
   emptyOverlay,
 };

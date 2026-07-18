@@ -9,6 +9,7 @@
 | 文件 | 职责 | 关键符号 |
 |------|------|----------|
 | [`js/level.js`](../../js/level.js) | `LevelManager` | `completeLevel`, `discoverItem`, `getGems` |
+| [`js/game/game-gems.js`](../../js/game/game-gems.js) | 钻石计数、飞行动画、`+N` 反馈 | `updateGemDisplay`, `showGemFlyAnimation` |
 | [`js/data/data-tasks.js`](../../js/data/data-tasks.js) | 任务定义 | `BAOZHU_TASKS` |
 | [`js/data/data-atlas.js`](../../js/data/data-atlas.js) | 图谱槽位 | |
 
@@ -18,6 +19,7 @@
 |------|------|----------|
 | [`utils/level-manager.js`](../../miniapp-weixin/utils/level-manager.js) | 同 H5 | |
 | [`utils/tasks.js`](../../miniapp-weixin/utils/tasks.js) | 任务 UI 逻辑 | |
+| [`pages/game/lib/game-gems.js`](../../miniapp-weixin/pages/game/lib/game-gems.js) | 钻石计数、飞行动画、`+N` 反馈 | `showGemReward` |
 | [`data/worlds.js`](../../miniapp-weixin/data/worlds.js) | 关卡数据 | export |
 
 ## 数据依赖

@@ -1,14 +1,19 @@
-const { navigateToWithFade } = require('../../utils/page-transitions');
+const { navigateToWithFade, reLaunchWithFade } = require('../../utils/page-transitions');
 const tutorialGuide = require('../../utils/tutorial-guide');
 const { INTRO_KEY, resetTutorialStorage } = require('../../utils/main-menu');
+const pageTransitionBehavior = require('../../behaviors/page-transition');
+const { BUILD_VERSION } = require('../../utils/build-version');
 
 Page({
+  behaviors: [pageTransitionBehavior],
   data: {
     pageReady: false,
+    buildVersion: BUILD_VERSION,
     loadError: '',
     showCanvas: false,
     ambienceOpacity: 1,
-    bgColor: '#F5E6E0',
+    // 路由首帧先保持深色；onLoad 会在同一批渲染中设置实际主界面背景。
+    bgColor: '#101010',
     menuVisible: true,
     codexPercent: 0,
     codexText: '0/3',
@@ -18,8 +23,8 @@ Page({
     settingsVisible: false,
     taskRows: [],
     showClaimableDot: false,
-    bgmVolume: 0,
-    sfxVolume: 0,
+    bgmVolume: 80,
+    sfxVolume: 80,
     postIntroHandoff: false,
     tutOverlay: tutorialGuide.emptyOverlay(),
   },
@@ -29,6 +34,7 @@ Page({
   _canvasReady: false,
 
   onLoad(options) {
+    this._preparePageTransitionEnter();
     try {
       this.meta = require('../../data/meta.js');
       this.levelManager = require('../../utils/level-manager');
@@ -99,12 +105,12 @@ Page({
   },
 
   onShow() {
+    this._handlePageTransitionEnter();
     if (!this.data.pageReady) return;
     try {
       this.audioManager.unlock();
-      this.audioManager.playBGM('bgm-menu');
+      this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
       this.refreshUI();
-      tutorialGuide.maybeShowMainGuide(this);
       if (this.data.showCanvas && !this.particleSystem) {
         setTimeout(() => this.initCanvases(), 100);
       }
@@ -114,12 +120,22 @@ Page({
   },
 
   onHide() {
-    if (this.audioManager) this.audioManager.stopBGM();
+    if (this.audioManager) this.audioManager.fadeOutBGM(2000);
   },
 
   onUnload() {
     this.destroyCanvases();
-    if (this.audioManager) this.audioManager.stopBGM();
+    if (this.audioManager) this.audioManager.fadeOutBGM(2000);
+  },
+
+  _setCanvasTransitionOpacity(opacity) {
+    this._canvasTransitionOpacity = opacity;
+    if (this.ambienceSystem && typeof this.ambienceSystem.setTransitionOpacity === 'function') {
+      this.ambienceSystem.setTransitionOpacity(opacity);
+    }
+    if (this.particleSystem && typeof this.particleSystem.setTransitionOpacity === 'function') {
+      this.particleSystem.setTransitionOpacity(opacity);
+    }
   },
 
   initCanvases(retry = 0) {
@@ -179,6 +195,7 @@ Page({
           },
         });
         this.ambienceSystem.init();
+        this.ambienceSystem.setTransitionOpacity(this._canvasTransitionOpacity || 0);
 
         if (ambienceDefer && this._ambienceFadeInMs > 0) {
           this.ambienceSystem.fadeInCanvas(this._ambienceFadeInMs);
@@ -198,6 +215,7 @@ Page({
             this.setData({ bgColor: color });
           },
         });
+        this.particleSystem.setTransitionOpacity(this._canvasTransitionOpacity || 0);
         this.particleSystem.start();
         this._canvasReady = true;
         this._pendingParticleMode = null;
@@ -215,7 +233,7 @@ Page({
   finishPostIntroHandoff() {
     // 粒子已在 mainTitleCenterYRatio 正确位置，直接淡入菜单
     this.setData({ menuVisible: true });
-    this.audioManager.playBGM('bgm-menu');
+    this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     this.refreshUI();
 
     // 稍作延迟再升级到 full mode，让菜单先完成 opacity 过渡
@@ -236,7 +254,7 @@ Page({
       menuVisible: true,
       bgColor: this.growthSystem.getBackgroundRgbString(),
     });
-    this.audioManager.playBGM('bgm-menu');
+    this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     this.refreshUI();
     this._skipIntroHandoff = false;
   },
@@ -291,19 +309,19 @@ Page({
   onContinue() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    setTimeout(() => navigateToWithFade('/pages/levels/levels'), 200);
+    navigateToWithFade('/pages/levels/levels');
   },
 
   onCodex() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    setTimeout(() => navigateToWithFade('/pages/codex/codex'), 200);
+    navigateToWithFade('/pages/codex/codex');
   },
 
   onGallery() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    setTimeout(() => navigateToWithFade('/pages/gallery/gallery'), 200);
+    navigateToWithFade('/pages/gallery/gallery');
   },
 
   openPanel(type) {
@@ -327,13 +345,13 @@ Page({
   onSettings() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    this.openPanel('settings');
+    navigateToWithFade('/pages/settings/settings');
   },
 
   onTasks() {
     if (!this.audioManager) return;
     this.audioManager.playClickOpen();
-    this.openPanel('tasks');
+    navigateToWithFade('/pages/tasks/tasks');
   },
 
   onCloseSettings() {
@@ -403,13 +421,16 @@ Page({
       confirmColor: '#A67C52',
       success: (res) => {
         if (!res.confirm) return;
+        if (this.audioManager && typeof this.audioManager.resetBGM === 'function') {
+          this.audioManager.resetBGM();
+        }
         this.levelManager.resetProgress();
         resetTutorialStorage();
         wx.showToast({ title: '进度已重置', icon: 'success' });
         this.refreshTasks();
         this.refreshUI();
         this.destroyCanvases();
-        wx.navigateTo({ url: '/pages/intro/intro' });
+        reLaunchWithFade('/pages/intro/intro');
       },
     });
   },

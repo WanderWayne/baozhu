@@ -279,6 +279,6 @@ class AtlasCodexPage {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.AudioManager) window.AudioManager.playBGM('bgm-menu');
+    if (window.AudioManager) window.AudioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     new AtlasCodexPage();
 });

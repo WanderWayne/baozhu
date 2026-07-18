@@ -99,52 +99,64 @@
   z-index: 20;
 }
 
+.game-item.lp-ring-active {
+  overflow: visible;
+  z-index: 120;
+  animation: longPressLift 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  border-color: rgba(232, 200, 115, 0.95);
+  box-shadow:
+    0 14px 28px rgba(107, 83, 68, 0.18),
+    0 0 22px rgba(232, 200, 115, 0.35);
+}
+
+@keyframes longPressLift {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
 .lp-ring-charge {
   position: absolute;
-  top: -6px;
-  left: -6px;
-  width: calc(100% + 12px);
-  height: calc(100% + 12px);
+  top: -7px;
+  left: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 14px);
   border-radius: 50%;
   box-sizing: border-box;
-  border: 6px solid transparent;
+  background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 0deg, transparent 0deg);
+  -webkit-mask: radial-gradient(circle, transparent 57%, #000 59%, #000 66%, transparent 68%);
+  mask: radial-gradient(circle, transparent 57%, #000 59%, #000 66%, transparent 68%);
   pointer-events: none;
   z-index: 21;
-  transform: rotate(-90deg);
   animation: lpRingDraw 0.8s linear forwards;
+  filter: drop-shadow(0 0 6px rgba(255, 214, 102, 0.55));
 }
 
 @keyframes lpRingDraw {
-  0% {
-    border-top-color: #FFD666;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-  }
-  25% {
-    border-top-color: #FFD666;
-    border-right-color: #FFD666;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-  }
-  50% {
-    border-top-color: #FFD666;
-    border-right-color: #FFD666;
-    border-bottom-color: #FFD666;
-    border-left-color: transparent;
-  }
-  75% {
-    border-top-color: #FFD666;
-    border-right-color: #FFD666;
-    border-bottom-color: #FFD666;
-    border-left-color: #FFD666;
-  }
-  100% {
-    border-top-color: #FFD666;
-    border-right-color: #FFD666;
-    border-bottom-color: #FFD666;
-    border-left-color: #FFD666;
-  }
+  0% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 0deg, transparent 0deg); }
+  5% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 18deg, transparent 18deg); }
+  10% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 36deg, transparent 36deg); }
+  15% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 54deg, transparent 54deg); }
+  20% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 72deg, transparent 72deg); }
+  25% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 90deg, transparent 90deg); }
+  30% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 108deg, transparent 108deg); }
+  35% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 126deg, transparent 126deg); }
+  40% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 144deg, transparent 144deg); }
+  45% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 162deg, transparent 162deg); }
+  50% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 180deg, transparent 180deg); }
+  55% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 198deg, transparent 198deg); }
+  60% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 216deg, transparent 216deg); }
+  65% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 234deg, transparent 234deg); }
+  70% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 252deg, transparent 252deg); }
+  75% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 270deg, transparent 270deg); }
+  80% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 288deg, transparent 288deg); }
+  85% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 306deg, transparent 306deg); }
+  90% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 324deg, transparent 324deg); }
+  95% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 342deg, transparent 342deg); }
+  100% { background: conic-gradient(from -90deg, #FFD666 0deg, #FFD666 360deg, transparent 360deg); }
 }
 
 .game-item.recipe-book-spawn {
@@ -173,6 +185,16 @@
   border-color: rgba(232, 200, 115, 0.9);
   box-shadow: 0 12px 24px rgba(107, 83, 68, 0.18);
   z-index: 100;
+}
+
+.game-item.collision-preview {
+  transform: scale(1.08);
+  border-color: rgba(232, 200, 115, 0.95);
+  box-shadow:
+    0 0 0 4px rgba(232, 200, 115, 0.22),
+    0 12px 24px rgba(107, 83, 68, 0.16),
+    0 0 22px rgba(232, 200, 115, 0.45);
+  z-index: 95;
 }
 
 .game-item.target-item {
@@ -346,26 +368,26 @@
 }
 
 .door-target-svg {
-  width: 36px;
-  height: 36px;
+  width: 29px;
+  height: 29px;
 }
 
 /* 名称区 — 圆的下缘独立底条（对齐 H5 .game-item .name） */
 .item-name {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #6B5344;
   text-align: center;
-  width: 88%;
+  width: 94%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  padding: 2px 4px;
+  padding: 3px 5px;
   background: rgba(255, 253, 247, 0.7);
-  border-radius: 6px;
-  margin-top: 2px;
+  border-radius: 7px;
+  margin-top: 3px;
   margin-bottom: 4px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -380,6 +402,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
+  z-index: 1;
 }
 
 .game-item.in-inventory {
@@ -529,13 +553,10 @@
   height: 100%;
 }
 
-.brew-name { font-size: 10px; color: #6B5344; }
-.brew-timer {
-  font-size: 18px;
-  color: #A67C52;
-  margin-top: 2px;
+.brew-name {
+  font-size: 13px;
+  color: #6B5344;
   font-weight: 600;
-  transition: color 0.3s ease;
 }
 
 /* 旋转圆环底轨 */

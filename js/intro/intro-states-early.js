@@ -5,6 +5,9 @@ IntroSystem.prototype.initDotIdle = function() {
     // 白点呼吸动画由 CSS 处理
     const dotEl = document.getElementById('intro-dot');
     if (dotEl) dotEl.classList.add('visible');
+    if (window.AudioManager) {
+        window.AudioManager.playBGM('hum', { fadeInMs: 2000 });
+    }
 };
 
 IntroSystem.prototype.initDoorExpand = function() {
@@ -35,9 +38,6 @@ IntroSystem.prototype.initDoorExpand = function() {
     // 0.7秒后白色开始渐变消失，同时显示门和粒子
     setTimeout(() => {
         // 播放门显现的 hum 音效
-        if (window.AudioManager) {
-            window.AudioManager.playSFX('hum');
-        }
         
         // 显示门和粒子 —— 门一出现就开始呼吸，不与后面的对白同步（避免「卡住」感）
         if (this.doorEl) {
@@ -301,7 +301,11 @@ IntroSystem.prototype.initOfferToDoor = function() {
             }
             
             if (window.AudioManager) {
-                window.AudioManager.playBGM('bgm-intro');
+                if (typeof window.AudioManager.fadeToBGM === 'function') {
+                    window.AudioManager.fadeToBGM('bgm-intro', { fadeOutMs: 2000, fadeInMs: 2000 });
+                } else {
+                    window.AudioManager.playBGM('bgm-intro', { fadeInMs: 2000 });
+                }
             }
             
             this.setState('blueWash');

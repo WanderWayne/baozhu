@@ -1,7 +1,7 @@
 {
   "navigationStyle": "custom",
-  "backgroundColor": "#FDF8E8",
-  "backgroundColorTop": "#FDF8E8",
+  "backgroundColor": "#101010",
+  "backgroundColorTop": "#101010",
   "usingComponents": {
     "item-icon": "/components/item-icon/item-icon"
   }

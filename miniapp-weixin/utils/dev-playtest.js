@@ -13,15 +13,21 @@ const STORAGE_KEY = 'baozhu_dev_playtest';
 /** @type {boolean|null} null = 读 storage / 默认；true/false = 强制 */
 let _forced = null;
 
-/** 未写入 storage 时的默认值；当前为试玩方便默认开启 */
-const DEFAULT_ENABLED = true;
+/** 未写入 storage 时的默认值；正式版默认关闭试玩模式 */
+const DEFAULT_ENABLED = false;
 
 const PHRASE_ENABLE = '宝珠酿造，开启试玩模式';
 const PHRASE_DISABLE = '宝珠酿造，恢复正式模式';
+const MODE_RESTORE_KEY = 'baozhu_dev_playtest_prod_restore';
 
 function isEnabled() {
   if (_forced !== null) return _forced;
   try {
+    // 曾默认开启试玩模式，一次性恢复为正式通关
+    if (!wx.getStorageSync(MODE_RESTORE_KEY)) {
+      wx.setStorageSync(STORAGE_KEY, '0');
+      wx.setStorageSync(MODE_RESTORE_KEY, '1');
+    }
     const v = wx.getStorageSync(STORAGE_KEY);
     if (v === '1') return true;
     if (v === '0') return false;

@@ -22,6 +22,7 @@ class MainAmbience {
     this._rafId = null;
     this._destroyed = false;
     this._opacity = 1;
+    this._transitionOpacity = 0;
   }
 
   init() {
@@ -50,6 +51,20 @@ class MainAmbience {
   setOpacity(value) {
     this._opacity = value;
     this.onOpacityChange(value);
+  }
+
+  setTransitionOpacity(value) {
+    this._transitionOpacity = Math.max(0, Math.min(1, Number(value) || 0));
+  }
+
+  drawTransitionOverlay() {
+    if (this._transitionOpacity <= 0) return;
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = 'source-over';
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = `rgba(16, 16, 16, ${this._transitionOpacity})`;
+    this.ctx.fillRect(0, 0, this.logicalWidth, this.logicalHeight);
+    this.ctx.restore();
   }
 
   fadeInCanvas(durationMs = 1400) {
@@ -272,6 +287,7 @@ class MainAmbience {
     this.ctx.clearRect(0, 0, w, h);
     if (this._opacity <= 0.01) {
       this.update();
+      this.drawTransitionOverlay();
       return;
     }
 
@@ -288,6 +304,7 @@ class MainAmbience {
     this.drawGoldenDust();
     this.drawFermentBubbles();
     this.ctx.restore();
+    this.drawTransitionOverlay();
   }
 
   drawWarmGlows() {

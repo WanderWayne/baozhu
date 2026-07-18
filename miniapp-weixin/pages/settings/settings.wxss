@@ -1,0 +1,138 @@
+.settings-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fffaf0 0%, #f5eadf 100%);
+  color: #6b5344;
+  box-sizing: border-box;
+  padding-bottom: 48rpx;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 32rpx 18rpx;
+}
+
+.back-btn {
+  width: 72rpx;
+  height: 72rpx;
+  min-width: 72rpx;
+  min-height: 72rpx;
+  max-width: 72rpx;
+  max-height: 72rpx;
+  border-radius: 50%;
+  background: rgba(245, 230, 224, 0.92);
+  color: #6b5344;
+  font-size: 46rpx;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 72rpx;
+  overflow: hidden;
+}
+
+.back-btn:active {
+  transform: scale(0.92);
+}
+
+.page-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.header-spacer {
+  width: 72rpx;
+  flex: 0 0 72rpx;
+}
+
+.settings-content {
+  margin: 24rpx 32rpx 0;
+  padding: 28rpx 28rpx 40rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 253, 247, 0.9);
+  border: 2rpx solid rgba(166, 124, 82, 0.12);
+  box-shadow: 0 12rpx 28rpx rgba(107, 83, 68, 0.08);
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: 176rpx 1fr 84rpx;
+  align-items: center;
+  gap: 18rpx;
+  min-height: 128rpx;
+  border-bottom: 2rpx solid rgba(166, 124, 82, 0.08);
+}
+
+.setting-row:last-of-type {
+  border-bottom: none;
+}
+
+.setting-label {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12rpx;
+}
+
+.setting-icon {
+  width: 34rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #d4a03a;
+}
+
+.setting-name {
+  font-size: 28rpx;
+  color: #6b5344;
+  white-space: nowrap;
+}
+
+.volume-slider {
+  width: 100%;
+}
+
+.volume-value {
+  font-size: 26rpx;
+  color: #a67c52;
+  text-align: right;
+}
+
+.version-block {
+  margin-top: 54rpx;
+  padding-top: 36rpx;
+  border-top: 2rpx solid rgba(166, 124, 82, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.brand {
+  font-size: 28rpx;
+  color: #a67c52;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: rgba(166, 124, 82, 0.78);
+}
+
+.reset-btn {
+  width: 220rpx;
+  height: 68rpx;
+  margin: 44rpx auto 0;
+  border-radius: 999rpx;
+  border: 2rpx solid rgba(166, 124, 82, 0.28);
+  color: #8f5d4a;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-btn:active {
+  transform: scale(0.96);
+}

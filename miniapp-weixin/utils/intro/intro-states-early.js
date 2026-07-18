@@ -13,6 +13,7 @@ function iconFor(name, fallback) {
 module.exports = function attachIntroStatesEarly(IntroSystem) {
   IntroSystem.prototype.initDotIdle = function initDotIdle() {
     this.patchUI({ dotVisible: true, dotOpacity: 1 });
+    this.playBGM('hum', { fadeInMs: 2000 });
   };
 
   IntroSystem.prototype.initDoorExpand = function initDoorExpand() {
@@ -21,7 +22,6 @@ module.exports = function attachIntroStatesEarly(IntroSystem) {
     this.setDoorOpacity(0);
 
     this.schedule(() => {
-      this.playSFX('hum');
       this.setDoorClass('breathing');
       this.setDoorOpacity(1);
       this.patchUI({ flashClass: 'fade-out' });
@@ -176,7 +176,11 @@ module.exports = function attachIntroStatesEarly(IntroSystem) {
         this.items = [];
         this.removeDoorClass('absorbing');
         this.addDoorClass('releasing');
-        this.playBGM('bgm-intro');
+        if (this.audioManager && typeof this.audioManager.fadeToBGM === 'function') {
+          this.audioManager.fadeToBGM('bgm-intro', { fadeOutMs: 2000, fadeInMs: 2000 });
+        } else {
+          this.playBGM('bgm-intro', { fadeInMs: 2000 });
+        }
         this.syncItemsToPage();
         this.setState('blueWash');
       }, 900);

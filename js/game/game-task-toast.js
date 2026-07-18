@@ -68,19 +68,10 @@
                 el.className = 'game-task-toast';
                 el.setAttribute('role', 'status');
 
-                const badge = document.createElement('span');
-                badge.className = 'game-task-toast__badge';
-                badge.setAttribute('aria-hidden', 'true');
-                const mark = document.createElement('span');
-                mark.className = 'game-task-toast__badge-mark';
-                mark.textContent = '!';
-                badge.appendChild(mark);
-
                 const textSpan = document.createElement('span');
                 textSpan.className = 'game-task-toast__text';
                 textSpan.textContent = '任务达成：' + taskName;
 
-                el.appendChild(badge);
                 el.appendChild(textSpan);
                 this._layer.appendChild(el);
 

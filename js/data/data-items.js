@@ -10,33 +10,35 @@ const RECIPES = [
     { ingredients: ["牛奶", "冰糖碎"], result: "甜牛奶", time: 0, msg: "甜蜜的开始" },
     
     // 第2关：凝固之术 — 鲜奶发酵成酸奶，滤布凝酪；酿造得奶酒（干扰）
-    { ingredients: ["牛奶", "发酵"], result: "酸奶", time: 5, msg: "乳酸菌悄悄做事，奶渐渐稠成酸奶…" },
-    { ingredients: ["发酵", "牛奶"], result: "酸奶", time: 5, msg: "乳酸菌悄悄做事，奶渐渐稠成酸奶…" },
+    { ingredients: ["牛奶", "发酵"], result: "酸奶", time: 3, msg: "乳酸菌悄悄做事，奶渐渐稠成酸奶…" },
+    { ingredients: ["发酵", "牛奶"], result: "酸奶", time: 3, msg: "乳酸菌悄悄做事，奶渐渐稠成酸奶…" },
     { ingredients: ["酸奶", "滤布"], result: "奶酪", time: 0, msg: "乳清滤去，奶香凝成厚实酪…" },
     { ingredients: ["滤布", "酸奶"], result: "奶酪", time: 0, msg: "乳清滤去，奶香凝成厚实酪…" },
-    { ingredients: ["牛奶", "酿造"], result: "奶酒", time: 5, msg: "谷香入奶，一盏柔性的小酒…" },
-    { ingredients: ["酿造", "牛奶"], result: "奶酒", time: 5, msg: "谷香入奶，一盏柔性的小酒…" },
-    { ingredients: ["奶酒", "酿造"], result: "高度奶酒", time: 5, msg: "再经凝炼，酒意更厚一层…" },
-    { ingredients: ["酿造", "奶酒"], result: "高度奶酒", time: 5, msg: "再经凝炼，酒意更厚一层…" },
+    { ingredients: ["牛奶", "酿造"], result: "奶酒", time: 3, msg: "谷香入奶，一盏柔性的小酒…" },
+    { ingredients: ["酿造", "牛奶"], result: "奶酒", time: 3, msg: "谷香入奶，一盏柔性的小酒…" },
+    { ingredients: ["奶酒", "酿造"], result: "高度奶酒", time: 3, msg: "再经凝炼，酒意更厚一层…" },
+    { ingredients: ["酿造", "奶酒"], result: "高度奶酒", time: 3, msg: "再经凝炼，酒意更厚一层…" },
 
     // 第3关：酿酒之道（多种米干扰项）
-    { ingredients: ["糯米", "酿造"], result: "酒酿", time: 5, msg: "糯米发酵，甜香弥漫..." },
-    { ingredients: ["酿造", "糯米"], result: "酒酿", time: 5, msg: "糯米发酵，甜香弥漫..." },
-    { ingredients: ["大米", "酿造"], result: "米酒", time: 5, msg: "大米也能酿，但不是酒酿..." },
-    { ingredients: ["酿造", "大米"], result: "米酒", time: 5, msg: "大米也能酿，但不是酒酿..." },
-    { ingredients: ["黑米", "酿造"], result: "黑米露", time: 5, msg: "紫黑色的酒露，但不是目标..." },
-    { ingredients: ["酿造", "黑米"], result: "黑米露", time: 5, msg: "紫黑色的酒露，但不是目标..." },
-    { ingredients: ["小米", "酿造"], result: "小米黄酒", time: 5, msg: "小米黄酒，古朴的味道..." },
-    { ingredients: ["酿造", "小米"], result: "小米黄酒", time: 5, msg: "小米黄酒，古朴的味道..." },
+    { ingredients: ["糯米", "酿造"], result: "酒酿", time: 3, msg: "糯米发酵，甜香弥漫..." },
+    { ingredients: ["酿造", "糯米"], result: "酒酿", time: 3, msg: "糯米发酵，甜香弥漫..." },
+    { ingredients: ["大米", "酿造"], result: "米酒", time: 3, msg: "大米也能酿，但不是酒酿..." },
+    { ingredients: ["酿造", "大米"], result: "米酒", time: 3, msg: "大米也能酿，但不是酒酿..." },
+    { ingredients: ["黑米", "酿造"], result: "黑米露", time: 3, msg: "紫黑色的酒露，但不是目标..." },
+    { ingredients: ["酿造", "黑米"], result: "黑米露", time: 3, msg: "紫黑色的酒露，但不是目标..." },
+    { ingredients: ["小米", "酿造"], result: "小米黄酒", time: 3, msg: "小米黄酒，古朴的味道..." },
+    { ingredients: ["酿造", "小米"], result: "小米黄酒", time: 3, msg: "小米黄酒，古朴的味道..." },
     
     // 第4关：双酪之约 — 甜奶发酵成甜酸奶，滤布得轻盈雪酪
-    { ingredients: ["甜牛奶", "发酵"], result: "甜酸奶", time: 5, msg: "甜奶也经得起发酵，稠成一碗甜酸奶…" },
-    { ingredients: ["发酵", "甜牛奶"], result: "甜酸奶", time: 5, msg: "甜奶也经得起发酵，稠成一碗甜酸奶…" },
+    { ingredients: ["甜牛奶", "发酵"], result: "甜酸奶", time: 3, msg: "甜奶也经得起发酵，稠成一碗甜酸奶…" },
+    { ingredients: ["发酵", "甜牛奶"], result: "甜酸奶", time: 3, msg: "甜奶也经得起发酵，稠成一碗甜酸奶…" },
+    { ingredients: ["酸奶", "冰糖碎"], result: "甜酸奶", time: 0, msg: "冰糖碎化进酸奶，甜酸奶成了。" },
+    { ingredients: ["冰糖碎", "酸奶"], result: "甜酸奶", time: 0, msg: "冰糖碎化进酸奶，甜酸奶成了。" },
     { ingredients: ["甜酸奶", "滤布"], result: "雪酪", time: 0, msg: "滤去水分，凝成轻盈雪酪…" },
     { ingredients: ["滤布", "甜酸奶"], result: "雪酪", time: 0, msg: "滤去水分，凝成轻盈雪酪…" },
     // 甜奶误配酿造：不是轻盈酪那条路
-    { ingredients: ["甜牛奶", "酿造"], result: "甜奶浊酿", time: 2, msg: "酿造把酒谷的香塞进甜奶里……轻盈酪要走发酵再滤布。" },
-    { ingredients: ["酿造", "甜牛奶"], result: "甜奶浊酿", time: 2, msg: "酿造把酒谷的香塞进甜奶里……轻盈酪要走发酵再滤布。" },
+    { ingredients: ["甜牛奶", "酿造"], result: "甜奶浊酿", time: 3, msg: "酿造把酒谷的香塞进甜奶里……轻盈酪要走发酵再滤布。" },
+    { ingredients: ["酿造", "甜牛奶"], result: "甜奶浊酿", time: 3, msg: "酿造把酒谷的香塞进甜奶里……轻盈酪要走发酵再滤布。" },
     { ingredients: ["奶酪", "雪酪"], result: "双酪", time: 0, msg: "双酪合璧，厚与轻，一体两面" },
     
     // 第4关：香气之约 - 桂花酒酿
@@ -46,11 +48,15 @@ const RECIPES = [
     // 第5关：酪饮之道 - 酒酿玫瑰酪
     { ingredients: ["玫瑰", "酒酿原浆"], result: "玫瑰酒酿", time: 3, msg: "玫瑰香气融入酒酿..." },
     { ingredients: ["酒酿原浆", "玫瑰"], result: "玫瑰酒酿", time: 3, msg: "玫瑰香气融入酒酿..." },
+    { ingredients: ["玫瑰", "双酪"], result: "玫瑰双酪", time: 0, msg: "玫瑰落进双酪，花香先安顿下来。" },
+    { ingredients: ["双酪", "玫瑰"], result: "玫瑰双酪", time: 0, msg: "玫瑰落进双酪，花香先安顿下来。" },
     { ingredients: ["菊花", "酒酿原浆"], result: "菊花酒酿", time: 3, msg: "菊花清香融入酒酿..." },
     { ingredients: ["酒酿原浆", "菊花"], result: "菊花酒酿", time: 3, msg: "菊花清香融入酒酿..." },
     { ingredients: ["茉莉花", "酒酿原浆"], result: "茉莉酒酿", time: 3, msg: "茉莉清香融入酒酿..." },
     { ingredients: ["酒酿原浆", "茉莉花"], result: "茉莉酒酿", time: 3, msg: "茉莉清香融入酒酿..." },
     { ingredients: ["双酪", "玫瑰酒酿"], result: "酒酿玫瑰酪", time: 3, msg: "玫瑰与酪融合中…", isTarget: true },
+    { ingredients: ["玫瑰双酪", "酒酿原浆"], result: "酒酿玫瑰酪", time: 3, msg: "酒酿慢慢渗进玫瑰双酪…", isTarget: true },
+    { ingredients: ["酒酿原浆", "玫瑰双酪"], result: "酒酿玫瑰酪", time: 3, msg: "酒酿慢慢渗进玫瑰双酪…", isTarget: true },
 
     // 第6关 Boss：冰酒酿桂花酪
     { ingredients: ["双酪", "桂花酒酿"], result: "酒酿桂花酪", time: 3, msg: "桂花与酪交融中…" },
@@ -91,14 +97,14 @@ const RECIPES = [
     { ingredients: ["小米", "发酵"], result: "酵粟饭", time: 3, msg: "粟米发酵后稠稠的，也不是黄酒那条路" },
     { ingredients: ["发酵", "小米"], result: "酵粟饭", time: 3, msg: "粟米发酵后稠稠的，也不是黄酒那条路" },
     // — 花香须先入酒酿原浆；单丢给酿造缺「酒底」
-    { ingredients: ["桂花", "酿造"], result: "桂花浊酿", time: 2, msg: "花香闷在糟里，浊得很，少了酒酿原浆那口气" },
-    { ingredients: ["酿造", "桂花"], result: "桂花浊酿", time: 2, msg: "花香闷在糟里，浊得很，少了酒酿原浆那口气" },
-    { ingredients: ["玫瑰", "酿造"], result: "玫瑰浊酿", time: 2, msg: "花瓣烂糟糟……记得先请酒酿原浆出场" },
-    { ingredients: ["酿造", "玫瑰"], result: "玫瑰浊酿", time: 2, msg: "花瓣烂糟糟……记得先请酒酿原浆出场" },
-    { ingredients: ["菊花", "酿造"], result: "菊花浊酿", time: 2, msg: "菊花清气扛不住闷酿，糊成一团" },
-    { ingredients: ["酿造", "菊花"], result: "菊花浊酿", time: 2, msg: "菊花清气扛不住闷酿，糊成一团" },
-    { ingredients: ["茉莉花", "酿造"], result: "茉莉浊酿", time: 2, msg: "茉莉要先遇见酒浆，直接进酿造只会浊" },
-    { ingredients: ["酿造", "茉莉花"], result: "茉莉浊酿", time: 2, msg: "茉莉要先遇见酒浆，直接进酿造只会浊" },
+    { ingredients: ["桂花", "酿造"], result: "桂花浊酿", time: 3, msg: "花香闷在糟里，浊得很，少了酒酿原浆那口气" },
+    { ingredients: ["酿造", "桂花"], result: "桂花浊酿", time: 3, msg: "花香闷在糟里，浊得很，少了酒酿原浆那口气" },
+    { ingredients: ["玫瑰", "酿造"], result: "玫瑰浊酿", time: 3, msg: "花瓣烂糟糟……记得先请酒酿原浆出场" },
+    { ingredients: ["酿造", "玫瑰"], result: "玫瑰浊酿", time: 3, msg: "花瓣烂糟糟……记得先请酒酿原浆出场" },
+    { ingredients: ["菊花", "酿造"], result: "菊花浊酿", time: 3, msg: "菊花清气扛不住闷酿，糊成一团" },
+    { ingredients: ["酿造", "菊花"], result: "菊花浊酿", time: 3, msg: "菊花清气扛不住闷酿，糊成一团" },
+    { ingredients: ["茉莉花", "酿造"], result: "茉莉浊酿", time: 3, msg: "茉莉要先遇见酒浆，直接进酿造只会浊" },
+    { ingredients: ["酿造", "茉莉花"], result: "茉莉浊酿", time: 3, msg: "茉莉要先遇见酒浆，直接进酿造只会浊" },
     // — 鲜奶渍原浆不如甜奶路径工整（对照酿香奶底）
     { ingredients: ["牛奶", "酒酿原浆"], result: "渍酿奶", time: 0, msg: "乳白混着琥珀色……甜香奶底那条路更利落" },
     { ingredients: ["酒酿原浆", "牛奶"], result: "渍酿奶", time: 0, msg: "乳白混着琥珀色……甜香奶底那条路更利落" },
@@ -111,8 +117,8 @@ const RECIPES = [
     { ingredients: ["高度奶酒", "发酵"], result: "滥酵奶酒", time: 3, msg: "再发酵只会更浊，不是考官要的酪" },
     { ingredients: ["发酵", "高度奶酒"], result: "滥酵奶酒", time: 3, msg: "再发酵只会更浊，不是考官要的酪" },
     // — 轻盈雪酪经不起「发酵」这一套
-    { ingredients: ["雪酪", "发酵"], result: "塌雪酪", time: 2, msg: "雪酪塌成糊……发酵毁了轻盈" },
-    { ingredients: ["发酵", "雪酪"], result: "塌雪酪", time: 2, msg: "雪酪塌成糊……发酵毁了轻盈" },
+    { ingredients: ["雪酪", "发酵"], result: "塌雪酪", time: 3, msg: "雪酪塌成糊……发酵毁了轻盈" },
+    { ingredients: ["发酵", "雪酪"], result: "塌雪酪", time: 3, msg: "雪酪塌成糊……发酵毁了轻盈" },
     // — 原浆已是工夫；再叠发酵失焦
     { ingredients: ["酒酿原浆", "发酵"], result: "酵浆浑汤", time: 3, msg: "底味太重又发酵……只剩一锅糊涂鲜" },
     { ingredients: ["发酵", "酒酿原浆"], result: "酵浆浑汤", time: 3, msg: "底味太重又发酵……只剩一锅糊涂鲜" },
@@ -157,7 +163,7 @@ const RECIPES = [
     // 雪域酸奶路径
     { ingredients: ["牛奶", "菌种"], result: "发酵奶", time: 3, msg: "发酵中，请稍候..." },
     { ingredients: ["发酵奶", "冰糖碎"], result: "原味酸奶", time: 0, msg: "原味的美好" },
-    { ingredients: ["原味酸奶", "冰糖碎"], result: "雪域酸奶", time: 2, msg: "四步两次发酵...", isTarget: true },
+    { ingredients: ["原味酸奶", "冰糖碎"], result: "雪域酸奶", time: 3, msg: "四步两次发酵...", isTarget: true },
     { ingredients: ["原味酸奶", "冰块"], result: "冰镇酸奶", time: 0, msg: "冰镇的清爽" },
     { ingredients: ["冰镇酸奶", "冰糖碎"], result: "雪域酸奶", time: 0, msg: "冰镇版雪域酸奶！", isTarget: true },
     
@@ -168,7 +174,7 @@ const RECIPES = [
     { ingredients: ["奶酪", "桂花酒酿"], result: "桂香奶酪", time: 3, msg: "桂花酪液交融中…" },
     { ingredients: ["桂香奶酪", "雪酪"], result: "酒酿桂花酪", time: 3, msg: "厚酪与轻盈合一…" },
     { ingredients: ["雪酪", "桂花"], result: "桂花雪酪", time: 0, msg: "桂花飘落雪酪" },
-    { ingredients: ["桂花雪酪", "酒酿原浆"], result: "酒酿桂花酪", time: 2, msg: "酒酿慢慢渗入..." },
+    { ingredients: ["桂花雪酪", "酒酿原浆"], result: "酒酿桂花酪", time: 3, msg: "酒酿慢慢渗入..." },
     
     // ========== 花之山脉（世界2） ==========
     { ingredients: ["桂花酪底", "芋头圆子"], result: "酒酿桂花酪（自然发酵甜）", time: 0, msg: "自然发酵的甜！", isTarget: true },
@@ -191,7 +197,7 @@ const RECIPES = [
     { ingredients: ["清爽柚子底", "西柚粒"], result: "青青柚子酪", time: 0, msg: "青青柚子酪！", isTarget: true },
     
     // ========== 谷物峡谷（世界4） ==========
-    { ingredients: ["混合坚果", "加热"], result: "脆烤坚果", time: 2, msg: "烘烤中..." },
+    { ingredients: ["混合坚果", "加热"], result: "脆烤坚果", time: 3, msg: "烘烤中..." },
     { ingredients: ["雪域酸奶", "脆烤坚果"], result: "坚果酸奶底", time: 0, msg: "坚果香脆" },
     { ingredients: ["坚果酸奶底", "蜂蜜"], result: "0蔗糖脆烤坚果酸奶碗", time: 0, msg: "健康美味！", isTarget: true },
     { ingredients: ["酒酿酸奶", "可可粉"], result: "可可酸奶", time: 0, msg: "可可香浓" },
@@ -200,7 +206,7 @@ const RECIPES = [
     
     // ========== 温差雪峰（世界5） ==========
     { ingredients: ["茉莉花茶", "Kiri芝士"], result: "芝士茶底", time: 0, msg: "芝士与茶相遇" },
-    { ingredients: ["芝士茶底", "加热"], result: "温热芝士茶", time: 2, msg: "加热中..." },
+    { ingredients: ["芝士茶底", "加热"], result: "温热芝士茶", time: 3, msg: "加热中..." },
     { ingredients: ["温热芝士茶", "牛奶"], result: "听泉茉白", time: 0, msg: "听泉茉白！", isTarget: true },
     { ingredients: ["Kiri芝士", "牛奶"], result: "芝士奶底", time: 0, msg: "芝士奶底" },
     { ingredients: ["芝士奶底", "玫瑰花"], result: "玫瑰茶奶", time: 0, msg: "玫瑰香气" },
@@ -210,11 +216,11 @@ const RECIPES = [
     { ingredients: ["桂花原浆", "玫瑰原浆"], result: "双花蜜", time: 0, msg: "两生花" },
     { ingredients: ["双花蜜", "茉莉花液"], result: "三花酿", time: 0, msg: "三花合一" },
     { ingredients: ["三花酿", "双酪底"], result: "宝珠精华", time: 3, msg: "精华凝聚中..." },
-    { ingredients: ["宝珠精华", "蜂蜜"], result: "天赐宝珠酪", time: 5, msg: "传奇诞生！", isTarget: true },
+    { ingredients: ["宝珠精华", "蜂蜜"], result: "天赐宝珠酪", time: 3, msg: "传奇诞生！", isTarget: true },
     
     // ========== 辅助合成（酒酿酸奶等） ==========
     { ingredients: ["雪域酸奶", "酒酿原浆"], result: "酒酿酸奶", time: 0, msg: "酒酿酸奶" },
-    { ingredients: ["奇亚籽", "牛奶"], result: "奇亚籽奶", time: 2, msg: "奇亚籽膨胀中..." },
+    { ingredients: ["奇亚籽", "牛奶"], result: "奇亚籽奶", time: 3, msg: "奇亚籽膨胀中..." },
 ];
 
 // ========================================
@@ -230,8 +236,8 @@ const ITEM_SVGS = {
     "酒酿原浆": '<svg viewBox="0 0 40 40"><rect x="16" y="4" width="8" height="4" rx="2" fill="#C89820" stroke="#A07808" stroke-width="1"/><path d="M13 8h14v22a5 5 0 01-5 5h-4a5 5 0 01-5-5z" fill="#E0B040" stroke="#A07808" stroke-width="1"/><circle cx="17" cy="20" r="1.5" fill="#F0C850" opacity=".6"/><circle cx="23" cy="24" r="1" fill="#F0C850" opacity=".5"/><circle cx="19" cy="28" r="1.2" fill="#F0C850" opacity=".55"/></svg>',
     "冰块": '<svg viewBox="0 0 40 40"><path d="M20 6l12 8v12l-12 8-12-8V14z" fill="#A0D8F0" stroke="#50A0D0" stroke-width="1"/><path d="M20 6l12 8-12 6-12-6z" fill="#C8ECFF" stroke="#50A0D0" stroke-width="1"/><path d="M20 20v14" stroke="#70C0E8" stroke-width=".6" opacity=".6"/><path d="M8 14l12 6" stroke="#70C0E8" stroke-width=".6" opacity=".5"/></svg>',
     "滤布": '<svg viewBox="0 0 40 40"><ellipse cx="20" cy="22" rx="14" ry="10" fill="#e8e4dc" stroke="#b8a898" stroke-width="1"/><path d="M8 14 Q20 10 32 14" fill="none" stroke="#a89888" stroke-width="1"/><line x1="12" y1="18" x2="28" y2="26" stroke="#d8d4cc" stroke-width=".8"/><line x1="28" y1="18" x2="12" y2="26" stroke="#d8d4cc" stroke-width=".8"/></svg>',
-    "珠宝": '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="#E0A800" stroke="#B88000" stroke-width="1.2"/><circle cx="20" cy="20" r="10" fill="#F0C030" stroke="#C89800" stroke-width=".8"/><path d="M20 12l3 6-3 10-3-10z" fill="#C89000" opacity=".5"/><path d="M12 18h16" stroke="#C89000" stroke-width=".6" opacity=".4"/></svg>',
     "配方书": '<svg viewBox="0 0 40 40"><path d="M8 7h12v28H10a2 2 0 01-2-2V7z" fill="#8B5E30" stroke="#6A4018" stroke-width="1"/><path d="M20 7h12v26a2 2 0 01-2 2H20V7z" fill="#FFF4D8" stroke="#B89060" stroke-width="1"/><line x1="23" y1="13" x2="29" y2="13" stroke="#B89060" stroke-width="1.2"/><line x1="23" y1="17" x2="28" y2="17" stroke="#C8A070" stroke-width=".8"/><line x1="23" y1="21" x2="27" y2="21" stroke="#C8A070" stroke-width=".8"/><line x1="23" y1="25" x2="29" y2="25" stroke="#C8A070" stroke-width=".8"/></svg>',
+    "_home": '<svg viewBox="0 0 40 40"><path d="M6 18 L20 5 L34 18 V33 H6 Z" fill="#FFF4D8" stroke="#B89060" stroke-width="1.2"/><path d="M6 18 L20 5 L34 18 H6 Z" fill="#F5E6C8" stroke="#B89060" stroke-width="1.2"/><rect x="17" y="24" width="6" height="9" rx="1" fill="#8B5E30" stroke="#6A4018" stroke-width=".8"/><rect x="10" y="20" width="5" height="5" rx=".8" fill="#E8F4FF" stroke="#88B8D8" stroke-width=".6" opacity=".85"/></svg>',
 
     // ===== 米类（共用碗形，不同颗粒颜色） =====
     "糯米": '<svg viewBox="0 0 40 40"><path d="M7 18h26l-3 14a3 3 0 01-3 2H13a3 3 0 01-3-2z" fill="#B08050" stroke="#885830" stroke-width="1"/><ellipse cx="20" cy="18" rx="13" ry="4" fill="#C89868" stroke="#885830" stroke-width="1"/><circle cx="15" cy="15" r="2.5" fill="#FFFFF0" stroke="#D0C8B0" stroke-width=".6"/><circle cx="20" cy="13" r="2.5" fill="#FFFFF0" stroke="#D0C8B0" stroke-width=".6"/><circle cx="25" cy="15" r="2.5" fill="#FFFFF0" stroke="#D0C8B0" stroke-width=".6"/><circle cx="17" cy="10" r="2" fill="#FFFFF0" stroke="#D0C8B0" stroke-width=".6"/><circle cx="23" cy="11" r="2" fill="#FFFFF0" stroke="#D0C8B0" stroke-width=".6"/></svg>',
@@ -249,6 +255,7 @@ const ITEM_SVGS = {
     "奶酪": '<svg viewBox="0 0 40 40"><rect x="5" y="8" width="30" height="24" rx="2" fill="#F5C800" stroke="#D4A000" stroke-width="1.2"/><circle cx="14" cy="18" r="3" fill="#D4A800" opacity=".55"/><circle cx="25" cy="23" r="2.5" fill="#D4A800" opacity=".5"/><circle cx="17" cy="28" r="2" fill="#D4A800" opacity=".45"/><circle cx="28" cy="15" r="1.8" fill="#D4A800" opacity=".4"/><circle cx="5" cy="20" r="2.5" fill="#D4A000"/><circle cx="5" cy="20" r="2.5" fill="#F5C800"/><path d="M5 17.5v5" fill="none"/><circle cx="35" cy="26" r="2" fill="#D4A000"/><circle cx="35" cy="26" r="2" fill="#F5C800"/><circle cx="22" cy="8" r="2.2" fill="#D4A000"/><circle cx="22" cy="8" r="2.2" fill="#F5C800"/><rect x="5" y="8" width="30" height="24" rx="2" fill="none" stroke="#D4A000" stroke-width="1.2"/></svg>',
     "雪酪": '<svg viewBox="0 0 40 40"><rect x="5" y="8" width="30" height="24" rx="2" fill="#C0E8F8" stroke="#70B8D8" stroke-width="1.2"/><circle cx="14" cy="18" r="3" fill="#90C8E0" opacity=".5"/><circle cx="25" cy="23" r="2.5" fill="#90C8E0" opacity=".45"/><circle cx="17" cy="28" r="2" fill="#90C8E0" opacity=".4"/><circle cx="28" cy="15" r="1.8" fill="#90C8E0" opacity=".35"/><circle cx="5" cy="22" r="2.5" fill="#70B8D8"/><circle cx="5" cy="22" r="2.5" fill="#C0E8F8"/><circle cx="35" cy="16" r="2" fill="#70B8D8"/><circle cx="35" cy="16" r="2" fill="#C0E8F8"/><circle cx="12" cy="8" r="2" fill="#70B8D8"/><circle cx="12" cy="8" r="2" fill="#C0E8F8"/><rect x="5" y="8" width="30" height="24" rx="2" fill="none" stroke="#70B8D8" stroke-width="1.2"/><path d="M19 11l1.5-2 1.5 2-1.5 .8z" fill="#E0F4FF" opacity=".5"/></svg>',
     "双酪": '<svg viewBox="0 0 40 40"><rect x="2" y="12" width="22" height="20" rx="2" fill="#F5C800" stroke="#D4A000" stroke-width="1"/><circle cx="10" cy="20" r="2.5" fill="#D4A800" opacity=".5"/><circle cx="17" cy="26" r="2" fill="#D4A800" opacity=".45"/><circle cx="2" cy="22" r="2" fill="#D4A000"/><circle cx="2" cy="22" r="2" fill="#F5C800"/><rect x="2" y="12" width="22" height="20" rx="2" fill="none" stroke="#D4A000" stroke-width="1"/><rect x="16" y="6" width="22" height="20" rx="2" fill="#C0E8F8" stroke="#70B8D8" stroke-width="1"/><circle cx="26" cy="14" r="2.5" fill="#90C8E0" opacity=".5"/><circle cx="31" cy="20" r="1.8" fill="#90C8E0" opacity=".4"/><circle cx="38" cy="12" r="2" fill="#70B8D8"/><circle cx="38" cy="12" r="2" fill="#C0E8F8"/><rect x="16" y="6" width="22" height="20" rx="2" fill="none" stroke="#70B8D8" stroke-width="1"/></svg>',
+    "玫瑰双酪": '<svg viewBox="0 0 40 40"><rect x="3" y="13" width="20" height="19" rx="2" fill="#F5C800" stroke="#D4A000" stroke-width="1"/><circle cx="11" cy="21" r="2.4" fill="#D4A800" opacity=".48"/><circle cx="17" cy="27" r="1.8" fill="#D4A800" opacity=".42"/><rect x="16" y="8" width="21" height="18" rx="2" fill="#C0E8F8" stroke="#70B8D8" stroke-width="1"/><circle cx="26" cy="15" r="2.3" fill="#90C8E0" opacity=".48"/><circle cx="31" cy="21" r="1.7" fill="#90C8E0" opacity=".38"/><ellipse cx="24" cy="8" rx="4.6" ry="3.5" fill="#E85888" stroke="#C83860" stroke-width=".5"/><ellipse cx="21" cy="7" rx="2.2" ry="3" fill="#E04878" transform="rotate(-18 21 7)"/><ellipse cx="27" cy="7" rx="2.2" ry="3" fill="#E04878" transform="rotate(18 27 7)"/><circle cx="24" cy="7.5" r="1.7" fill="#C83058"/></svg>',
 
     // ===== Group C: 花酒酿家族（坛子+花朵） =====
     "桂花酒酿": '<svg viewBox="0 0 40 40"><ellipse cx="20" cy="14" rx="8" ry="3" fill="#B87820" stroke="#905810" stroke-width="1"/><path d="M12 14v14c0 4 3.5 7 8 7s8-3 8-7V14" fill="#D8A840" stroke="#905810" stroke-width="1"/><circle cx="20" cy="8" r="3" fill="#F0B000" stroke="#C08800" stroke-width=".6"/><ellipse cx="20" cy="5" rx="1.5" ry="2.5" fill="#F8C800"/><ellipse cx="24" cy="8" rx="2.5" ry="1.5" fill="#F8C800"/><ellipse cx="16" cy="8" rx="2.5" ry="1.5" fill="#F8C800"/></svg>',
@@ -264,7 +271,7 @@ const ITEM_SVGS = {
     // ===== 中间产物 =====
     "甜牛奶": '<svg viewBox="0 0 40 40"><rect x="16" y="4" width="8" height="4" rx="1.5" fill="#F0E0C0" stroke="#B89060" stroke-width="1"/><path d="M16 8l-3 4h14l-3-4" fill="#FFF4D8" stroke="#B89060" stroke-width="1"/><path d="M13 12h14v19a4 4 0 01-4 4H17a4 4 0 01-4-4z" fill="#FFFDF0" stroke="#B89060" stroke-width="1"/><path d="M23 7l2-3" stroke="#F0B000" stroke-width="1.5" stroke-linecap="round"/><circle cx="26" cy="3" r="1.5" fill="#F0B000"/></svg>',
     "酸奶": '<svg viewBox="0 0 40 40"><rect x="16" y="4" width="8" height="4" rx="1.5" fill="#E8ECD8" stroke="#98A878" stroke-width="1"/><path d="M16 8l-3 4h14l-3-4" fill="#F2F5E8" stroke="#98A878" stroke-width="1"/><path d="M13 12h14v19a4 4 0 01-4 4H17a4 4 0 01-4-4z" fill="#FAFCF4" stroke="#98A878" stroke-width="1"/><ellipse cx="20" cy="22" rx="5" ry="7" fill="#E0E8D0" opacity=".45"/></svg>',
-    "甜酸奶": '<svg viewBox="0 0 40 40"><rect x="16" y="4" width="8" height="4" rx="1.5" fill="#F0E8D0" stroke="#B89868" stroke-width="1"/><path d="M16 8l-3 4h14l-3-4" fill="#FFF6E8" stroke="#B89868" stroke-width="1"/><path d="M13 12h14v19a4 4 0 01-4 4H17a4 4 0 01-4-4z" fill="#FFFBF2" stroke="#B89868" stroke-width="1"/><ellipse cx="20" cy="22" rx="5" ry="7" fill="#F8ECD8" opacity=".5"/><circle cx="24" cy="16" r="1.2" fill="#F0C030" opacity=".7"/></svg>',
+    "甜酸奶": '<svg viewBox="0 0 40 40"><rect x="16" y="4" width="8" height="4" rx="1.5" fill="#D7F0FF" stroke="#4FA7D6" stroke-width="1"/><path d="M16 8l-3 4h14l-3-4" fill="#EAF8FF" stroke="#4FA7D6" stroke-width="1"/><path d="M13 12h14v19a4 4 0 01-4 4H17a4 4 0 01-4-4z" fill="#F4FCFF" stroke="#4FA7D6" stroke-width="1"/><ellipse cx="20" cy="22" rx="5" ry="7" fill="#9EDBFF" opacity=".65"/><circle cx="24" cy="16" r="1.2" fill="#35B7EA" opacity=".8"/></svg>',
     "霜酪": '<svg viewBox="0 0 40 40"><rect x="8" y="10" width="24" height="18" rx="3" fill="#DCECF8" stroke="#78B0D0" stroke-width="1"/><path d="M12 12 Q20 8 28 12" fill="none" stroke="#B8DCF0" stroke-width="1"/><circle cx="14" cy="20" r="2" fill="#C8E4F8" opacity=".7"/><circle cx="26" cy="22" r="1.6" fill="#C8E4F8" opacity=".65"/><path d="M18 8l2-3 2 3z" fill="#A8D8F0" opacity=".85"/></svg>',
     "酒酿": '<svg viewBox="0 0 40 40"><ellipse cx="20" cy="12" rx="8" ry="3" fill="#B87820" stroke="#905810" stroke-width="1"/><path d="M12 12v16c0 4 3.5 7 8 7s8-3 8-7V12" fill="#D8A840" stroke="#905810" stroke-width="1"/><circle cx="17" cy="22" r="1.2" fill="#F0C050" opacity=".5"/><circle cx="23" cy="26" r="1" fill="#F0C050" opacity=".45"/></svg>',
     "米酒": '<svg viewBox="0 0 40 40"><rect x="16" y="5" width="8" height="4" rx="2" fill="#C8B888" stroke="#988860" stroke-width="1"/><path d="M13 9h14v21a5 5 0 01-5 5h-4a5 5 0 01-5-5z" fill="#F0E0B8" stroke="#988860" stroke-width="1"/><circle cx="18" cy="22" r="1" fill="#D8C898" opacity=".5"/><circle cx="22" cy="26" r=".8" fill="#D8C898" opacity=".45"/></svg>',
@@ -358,7 +365,6 @@ const ITEMS = {
     
     // 功能 / 货币物品
     "配方书": { icon: "📖", type: "special", desc: "记着前人试错与心得的旧册子。", isRecipeBook: true },
-    "珠宝": { icon: "🪙", type: "currency", desc: "一点温润亮光，可在坊间换来稀罕花材。", noSynthesize: true },
 
     // 花卉原料（干扰项）
     "茉莉花": { icon: "🌸", type: "floral", desc: "新开时像落了薄雪，香气温吞吞地渗出来。" },
@@ -442,6 +448,7 @@ const ITEMS = {
     "双酪底": { icon: "🥣", type: "mid", desc: "双酪合璧（旧版兼容）" },
     "桂花酒酿": { icon: "🌼", type: "mid", desc: "桂花落进酒酿里，秋意有了形状。" },
     "玫瑰酒酿": { icon: "🌹", type: "mid", desc: "玫瑰把心事浸进酒里，香得坦荡。" },
+    "玫瑰双酪": { icon: "🌹", type: "mid", desc: "玫瑰先融进双酪里，等一口酒酿点醒。" },
     "茉莉酒酿": { icon: "🌸", type: "mid", desc: "茉莉的清气一丝一缕渗进酒坛。" },
     "菊花酒酿": { icon: "🏵️", type: "mid", desc: "菊花借酒托出一口山野。" },
     "桂香奶酪": { icon: "🌼", type: "mid", desc: "桂花香气包裹奶酪" },

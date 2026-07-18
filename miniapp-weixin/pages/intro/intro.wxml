@@ -1,5 +1,5 @@
 <view
-  class="intro-screen {{warmTransition ? 'warm-transition' : ''}}"
+  class="intro-screen {{warmTransition ? 'warm-transition' : ''}} {{settingsVisible || tasksVisible ? 'panel-open' : ''}}"
   style="background-color: {{screenBg}};"
 >
   <view class="canvas-stack">
@@ -10,12 +10,16 @@
       style="opacity: {{ambienceOpacity}};"
     ></canvas>
 
-    <canvas type="2d" id="intro-canvas" class="intro-canvas"></canvas>
+    <canvas
+      type="2d"
+      id="intro-canvas"
+      class="intro-canvas"
+    ></canvas>
   </view>
 
   <view class="intro-flash {{flashClass}}"></view>
 
-  <!-- 透明触摸层：canvas 为原生层，拖拽事件经此坐标命中 -->
+  <!-- 闂備緡鍋勭换鎴澪ｉ幋鐘冲枂闁挎棁濮ら崵瀣倶閻愭彃浜扮紒杈╂珱anvas 婵炴垶鎸搁幖顐ゆ暜椤愶附鍋ㄩ柣鏃堫棑濠€鎾煥濞戞ɑ婀伴悗姘儔楠炲繘骞嬮幒鏃傛婵炲濮存晶搴ｅ垝閳ユ剚娼伴柕鍫濇噺缂嶅繘鏌″鍛悙闁规枼鍓濈粙?-->
   <view
     class="intro-touch-layer"
     catchtouchstart="onItemTouchStart"
@@ -33,16 +37,14 @@
     <view class="dot-pulse-wave wave-b"></view>
     <view class="intro-dot-core"></view>
   </view>
-
-  <view class="intro-inventory {{inventoryVisible ? 'visible' : ''}}"></view>
-
-  <view class="intro-narrative {{narrativeVisible ? 'visible' : ''}}">{{narrativeText}}</view>
+  <view wx:if="{{!menuMode}}" class="intro-version">{{buildVersion}}</view>
+<view class="intro-narrative {{narrativeVisible ? 'visible' : ''}}">{{narrativeText}}</view>
 
   <view class="story-container" wx:if="{{storyVisible}}">
     <text class="story-text {{storyTextGoal ? 'goal-text' : ''}} {{storyTextVisible ? 'show' : ''}}">{{storyText}}</text>
   </view>
 
-  <!-- 主菜单覆盖层：粒子聚字后直接在此页展示，不跳转 index -->
+  <!-- 婵炴垶鎸诲Σ鎺曘亹瀹ュ纭€闁哄洠妲呭ú顒勬煟閳哄倻澧柣顏冨嵆閺佸秴顫濇潏鈺冨帥闁诲孩绋掗崝妯荤濞戞埃鍋撳☉娆樻當闁诡喗顨婇幆鍕偓娑櫭径宥夋煕閿斿搫濡芥い鎺撶箖閵囧嫰妫冨☉姘秾缂備讲鍋撻柣姘嚟缁€澶娾槈閹惧磭啸闁绘埊闄勫?index -->
   <view wx:if="{{menuMode}}" class="intro-main-ui {{menuVisible ? 'menu-visible' : ''}}">
     <view class="main-menu-container">
       <view class="main-menu-block">
@@ -71,7 +73,7 @@
         <view class="main-footer-side main-footer-side-left">
           <view class="main-link-btn" hover-class="link-btn-flash" bindtap="onReset">重置进度</view>
         </view>
-        <text class="main-footer-divider">·</text>
+        <text class="main-footer-divider">-</text>
         <view class="main-footer-side main-footer-side-right">
           <view class="main-link-btn-wrap">
             <view class="main-link-btn" hover-class="link-btn-flash" bindtap="onTasks">任务</view>
@@ -82,65 +84,18 @@
     </view>
   </view>
 
-  <!-- 任务面板 -->
-  <view wx:if="{{menuMode}}" class="panel-overlay {{tasksVisible ? 'visible' : ''}}" bindtap="onTasksOverlayTap">
-    <view class="panel tasks-panel" catchtap="noop">
-      <button class="panel-close" bindtap="onCloseTasks">✕</button>
-      <view class="panel-title">任务</view>
-      <view class="tasks-list">
-        <view
-          wx:for="{{taskRows}}"
-          wx:key="id"
-          class="task-row {{item.done ? 'task-done' : ''}} {{item.alreadyClaimed ? 'task-claimed' : ''}}"
-        >
-          <view class="task-left">
-            <view class="task-info">
-              <text class="task-name">{{item.name}}<text wx:if="{{item.done}}" class="task-check"> ✓</text></text>
-              <text class="task-desc">{{item.description}}</text>
-            </view>
-            <view class="task-progress-bar">
-              <view class="task-progress-fill" style="width: {{item.percent}}%;"></view>
-            </view>
-            <text class="task-progress-text">{{item.current}} / {{item.total}}</text>
-          </view>
-          <view
-            class="task-reward {{item.canClaim ? 'task-claimable' : ''}}"
-            data-id="{{item.id}}"
-            bindtap="onClaimTask"
-          >
-            <view wx:if="{{item.canClaim}}" class="claimable-dot"></view>
-            <text class="task-reward-label">{{item.rewardLabel}}</text>
-            <text class="task-reward-value">{{item.reward}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-  </view>
+  <!-- 婵炲濮鹃褎鎱ㄩ悢鍏碱棃闁靛繆鍓濈欢?-->
 
-  <!-- 设置面板 -->
-  <view wx:if="{{menuMode}}" class="panel-overlay {{settingsVisible ? 'visible' : ''}}" bindtap="onSettingsOverlayTap">
-    <view class="panel settings-panel" catchtap="noop">
-      <button class="panel-close" bindtap="onCloseSettings">✕</button>
-      <view class="panel-title">设置</view>
-      <view class="settings-content">
-        <view class="settings-row">
-          <text class="settings-label">🎵 背景音乐</text>
-          <slider class="volume-slider" min="0" max="100" value="{{bgmVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="16" bindchanging="onBgmChanging" bindchange="onBgmChange" />
-          <text class="volume-value">{{bgmVolume}}%</text>
-        </view>
-        <view class="settings-row">
-          <text class="settings-label">🔊 音效</text>
-          <slider class="volume-slider" min="0" max="100" value="{{sfxVolume}}" activeColor="#E8C873" backgroundColor="rgba(166,124,82,0.15)" block-size="16" bindchanging="onSfxChanging" bindchange="onSfxChange" />
-          <text class="volume-value">{{sfxVolume}}%</text>
-        </view>
-        <view class="settings-divider"></view>
-        <view class="settings-info">
-          <text>宝珠酿造 v1.0</text>
-          <text class="info-sub">唤醒酿造之力</text>
-        </view>
-      </view>
-    </view>
-  </view>
+  <!-- 闁荤姳绀佹晶浠嬫偪閸℃稒顥堥柕蹇婂墲缁?-->
 
-  <cover-view class="skip-btn" style="top: {{skipBtnTop}}px;" bindtap="onSkipIntro">跳过开场</cover-view>
+  <cover-view wx:if="{{!menuMode}}" class="skip-btn" style="top: {{skipBtnTop}}px;" bindtap="onSkipIntro">跳过开场</cover-view>
+
 </view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>

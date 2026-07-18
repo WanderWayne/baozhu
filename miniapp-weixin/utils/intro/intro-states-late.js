@@ -178,7 +178,14 @@ module.exports = function attachIntroStatesLate(IntroSystem) {
       }
     });
 
-    this.playBGM('bgm-menu');
+    if (this.audioManager && typeof this.audioManager.fadeToBGM === 'function') {
+      this.audioManager.fadeToBGM('bgm-menu', { fadeOutMs: 4000, fadeInMs: 2000 });
+    } else if (this.audioManager?.currentBGMName === 'bgm-intro'
+      && typeof this.audioManager.fadeOutBGM === 'function') {
+      this.audioManager.fadeOutBGM(4000, () => this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 }));
+    } else {
+      this.audioManager?.playBGM('bgm-menu', { fadeInMs: 2000 });
+    }
     this.initAmbience(() => {
       if (this.ambience && typeof this.ambience.fadeInCanvas === 'function') {
         this.ambience.fadeInCanvas(2200);

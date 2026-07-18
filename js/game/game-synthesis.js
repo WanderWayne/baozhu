@@ -311,14 +311,8 @@ Game.prototype.startTimerSynthesis = function(item1, item2, resultData) {
 
     // 添加倒计时覆盖层
     setTimeout(() => {
-        // 开始播放倒计时音效（循环）
-        if (window.AudioManager) {
-            window.AudioManager.playSFXLoop('timer-tick');
-        }
-        
         const overlay = document.createElement('div');
         overlay.className = 'timer-overlay';
-        const totalSec = Math.max(1, Math.ceil(Number(resultData.duration) || 1));
         overlay.innerHTML = `
             <svg class="timer-ring-svg" viewBox="0 0 100 100" aria-hidden="true">
                 <circle class="timer-ring-track" cx="50" cy="50" r="46" fill="none"/>
@@ -326,32 +320,15 @@ Game.prototype.startTimerSynthesis = function(item1, item2, resultData) {
                     <circle class="timer-ring-spin" cx="50" cy="50" r="46" fill="none"/>
                 </g>
             </svg>
-            <div class="timer-count">${totalSec}</div>
-            <div class="timer-text">${resultData.message || '酿造中...'}</div>
+            <div class="timer-text">酿造中</div>
         `;
         item1.appendChild(overlay);
-
-        const countEl = overlay.querySelector('.timer-count');
-        let remaining = totalSec;
-        item1._brewCountInterval = setInterval(() => {
-            remaining -= 1;
-            if (remaining < 1) {
-                clearInterval(item1._brewCountInterval);
-                item1._brewCountInterval = null;
-                return;
-            }
-            if (countEl) countEl.textContent = String(remaining);
-        }, 1000);
 
         item2.style.opacity = '0';
     }, 300);
 
     // 倒计时结束后合成（结束前再对齐叠放与伴侣，避免拖拽后伴侣仍停在旧坐标）
     setTimeout(() => {
-        // 停止倒计时音效
-        if (window.AudioManager) {
-            window.AudioManager.stopSFXLoop('timer-tick');
-        }
         const synthEl = document.getElementById('synthesis-area');
         if (
             synthEl &&
@@ -429,6 +406,7 @@ Game.prototype.updateDoorStageFor = function(ds, stage) {
     ds.stage = stage;
     if (ds.container) {
         ds.container.className = `door-container stage-${stage}`;
+        this._emitDoorWave(ds.container);
     }
 };
 
@@ -441,6 +419,7 @@ Game.prototype.updateDoorStage = function(stage) {
     
     if (doorContainer) {
         doorContainer.className = `door-container stage-${stage}`;
+        this._emitDoorWave(doorContainer);
     }
     
     // 提示暂时禁用
@@ -898,27 +877,29 @@ Game.prototype.performItemTransition = function() {
     const appearInterval = 300;
     const appearAnimationDuration = 1900;
     const appearStartDelay = allDisappearTime > 0 ? 200 : 150;
-    const itemsPerRow = 4;
-    /** 在轮到下一行动画之前就开始拉高（略小于物品间隔，配合 CSS height 0.35s） */
-    const expandLeadMs = 220;
+    const stagedNewItems = new Map();
+
+    // 先一次性建立全部透明槽位，避免逐项 append 让已出现物品反复参与 flex 重排。
+    if (newItemNames.length > 0) {
+        setTimeout(() => {
+            newItemNames.forEach((newItemName, index) => {
+                const newItem = this.createItemElement(newItemName);
+                newItem.style.opacity = '0';
+                newItem.style.transform = 'scale(0)';
+                newItem.classList.add('in-inventory');
+                inventoryArea.appendChild(newItem);
+                stagedNewItems.set(index, newItem);
+            });
+            this.updateInventoryLayout({ impliedItemCount: newItemNames.length });
+        }, allDisappearTime + 20);
+    }
 
     newItemNames.forEach((newItemName, index) => {
         const appearAt = allDisappearTime + appearStartDelay + index * appearInterval;
-        const rowsBefore = Math.ceil(index / itemsPerRow);
-        const rowsAfterAdd = Math.ceil((index + 1) / itemsPerRow);
-        if (rowsAfterAdd > rowsBefore && rowsAfterAdd >= 2) {
-            const expandAt = Math.max(0, appearAt - expandLeadMs);
-            setTimeout(() => {
-                this.updateInventoryLayout({ impliedItemCount: index + 1 });
-            }, expandAt);
-        }
 
         setTimeout(() => {
-            const newItem = this.createItemElement(newItemName);
-            newItem.style.opacity = '0';
-            newItem.style.transform = 'scale(0)';
-            newItem.classList.add('in-inventory');
-            inventoryArea.appendChild(newItem);
+            const newItem = stagedNewItems.get(index);
+            if (!newItem) return;
             if (window.AudioManager) window.AudioManager.playInventoryTransitionSlot(false);
             requestAnimationFrame(() => {
                 newItem.style.opacity = '';
@@ -1259,8 +1240,6 @@ Game.prototype.onItemLongPress = function(itemEl) {
         this.activateRecipeBook(itemEl);
         return;
     }
-
-    this.showExtractCard(itemName, itemEl);
 };
 
 // 配方书激活：先显示按钮，然后物品飞向按钮消失
@@ -1383,12 +1362,10 @@ Game.prototype.performExtraction = function(sourceItemEl, extractName) {
 // 前五关结算画面
 Game.prototype.showSettlementScreen = function() {
     return new Promise(resolve => {
-        const elapsed = window.LevelManager.getBasicLevelElapsedTime();
-        const timeStr = window.LevelManager.formatElapsedTime(elapsed);
-        const rating = window.LevelManager.getSpeedRating(elapsed);
-        const completed = (window.LevelManager.currentProgress.completedLevels || [])
-            .filter(id => id >= 101 && id <= 105).length;
-        const gems = completed * 50;
+        const chapterName = this.chapterData?.name || '这一章';
+        const objectives = Array.isArray(this.chapterData?.objectives) ? this.chapterData.objectives : [];
+        const completed = objectives.filter(id => window.LevelManager.isLevelCompleted(id)).length;
+        const percent = objectives.length > 0 ? Math.round((completed / objectives.length) * 100) : 0;
 
         const overlay = document.createElement('div');
         overlay.className = 'settlement-overlay';
@@ -1396,31 +1373,21 @@ Game.prototype.showSettlementScreen = function() {
             '<div class="settlement-content">' +
                 '<div class="settlement-title">阶段完成</div>' +
                 '<div class="settlement-sep"></div>' +
-                '<div class="settlement-stats">' +
-                    '<div class="settlement-stat">' +
-                        '<span class="settlement-stat-icon">⏱</span>' +
-                        '<span>用时</span>' +
-                        '<span class="settlement-stat-value">' + timeStr + '</span>' +
-                    '</div>' +
-                    '<div class="settlement-stat">' +
-                        '<span class="settlement-stat-icon">' + rating.icon + '</span>' +
-                        '<span>评价</span>' +
-                        '<span class="settlement-stat-value" style="color:' + rating.color + '">' + rating.name + '</span>' +
-                    '</div>' +
-                    '<div class="settlement-stat">' +
-                        '<span class="settlement-stat-icon">💎</span>' +
-                        '<span>获得钻石</span>' +
-                        '<span class="settlement-stat-value">' + gems + '</span>' +
+                '<div class="settlement-encouragement">做得很好，这一章的香气已经被你点亮了一大半。</div>' +
+                '<div class="settlement-progress">' +
+                    '<div class="settlement-progress-label">' + chapterName + '已完成</div>' +
+                    '<div class="settlement-progress-value">' + percent + '%</div>' +
+                    '<div class="settlement-progress-track">' +
+                        '<div class="settlement-progress-fill" style="width:' + percent + '%"></div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="settlement-message">' +
-                    '你已经掌握了酿造的基础语言<br>' +
-                    '接下来将是一个挑战<br>' +
-                    '可以先休息一下' +
+                    '接下来会进入更完整的酿造组合。<br>' +
+                    '要不要先休息一下？' +
                 '</div>' +
                 '<div class="settlement-buttons">' +
                     '<button class="settlement-btn settlement-btn-exit">休息一下</button>' +
-                    '<button class="settlement-btn settlement-btn-continue">继续挑战</button>' +
+                    '<button class="settlement-btn settlement-btn-continue">继续酿造</button>' +
                 '</div>' +
             '</div>';
 
@@ -1479,4 +1446,3 @@ Game.prototype._showLevel2CompletionTutorial = async function() {
     // 此方法已不再使用，保留空实现以兼容旧代码
     // 新手引导已改为：第一次玩家进入游戏后退出到主界面时，引导玩家查看任务
 };
-

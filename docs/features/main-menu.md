@@ -23,3 +23,7 @@
 ## 修改检查清单
 
 - [ ] 同时改 intro embedded 与 index 或已提取 main-menu.js
+
+## 关卡内任务达成提示
+
+H5 `js/game/game-task-toast.js` + `css/game/game-task-toast.css`，小程序 `utils/game-task-toast.js` + `pages/game/game.wxss`。提示固定在左上角，使用白底、薄荷色细边框和薄荷色文字的直角长方形卡片。

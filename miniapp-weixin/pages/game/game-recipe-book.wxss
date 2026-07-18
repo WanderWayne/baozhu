@@ -1,7 +1,8 @@
 .recipe-book-btn {
   position: fixed;
   top: calc(20px + env(safe-area-inset-top, 0px));
-  right: 20px;
+  left: 20px;
+  right: auto;
   padding: 6px 14px;
   background: #FFFDF7;
   border: 1px solid rgba(166, 124, 82, 0.2);
@@ -17,6 +18,41 @@
 .recipe-book-btn.golden-pulse {
   border-color: rgba(232, 200, 115, 0.6);
   box-shadow: 0 0 8px rgba(232, 200, 115, 0.3);
+}
+
+.recipe-book-btn.needs-attention {
+  animation: recipeBookNudgeShake 2.6s ease-in-out infinite;
+  border-color: rgba(232, 200, 115, 0.8);
+  box-shadow: 0 0 14px rgba(232, 200, 115, 0.4);
+}
+
+.recipe-book-btn.needs-attention::before,
+.recipe-book-btn.needs-attention::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(232, 200, 115, 0.55);
+  border-radius: 22px;
+  pointer-events: none;
+  animation: recipeBookAttentionWave 2.2s ease-out infinite;
+}
+
+.recipe-book-btn.needs-attention::after {
+  animation-delay: 1.1s;
+}
+
+@keyframes recipeBookAttentionWave {
+  0% { opacity: 0.75; transform: scale(0.92); }
+  70%, 100% { opacity: 0; transform: scale(1.55); }
+}
+
+@keyframes recipeBookNudgeShake {
+  0%, 36%, 100% { transform: rotate(0deg); }
+  40% { transform: rotate(-10deg); }
+  44% { transform: rotate(10deg); }
+  48% { transform: rotate(-8deg); }
+  52% { transform: rotate(8deg); }
+  56% { transform: rotate(0deg); }
 }
 
 .recipe-book-btn.btn-flash {
@@ -62,7 +98,7 @@
 }
 
 .recipe-book-page {
-  width: 88%;
+  width: calc(100vw - 72rpx);
   max-width: 360px;
   max-height: 80vh;
   background: #FDF8EE;
@@ -116,44 +152,16 @@
 
 .recipe-search-input {
   width: 100%;
-  padding: 8px 14px;
+  min-height: 76rpx;
+  height: 76rpx;
+  padding: 0 28rpx;
   border: 1px solid rgba(166, 124, 82, 0.15);
   border-radius: 10px;
   background: rgba(255, 253, 247, 0.8);
   font-size: 13px;
   color: #6B5344;
   box-sizing: border-box;
-}
-
-.recipe-book-tabs {
-  display: flex;
-  border-bottom: 1px solid rgba(166, 124, 82, 0.12);
-  margin-bottom: 10px;
-}
-
-.recipe-tab {
-  flex: 1;
-  padding: 8px 0;
-  text-align: center;
-  font-size: 13px;
-  color: #B8A590;
-  letter-spacing: 3px;
-  border-bottom: 2px solid transparent;
-}
-
-.recipe-tab.active {
-  color: #6B5344;
-  border-bottom-color: #A67C52;
-}
-
-.recipe-book-tab-hint {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-  font-size: 10px;
-  color: #A8917A;
-  line-height: 1.45;
+  line-height: 76rpx;
 }
 
 .recipe-book-divider {

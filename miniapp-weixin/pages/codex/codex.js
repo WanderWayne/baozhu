@@ -6,6 +6,7 @@ const atlas = require('../../data/atlas.js');
 const { ITEMS, RECIPES } = require('../../data/items.js');
 const { LEVELS: ALL_LEVELS } = require('../../data/worlds.js');
 const { navigateBackWithFade } = require('../../utils/page-transitions');
+const pageTransitionBehavior = require('../../behaviors/page-transition');
 
 function categorizeRecipes() {
   const core = [];
@@ -27,6 +28,7 @@ function categorizeRecipes() {
 }
 
 Page({
+  behaviors: [pageTransitionBehavior],
   data: {
     statusBarHeight: 0,
     atlasProgressText: '0/3',
@@ -48,6 +50,7 @@ Page({
   discovered: [],
 
   onLoad() {
+    this._preparePageTransitionEnter();
     const sys = wx.getSystemInfoSync();
     this.setData({ statusBarHeight: sys.statusBarHeight || 0 });
     this.audioManager = require('../../utils/audio-manager');
@@ -55,8 +58,9 @@ Page({
   },
 
   onShow() {
+    this._handlePageTransitionEnter();
     this.audioManager.unlock();
-    this.audioManager.playBGM('bgm-menu');
+    this.audioManager.playBGM('bgm-menu', { fadeInMs: 2000 });
     this.refresh();
   },
 

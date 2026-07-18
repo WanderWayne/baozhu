@@ -9,6 +9,14 @@
       {
         "value": "assets/images",
         "type": "folder"
+      },
+      {
+        "value": ".svg",
+        "type": "suffix"
+      },
+      {
+        "type": "regexp",
+        "value": "^pages/game/audio/_.*\\.mp3$"
       }
     ],
     "include": []
@@ -38,7 +46,7 @@
     "useIsolateContext": true,
     "compileWorklet": false,
     "uglifyFileName": false,
-    "uploadWithSourceMap": true,
+    "uploadWithSourceMap": false,
     "enhance": false,
     "packNpmManually": false,
     "packNpmRelationList": [],
@@ -53,7 +61,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.16.1",
-  "appid": "wxa6bda97e215d2e6d",
+  "appid": "wx5e6b1d97c009aa0e",
   "projectname": "baozhu-weixin",
   "condition": {},
   "simulatorPluginLibVersion": {},

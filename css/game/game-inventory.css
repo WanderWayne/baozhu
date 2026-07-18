@@ -94,12 +94,13 @@
     flex-wrap: wrap;
     justify-content: flex-start;
     align-content: flex-start;
-    overflow-y: auto;
+    overflow-y: scroll;
     overflow-x: hidden;
     gap: 8px;
     z-index: 20;
     border-top: 1px solid rgba(166, 124, 82, 0.08);
     transition: height 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+    scrollbar-gutter: stable;
 }
 
 /* 物品栏高度状态（使用固定高度以支持 transition 动画） */
@@ -163,6 +164,8 @@
 /* ========== 物品栏金光效果 ========== */
 #inventory-area.golden-glow {
     animation: inventoryGoldenGlow 0.5s ease-out forwards;
+    overflow: visible;
+    z-index: 60;
 }
 
 @keyframes inventoryGoldenGlow {
@@ -198,6 +201,8 @@
 /* 物品栏金光消失 */
 #inventory-area.golden-fade {
     animation: inventoryGoldenFade 0.6s ease-out forwards;
+    overflow: visible;
+    z-index: 60;
 }
 
 @keyframes inventoryGoldenFade {

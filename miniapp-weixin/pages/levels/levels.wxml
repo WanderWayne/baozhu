@@ -4,13 +4,17 @@
     <image
       wx:if="{{theme === 'dairy'}}"
       class="levels-hills-img"
-      src="/assets/images/levels-hills-dairy.svg"
+      src="/pages/levels/levels-hills-dairy.svg"
       mode="scaleToFill"
     />
   </view>
-  <!-- 粒子 canvas（pointer-events:none，浮在最上层） -->
+  <!-- 粒子 canvas：对齐 H5，置于背景层，避免真机拦截滑动 -->
   <view class="bubble-canvas-stack">
-    <canvas type="2d" id="bubble-canvas" class="bubble-canvas"></canvas>
+    <canvas
+      type="2d"
+      id="bubble-canvas"
+      class="bubble-canvas"
+    ></canvas>
   </view>
   <!-- UI 内容层 -->
   <view class="container">
@@ -63,20 +67,21 @@
     <view class="level-carousel-container" id="carousel-container">
       <scroll-view
         class="level-carousel"
+        style="height: {{carouselHeight}}px;"
         scroll-y
-        enhanced
         show-scrollbar="{{false}}"
         scroll-with-animation
         scroll-into-view="{{scrollIntoView}}"
+        scroll-top="{{scrollTop}}"
         bindscroll="onCarouselScroll"
         bindscrollend="onCarouselScrollEnd"
       >
-        <view wx:if="{{levels.length >= 3}}" class="level-spacer"></view>
+        <view wx:if="{{levels.length >= 3}}" class="level-spacer" style="height: {{spacerHeight}}px;"></view>
         <view
           wx:for="{{levels}}"
           wx:key="id"
           id="door-{{item.id}}"
-          class="level-door {{item.unlocked ? 'unlocked' : 'locked'}} {{item.completed ? 'completed' : ''}} {{item.selected ? 'selected' : ''}}"
+          class="level-door {{item.unlocked ? 'unlocked' : 'locked'}} {{item.completed ? 'completed' : ''}} {{item.selected ? 'selected' : ''}} {{item.fallbackSelected ? 'fallback-selected' : ''}}"
           style="{{item.doorStyle}}"
           data-index="{{index}}"
           data-id="{{item.id}}"
@@ -103,10 +108,19 @@
             进 入
           </view>
         </view>
-        <view wx:if="{{levels.length >= 3}}" class="level-spacer"></view>
+        <view wx:if="{{levels.length >= 3}}" class="level-spacer" style="height: {{spacerHeight}}px;"></view>
       </scroll-view>
     </view>
   </view>
 
   <view class="global-top-hint {{topHintVisible ? 'visible' : ''}} {{topHintFading ? 'fade' : ''}}" wx:if="{{topHintText}}">{{topHintText}}</view>
+
 </view>
+
+<root-portal wx:if="{{pageTransition.active}}" class="page-transition-portal">
+  <cover-view
+    class="page-transition-overlay {{pageTransition.mode === 'black' ? 'fade-to-black' : 'fade-to-warm'}}"
+    style="opacity: {{pageTransition.opacity}};"
+    catchtouchmove="_blockTransitionTouch"
+  ></cover-view>
+</root-portal>
