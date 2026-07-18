@@ -4,7 +4,7 @@
     <image
       wx:if="{{theme === 'dairy'}}"
       class="levels-hills-img"
-      src="/pages/levels/levels-hills-dairy.svg"
+      src="/pages/levels/levels-hills-dairy.png"
       mode="scaleToFill"
     />
   </view>
